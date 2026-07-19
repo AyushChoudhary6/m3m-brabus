@@ -8,7 +8,7 @@ import { IMG, px } from "../../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const HERO_VIDEO = "/BrabusIslandVilla_H264_WEB.mp4";
+const HERO_VIDEO = "/hero-brabus.mp4";
 const prefersReduced =
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
