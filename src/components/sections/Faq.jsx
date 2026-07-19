@@ -8,7 +8,7 @@ export default function Faq() {
   const [open, setOpen] = useState(0);
 
   return (
-    <section className="py-24 md:py-32">
+    <section className="py-16 md:py-24">
       {/* FAQPage structured data for AEO / rich snippets */}
       <script
         type="application/ld+json"
@@ -27,8 +27,8 @@ export default function Faq() {
       <div className="container-lux grid gap-14 lg:grid-cols-[0.8fr_1.2fr]">
         <Reveal>
           <p className="kicker mb-5">Answers</p>
-          <h2 className="text-[clamp(2rem,5vw,3.4rem)] font-light leading-[1.06] text-ink">
-            Everything you <span className="italic text-brass">need to know.</span>
+          <h2 className="text-[clamp(2rem,5vw,3.4rem)] font-medium leading-[1.06] text-ink">
+            Everything you <span className="font-serif font-light italic text-champagne-soft">need to know.</span>
           </h2>
         </Reveal>
 

@@ -49,7 +49,7 @@ export default function Engineering() {
   );
 
   return (
-    <section ref={root} className="relative mx-3 min-h-screen overflow-hidden rounded-[2.5rem] bg-ink-900 py-[14vh] text-white md:mx-5">
+    <section ref={root} className="relative mx-3 min-h-[78vh] overflow-hidden rounded-[2.5rem] bg-ink-900 py-[10vh] text-white md:mx-5">
       {/* Metal visual */}
       <div className="absolute inset-0 opacity-60">
         <div className="eng-metal h-full w-full">

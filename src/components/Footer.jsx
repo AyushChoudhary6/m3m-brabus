@@ -7,8 +7,8 @@ export default function Footer() {
       <div className="container-lux py-20">
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
-            <span className="font-display text-2xl tracking-tight text-ink">
-              M3M <span className="italic text-brass">Brabus</span>
+            <span className="font-display text-3xl tracking-[-0.01em] text-ink">
+              M3M <span className="font-serif italic text-brass">Brabus</span>
             </span>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-ink-soft">
               Branded residences at {PROJECT.location}, on Golf Course Extension

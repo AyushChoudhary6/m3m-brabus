@@ -1,0 +1,115 @@
+import { useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import Media from "../ui/Media.jsx";
+import { IMG, px } from "../../lib/images.js";
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+/* CHAPTER 01 / 02 — THE PHILOSOPHY & ENGINEERING
+   A read-along statement, then the BRABUS engineering as a framed plate beside
+   three principles. Motion: the statement brightens word by word; the plate
+   clip-reveals; the text rises. */
+const PRINCIPLES = [
+  { k: "i", t: "Obsessive detail", d: "Every junction, material and line considered like a bespoke commission." },
+  { k: "ii", t: "Performance living", d: "Systems, air and light tuned to perform — quietly, precisely, always." },
+  { k: "iii", t: "Bespoke by nature", d: "No two residences alike; crafted for those who refuse the ordinary." },
+];
+
+export default function Manifesto() {
+  const root = useRef(null);
+  const imgWrap = useRef(null);
+
+  useGSAP(
+    () => {
+      const q = gsap.utils.selector(root);
+      gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.set(q(".rise"), { autoAlpha: 0, y: 24 });
+        gsap.set(imgWrap.current, { clipPath: "inset(100% 0 0 0)" });
+
+        // read-along: words brighten one by one as you scroll through them
+        gsap.fromTo(q(".stmt-word"),
+          { opacity: 0.14 },
+          {
+            opacity: 1, ease: "none", stagger: 0.4,
+            scrollTrigger: { trigger: q(".stmt")[0], start: "top 72%", end: "top 24%", scrub: true },
+          },
+        );
+
+        // engineering plate reveal + text rise
+        gsap.to(imgWrap.current, {
+          clipPath: "inset(0% 0 0 0)", duration: 1.4, ease: "power3.inOut",
+          scrollTrigger: { trigger: q(".eng")[0], start: "top 82%" },
+        });
+        gsap.to(q(".rise"), {
+          autoAlpha: 1, y: 0, duration: 0.9, ease: "power3.out", stagger: 0.08,
+          scrollTrigger: { trigger: q(".eng")[0], start: "top 78%" },
+        });
+        gsap.to(q(".mf-img-inner"), {
+          yPercent: 8, ease: "none",
+          scrollTrigger: { trigger: q(".eng")[0], start: "top bottom", end: "bottom top", scrub: true },
+        });
+      });
+    },
+    { scope: root },
+  );
+
+  return (
+    <section id="philosophy" ref={root} className="container-lux py-[clamp(5rem,13vh,9rem)]">
+      {/* statement */}
+      <div className="stmt grid gap-8 lg:grid-cols-[auto_1fr] lg:gap-16">
+        <div className="flex items-baseline gap-5">
+          <span className="idx">01</span>
+          <span className="kicker">The Philosophy</span>
+        </div>
+        <h2 className="flex max-w-[24ch] flex-wrap font-display text-[clamp(1.9rem,4.6vw,3.9rem)] font-light leading-[1.14] tracking-[-0.02em] text-ink">
+          {"We did not set out to build homes. We set out to compose a".split(" ").map((w, i) => (
+            <span key={i} className="stmt-word mr-[0.28em]">{w}</span>
+          ))}
+          {"way of living.".split(" ").map((w, i) => (
+            <span key={`a${i}`} className="stmt-word mr-[0.28em] font-serif italic text-brass">{w}</span>
+          ))}
+        </h2>
+      </div>
+
+      {/* engineering */}
+      <div className="eng mt-[clamp(4.5rem,12vh,8rem)] grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-20">
+        {/* framed plate */}
+        <figure className="rise">
+          <div ref={imgWrap} className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-line md:aspect-[5/6]">
+            <div className="mf-img-inner ed-breath absolute inset-0 scale-[1.06]">
+              <Media src={px(IMG.lobby, 1600)} alt="BRABUS engineering craftsmanship" sizes="(max-width:1024px) 100vw, 46vw" />
+            </div>
+            <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_50%,rgba(8,6,5,0.6))]" />
+            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
+            <span className="mono absolute left-5 bottom-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">With BRABUS — Precision engineering</span>
+          </div>
+        </figure>
+
+        {/* text */}
+        <div>
+          <div className="rise flex items-baseline gap-5">
+            <span className="idx">02</span>
+            <span className="kicker">The Engineering</span>
+          </div>
+          <h3 className="rise mt-6 max-w-[18ch] font-display text-[clamp(1.8rem,3.8vw,3.1rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
+            Hand-built precision, <span className="font-serif italic text-brass">translated into architecture.</span>
+          </h3>
+
+          <ul className="mt-9 border-t border-line">
+            {PRINCIPLES.map((c) => (
+              <li key={c.k} className="rise group flex gap-6 border-b border-line py-6 transition-colors duration-500 hover:bg-brass/[0.035]">
+                <span className="idx pt-1.5 text-brass">{c.k}</span>
+                <div>
+                  <h4 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">{c.t}</h4>
+                  <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{c.d}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}

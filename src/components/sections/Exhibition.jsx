@@ -7,55 +7,76 @@ import { IMG, px } from "../../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+/* CHAPTER 06 — THE EXHIBITION
+   A first look at the architecture, hung like a gallery: large plates
+   that alternate side to side, each with a clip reveal and a caption
+   ledger. Distinct from the amenity gallery — this is the building itself. */
 const PIECES = [
-  { label: "I. The Tower", id: IMG.tower, w: "w-full md:w-[58%]", ratio: "aspect-[4/5]", align: "md:mr-auto" },
-  { label: "II. The Lobby", id: IMG.lobbyWarm, w: "w-full md:w-[42%]", ratio: "aspect-[3/4]", align: "md:ml-auto md:-mt-[18vh]" },
-  { label: "III. The Residence", id: IMG.livingRoom, w: "w-full md:w-[50%]", ratio: "aspect-[16/10]", align: "md:mx-auto" },
-  { label: "IV. The Spa", id: IMG.spa, w: "w-full md:w-[46%]", ratio: "aspect-[4/5]", align: "md:mr-auto md:-mt-[10vh]" },
+  { no: "I", label: "The Tower", id: IMG.tower, note: "The silhouette on the Golf Course Extension skyline." },
+  { no: "II", label: "The Arrival", id: IMG.lobbyWarm, note: "A porte-cochère and lobby scaled for occasion." },
+  { no: "III", label: "The Residence", id: IMG.duplexLiving, note: "Interiors composed in stone, timber and considered light." },
 ];
 
-/* CHAPTER 09 — THE EXHIBITION
-   Not a grid — an exhibition. Framed pieces reveal with a clip mask and
-   a slow inner parallax; asymmetric hanging so every screen surprises. */
 export default function Exhibition() {
   const root = useRef(null);
 
   useGSAP(
     () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const q = gsap.utils.selector(root);
-      q(".piece").forEach((el) => {
-        gsap.fromTo(el.querySelector(".frame"), { clipPath: "inset(100% 0 0 0)" }, {
-          clipPath: "inset(0% 0 0 0)", duration: 1.3, ease: "power4.out",
-          scrollTrigger: { trigger: el, start: "top 85%" },
-        });
-        gsap.fromTo(el.querySelector(".frame img"), { yPercent: -12 }, {
-          yPercent: 12, ease: "none",
-          scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
+      gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
+        q(".piece").forEach((el) => {
+          const wrap = el.querySelector(".pc-img");
+          gsap.set(wrap, { clipPath: "inset(100% 0 0 0)" });
+          gsap.set(el.querySelectorAll(".rise"), { autoAlpha: 0, y: 20 });
+          gsap.to(wrap, {
+            clipPath: "inset(0% 0 0 0)", duration: 1.4, ease: "power3.inOut",
+            scrollTrigger: { trigger: el, start: "top 82%" },
+          });
+          gsap.to(el.querySelectorAll(".rise"), {
+            autoAlpha: 1, y: 0, duration: 0.9, ease: "power3.out", stagger: 0.08,
+            scrollTrigger: { trigger: el, start: "top 80%" },
+          });
+          gsap.to(el.querySelector(".pc-img-inner"), {
+            yPercent: 10, ease: "none",
+            scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
+          });
         });
       });
     },
-    { scope: root }
+    { scope: root },
   );
 
   return (
-    <section ref={root} className="relative py-[14vh]">
-      <div className="mb-[8vh] px-[var(--spacing-gutter)]">
-        <p className="kicker mb-5">Chapter 09 — The Exhibition</p>
-        <h2 className="max-w-[16ch] font-display text-[clamp(2.4rem,6vw,5rem)] font-light leading-[1.02] text-ink">
-          A first look, <span className="italic text-brass">framed.</span>
+    <section id="gallery" ref={root} className="container-lux py-[clamp(5rem,13vh,9rem)]">
+      <div className="mb-[clamp(2.5rem,7vh,5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
+        <div className="flex items-baseline gap-5">
+          <span className="idx">07</span>
+          <span className="kicker">The Exhibition</span>
+        </div>
+        <h2 className="max-w-[16ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
+          A first look, <span className="font-serif italic text-brass">framed.</span>
         </h2>
       </div>
 
-      <div className="flex flex-col gap-[10vh] px-[var(--spacing-gutter)]">
-        {PIECES.map((p) => (
-          <figure key={p.label} className={`piece ${p.w} ${p.align}`} data-cursor="VIEW">
-            <div className={`frame relative ${p.ratio} overflow-hidden rounded-[1.5rem] border border-line`}>
-              <div className="absolute inset-0 scale-110">
-                <Media src={px(p.id, 1200)} alt={p.label} sizes="(max-width:768px) 100vw, 55vw" />
+      <div className="flex flex-col gap-[clamp(3.5rem,9vh,7rem)]">
+        {PIECES.map((p, i) => (
+          <figure
+            key={p.label}
+            className={`piece grid items-center gap-8 lg:grid-cols-2 lg:gap-16 ${i % 2 ? "lg:[&>figcaption]:order-first" : ""}`}
+            data-cursor="VIEW"
+          >
+            <div className="pc-img relative aspect-[4/3] overflow-hidden rounded-[1.5rem] border border-line">
+              <div className="pc-img-inner ed-breath absolute inset-0 scale-[1.05]">
+                <Media src={px(p.id, 1600)} alt={p.label} sizes="(max-width:1024px) 100vw, 48vw" />
               </div>
+              <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_60%,rgba(8,6,5,0.45))]" />
+              <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
             </div>
-            <figcaption className="mt-4 font-display text-sm italic text-ink-soft">{p.label}</figcaption>
+            <figcaption>
+              <span className="rise idx block">{p.no}</span>
+              <h3 className="rise mt-4 font-display text-[clamp(1.8rem,3.4vw,2.8rem)] font-light tracking-[-0.01em] text-ink">{p.label}</h3>
+              <p className="rise mt-4 max-w-[38ch] text-lg leading-relaxed text-ink-soft">{p.note}</p>
+            </figcaption>
           </figure>
         ))}
       </div>

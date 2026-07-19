@@ -1,46 +1,54 @@
 @import "tailwindcss";
 
 /* ---- Fonts ---- */
-@import "@fontsource-variable/fraunces";
-@import "@fontsource-variable/inter";
+@import "@fontsource-variable/fraunces";  /* display — high-contrast editorial serif */
+@import "@fontsource-variable/inter";     /* body */
 
 /* ============================================================
-   M3M BRABUS — Light Editorial Design System
-   Warm ivory canvas · charcoal ink · serif display · brass accent
-   Bright, magazine-style, photography-forward.
+   M3M × BRABUS — "Obsidian & Gold"  (premium dark luxury)
+   Warm obsidian ground · bone serif · champagne-gold accent.
+   Editorial craft + cinematic richness: deep warm blacks, gold
+   hairlines, layered glow and grain — the register of a ₹25cr home.
    ============================================================ */
 @theme {
-  /* Surfaces */
-  --color-canvas: #f6f2ec;   /* page background */
-  --color-cream: #efe7db;    /* alt sections */
-  --color-paper: #ffffff;    /* cards */
-  --color-ink-900: #1a1712;  /* darkest block bg */
+  /* Surfaces — warm obsidian (never flat black) */
+  --color-canvas: #0e0b08;   /* page background */
+  --color-cream: #15110b;    /* alt sections */
+  --color-paper: #1b160f;    /* cards / elevated */
+  --color-ink-900: #080605;  /* deepest block */
 
-  /* Ink / text */
-  --color-ink: #17140f;
-  --color-ink-soft: #5f584d;
-  --color-ink-faint: #9b9184;
+  /* Ink — warm bone */
+  --color-ink: #f1ead9;
+  --color-ink-soft: #a99d86;
+  --color-ink-faint: #6f6551;
 
-  /* Lines */
-  --color-line: #e4dccd;
-  --color-line-soft: #ece5d8;
+  /* Lines — warm gold-tinted hairlines */
+  --color-line: #2c2418;
+  --color-line-soft: #201a11;
 
-  /* Accents */
-  --color-brass: #9a7b3f;
-  --color-brass-soft: #c2a15f;
-  --color-champagne: #c6a664;      /* gold on dark surfaces */
-  --color-champagne-soft: #e2cf9e; /* lighter gold on dark surfaces */
-  --color-oxblood: #8c2f1d;  /* sparing brand-red nod */
+  /* Accent — champagne gold (the luxury signal) */
+  --color-brass: #c9a86a;
+  --color-brass-soft: #e6d2a0;
+  --color-champagne: #c9a86a;
+  --color-champagne-soft: #e6d2a0;
+  --color-gold-deep: #a07c3f;
+  --color-oxblood: #8c2f1d;
+
+  /* Named tones */
+  --color-obsidian: #0e0b08;
+  --color-bone: #f1ead9;
 
   /* Typography */
-  --font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
-  --font-sans: "Inter Variable", system-ui, sans-serif;
+  --font-display: "Fraunces Variable", ui-serif, Georgia, "Times New Roman", serif;
+  --font-serif: "Fraunces Variable", ui-serif, Georgia, serif;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Easing */
   --ease-lux: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* Layout */
-  --spacing-gutter: clamp(1.25rem, 5vw, 6rem);
+  --spacing-gutter: clamp(1.5rem, 6.5vw, 8rem);
 }
 
 /* ---- Base ---- */
@@ -63,13 +71,13 @@ body {
   overflow-x: hidden;
 }
 
-::selection { background: var(--color-brass); color: #fff; }
+::selection { background: var(--color-brass); color: var(--color-obsidian); }
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   color: var(--color-ink);
   font-weight: 400;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   margin: 0;
 }
 
@@ -77,98 +85,130 @@ h1, h2, h3, h4 {
 ::-webkit-scrollbar { width: 9px; }
 ::-webkit-scrollbar-track { background: var(--color-canvas); }
 ::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-brass-soft); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gold-deep); }
 
 /* ---- Utilities ---- */
 @utility container-lux {
   width: 100%;
-  max-width: 84rem;
+  max-width: 85rem;
   margin-inline: auto;
   padding-inline: var(--spacing-gutter);
 }
 
-/* Editorial eyebrow — small caps + italic serif touch */
+/* Editorial eyebrow — mono small caps, gold */
 @utility kicker {
-  font-family: var(--font-sans);
-  font-size: 0.7rem;
-  letter-spacing: 0.32em;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--color-brass);
   font-weight: 500;
 }
 
-/* Editorial italic serif accent inside headings */
-@utility serif-italic {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 300;
+@utility mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
-@utility hairline {
-  border-top: 1px solid var(--color-line);
+@utility serif-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+@utility hairline { border-top: 1px solid var(--color-line); }
+
+/* Editorial index numeral — gold */
+@utility idx {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  color: var(--color-brass);
+}
+
+/* Gold metallic text for accent words */
+@utility gold-text {
+  color: transparent;
+  background-image: linear-gradient(100deg, #a07c3f 0%, #c9a86a 40%, #f3e6c4 50%, #c9a86a 60%, #a07c3f 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   .reveal-hidden { opacity: 1 !important; }
+  .ed-line > span { transform: none !important; }
 }
 
-/* STEP 10 — Hero animated film grain (~2%) */
-.hero-grain {
-  opacity: 0.022;
+/* Line-clip heading reveal */
+.ed-line { display: block; overflow: hidden; }
+.ed-line > span { display: block; will-change: transform; }
+
+/* Slow ambient breath on framed imagery */
+@keyframes edBreath {
+  0%, 100% { transform: scale(1.02); }
+  50% { transform: scale(1.06); }
+}
+.ed-breath { animation: edBreath 24s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .ed-breath { animation: none; } }
+
+/* Ambient gold glow drift */
+@keyframes goldDrift {
+  0%, 100% { transform: translate(0, 0); opacity: 0.6; }
+  50% { transform: translate(6%, -5%); opacity: 0.9; }
+}
+.gold-glow { animation: goldDrift 18s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .gold-glow { animation: none; } }
+
+/* Cinematic film grain over dark imagery */
+.grain {
+  opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-  animation: heroGrain 8s steps(6) infinite;
+  animation: grainShift 8s steps(6) infinite;
 }
-@keyframes heroGrain {
-  0% { transform: translate(0, 0); }
-  20% { transform: translate(-4%, 3%); }
-  40% { transform: translate(3%, -4%); }
-  60% { transform: translate(-3%, -2%); }
-  80% { transform: translate(4%, 2%); }
-  100% { transform: translate(0, 0); }
+@keyframes grainShift {
+  0% { transform: translate(0,0); } 20% { transform: translate(-4%,3%); }
+  40% { transform: translate(3%,-4%); } 60% { transform: translate(-3%,-2%); }
+  80% { transform: translate(4%,2%); } 100% { transform: translate(0,0); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .hero-grain { animation: none; }
-}
+@media (prefers-reduced-motion: reduce) { .grain { animation: none; } }
 
-/* Floating luxury panel — idle breath + ambient glass reflection */
-@keyframes lsFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+/* ---- Leaflet dark map (real GPS) ---- */
+.leaflet-container { background: #0e0b08; font-family: var(--font-mono); }
+.leaflet-control-attribution {
+  background: rgba(14, 11, 8, 0.72) !important;
+  color: #6f6551 !important; font-size: 9px; letter-spacing: 0.04em;
 }
-.ls-float { animation: lsFloat 12s ease-in-out infinite; }
-
-@keyframes lsReflect {
-  0% { transform: translateX(-70%) rotate(8deg); opacity: 0; }
-  5% { opacity: 0.5; }
-  14% { transform: translateX(190%) rotate(8deg); opacity: 0; }
-  100% { transform: translateX(190%) rotate(8deg); opacity: 0; }
+.leaflet-control-attribution a { color: var(--color-brass) !important; }
+.leaflet-bar { border: none !important; box-shadow: none !important; }
+.leaflet-bar a {
+  background: rgba(21, 17, 11, 0.92) !important;
+  color: var(--color-ink-soft) !important;
+  border: 1px solid var(--color-line) !important;
+  width: 32px; height: 32px; line-height: 32px;
 }
-.ls-reflect { animation: lsReflect 17s ease-in-out infinite; }
-
-@media (prefers-reduced-motion: reduce) {
-  .ls-float, .ls-reflect { animation: none; }
+.leaflet-bar a:hover { background: #1b160f !important; color: var(--color-brass) !important; }
+.mb-pin-dot, .mb-pin-ring {
+  position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; border-radius: 50%;
+  transform: translate(-50%, -50%);
 }
-
-/* Lifestyle tour — slow cinematic "camera" (Ken Burns) on the active scene */
-@keyframes tourKen {
-  0% { transform: scale(1.05) translate(0, 0); }
-  100% { transform: scale(1.12) translate(-1.6%, -1.4%); }
+.mb-pin-dot { background: #c9a86a; box-shadow: 0 0 14px 2px rgba(201, 168, 106, 0.6); }
+.mb-pin-ring { border: 1px solid #c9a86a; animation: mbPulse 2.4s ease-out infinite; }
+@keyframes mbPulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(4.6); opacity: 0; }
 }
-.tour-ken { animation: tourKen 22s ease-in-out infinite alternate; will-change: transform; }
-@media (prefers-reduced-motion: reduce) { .tour-ken { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .mb-pin-ring { animation: none; } }
 
-/* Subtle paper grain */
+/* Fine page grain */
 .noise::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 60;
   pointer-events: none;
-  opacity: 0.025;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }

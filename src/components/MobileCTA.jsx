@@ -1,8 +1,10 @@
 import { Phone, MessageCircle, Mail } from "lucide-react";
+import { useEnquiry } from "./ui/Enquiry.jsx";
 import { PROJECT } from "../lib/site.js";
 
 /** Sticky bottom action bar — mobile only. */
 export default function MobileCTA() {
+  const { openEnquiry } = useEnquiry();
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-canvas/95 backdrop-blur-xl lg:hidden">
       <a
@@ -17,12 +19,13 @@ export default function MobileCTA() {
       >
         <MessageCircle size={15} /> WhatsApp
       </a>
-      <a
-        href="#enquire"
-        className="flex items-center justify-center gap-2 bg-ink py-4 font-sans text-[0.72rem] font-medium uppercase tracking-[0.12em] text-canvas"
+      <button
+        type="button"
+        onClick={() => openEnquiry()}
+        className="flex items-center justify-center gap-2 bg-brass py-4 font-sans text-[0.72rem] font-medium uppercase tracking-[0.12em] text-obsidian"
       >
         <Mail size={15} /> Enquire
-      </a>
+      </button>
     </div>
   );
 }

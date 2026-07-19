@@ -2,152 +2,168 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import Button from "../ui/Button.jsx";
-import Magnetic from "../ui/Magnetic.jsx";
-import Media from "../ui/Media.jsx";
+import { useEnquiry } from "../ui/Enquiry.jsx";
 import { PROJECT } from "../../lib/site.js";
 import { IMG, px } from "../../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/* CHAPTER 01 — ARRIVAL
-   Full-bleed 100vh. One breathtaking visual. Typography anchored to the
-   edges so the whole screen is used, not a centred column. */
+const HERO_VIDEO = "/BrabusIslandVilla_H264_WEB.mp4";
+const prefersReduced =
+  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* CHAPTER 01 — ARRIVAL · Obsidian & Gold
+   A cinematic film held in a rounded card. A tall section + a CSS-sticky
+   frame let the card grow to full-bleed as you scroll (margins → 0, corners
+   → square) with no pin-spacer to misbehave. Gold-swept serif headline. */
 export default function Hero() {
   const root = useRef(null);
-  const bandScroll = useRef(null);
-  const bandFocus = useRef(null);
-  const ambient = useRef(null);
-  const contentExit = useRef(null);
-  const headingPar = useRef(null);
-  const indicator = useRef(null);
+  const pad = useRef(null);
+  const card = useRef(null);
+  const videoWrap = useRef(null);
+  const { openEnquiry } = useEnquiry();
 
   useGSAP(
     () => {
       const q = gsap.utils.selector(root);
 
       gsap.matchMedia().add(
-        { reduce: "(prefers-reduced-motion: reduce)", ok: "(prefers-reduced-motion: no-preference)" },
+        {
+          ok: "(prefers-reduced-motion: no-preference)",
+          desktop: "(min-width:768px) and (prefers-reduced-motion: no-preference)",
+          reduce: "(prefers-reduced-motion: reduce)",
+          fine: "(pointer:fine)",
+        },
         (ctx) => {
-          if (ctx.conditions.reduce) {
-            gsap.set([q(".kicker-mask"), q(".hd-inner"), q(".meta-inner")], { clearProps: "all" });
-            gsap.set(bandFocus.current, { autoAlpha: 1, filter: "blur(0px)", scale: 1 });
-            return;
+          if (ctx.conditions.reduce) return;
+
+          // ---- entrance ----
+          gsap.set(videoWrap.current, { autoAlpha: 0, scale: 1.12, filter: "blur(16px)" });
+          gsap.set(q(".ed-line > span"), { yPercent: 112 });
+          gsap.set(q(".hero-fade"), { autoAlpha: 0, y: 20 });
+
+          gsap
+            .timeline({ defaults: { ease: "power4.out" } })
+            .to(videoWrap.current, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 2, ease: "expo.out" }, 0)
+            .to(q(".ed-line > span"), { yPercent: 0, duration: 1.3, stagger: 0.14 }, 0.5)
+            .fromTo(q(".gold-sweep"), { backgroundPositionX: "120%" }, { backgroundPositionX: "-20%", duration: 1.3, ease: "power2.inOut" }, 1.3)
+            .to(q(".hero-fade"), { autoAlpha: 1, y: 0, duration: 1, stagger: 0.09 }, 1.4);
+
+          // ---- scroll-expand (desktop): rounded card → full-bleed ----
+          if (ctx.conditions.desktop) {
+            gsap.set(pad.current, { paddingTop: "13vh", paddingBottom: "13vh", paddingLeft: "6vw", paddingRight: "6vw" });
+            gsap.set(card.current, { borderRadius: "2rem" });
+
+            gsap
+              .timeline({
+                scrollTrigger: { trigger: root.current, start: "top top", end: "+=58%", scrub: 0.6 },
+                defaults: { ease: "none" },
+              })
+              .to(pad.current, { paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0 }, 0)
+              .to(card.current, { borderRadius: 0 }, 0)
+              .to(q(".hero-cue"), { autoAlpha: 0 }, 0);
           }
 
-          // Initial states (layout effect → no flash)
-          gsap.set(q(".kicker-mask"), { clipPath: "inset(0 100% 0 0)" });
-          gsap.set(q(".hd-inner"), { yPercent: 115, autoAlpha: 0, filter: "blur(16px)" });
-          gsap.set(q(".meta-inner"), { y: 16, autoAlpha: 0, filter: "blur(6px)" });
-          gsap.set(bandFocus.current, { autoAlpha: 0, filter: "blur(20px)", scale: 1.08 });
-          gsap.set(indicator.current, { autoAlpha: 0 });
-
-          const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-          tl.to(bandFocus.current, { autoAlpha: 1, filter: "blur(0px)", scale: 1, duration: 2, ease: "expo.out" }, 0)
-            .to(q(".kicker-mask"), { clipPath: "inset(0 0% 0 0)", duration: 1, ease: "power4.inOut" }, 0.5)
-            .to(q(".hd-inner"), { yPercent: 0, autoAlpha: 1, filter: "blur(0px)", duration: 1.2, stagger: 0.16 }, 0.7)
-            .fromTo(q(".gold-sweep"), { backgroundPositionX: "120%" }, { backgroundPositionX: "-20%", duration: 1.1, ease: "power2.inOut" }, 1.5)
-            .to(q(".meta-inner"), { y: 0, autoAlpha: 1, filter: "blur(0px)", duration: 1, stagger: 0.12 }, 1.7)
-            .to(indicator.current, { autoAlpha: 1, duration: 0.9 }, 2.1);
-
-          // Ambient light drift + indicator dot
-          gsap.to(ambient.current, { xPercent: 8, yPercent: -6, duration: 16, ease: "sine.inOut", yoyo: true, repeat: -1, delay: 2.2 });
-          gsap.to(q(".ind-dot"), { y: 40, duration: 1.9, ease: "sine.inOut", repeat: -1, yoyo: true, delay: 2.2 });
-
-          // Scroll exit — image scales, content lifts & fades
-          gsap.timeline({ scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true } })
-            .to(bandScroll.current, { scale: 1.14, ease: "none" }, 0)
-            .to(contentExit.current, { yPercent: -18, autoAlpha: 0, ease: "none" }, 0)
-            .to(indicator.current, { autoAlpha: 0, ease: "none" }, 0);
-
-          // Mouse parallax (eased, separate nodes)
-          const bg = { x: gsap.quickTo(bandFocus.current, "x", { duration: 0.8, ease: "power3.out" }), y: gsap.quickTo(bandFocus.current, "y", { duration: 0.8, ease: "power3.out" }) };
-          const hd = { x: gsap.quickTo(headingPar.current, "x", { duration: 0.8, ease: "power3.out" }), y: gsap.quickTo(headingPar.current, "y", { duration: 0.8, ease: "power3.out" }) };
-          const onMove = (e) => {
-            const nx = e.clientX / window.innerWidth - 0.5;
-            const ny = e.clientY / window.innerHeight - 0.5;
-            bg.x(nx * 16); bg.y(ny * 16);
-            hd.x(nx * 7); hd.y(ny * 7);
-          };
-          if (window.matchMedia("(pointer:fine)").matches) window.addEventListener("mousemove", onMove);
-          return () => window.removeEventListener("mousemove", onMove);
-        }
+          // ---- subtle mouse parallax on the film ----
+          if (ctx.conditions.fine) {
+            const xTo = gsap.quickTo(videoWrap.current, "x", { duration: 1, ease: "power3.out" });
+            const yTo = gsap.quickTo(videoWrap.current, "y", { duration: 1, ease: "power3.out" });
+            const onMove = (e) => {
+              xTo((e.clientX / window.innerWidth - 0.5) * 16);
+              yTo((e.clientY / window.innerHeight - 0.5) * 16);
+            };
+            window.addEventListener("mousemove", onMove);
+            return () => window.removeEventListener("mousemove", onMove);
+          }
+        },
       );
     },
-    { scope: root }
+    { scope: root },
   );
 
   return (
-    <section ref={root} className="relative mx-3 h-[100svh] min-h-[640px] overflow-hidden rounded-[2.5rem] bg-ink-900 md:mx-5">
-      {/* Full-bleed visual */}
-      <div className="absolute inset-0">
-        <div ref={bandScroll} className="h-full w-full">
-          <div ref={bandFocus} className="h-full w-full">
-            <Media src={px(IMG.heroExterior, 2000)} alt="M3M Brabus branded residences, Sector 58 Gurgaon" priority sizes="100vw" />
-          </div>
-        </div>
-        <div className="absolute inset-0 [background:linear-gradient(180deg,rgba(10,9,8,0.55)_0%,rgba(10,9,8,0.15)_38%,rgba(10,9,8,0.75)_100%)]" />
-        <div ref={ambient} className="pointer-events-none absolute -inset-1/4 [background:radial-gradient(40%_40%_at_30%_35%,rgba(198,166,100,0.16),transparent_70%)]" />
-        <div className="hero-grain pointer-events-none absolute inset-0" />
-      </div>
+    <section ref={root} className="relative h-svh md:h-[165vh]">
+      <div className="sticky top-0 h-svh w-full overflow-hidden">
+        <div ref={pad} className="h-full w-full p-3 md:p-0">
+          <div
+            ref={card}
+            className="hero-card relative h-full w-full overflow-hidden rounded-[1.5rem] bg-ink-900 shadow-[0_60px_140px_-40px_rgba(0,0,0,0.85)] md:rounded-[2rem]"
+          >
+            {/* cinematic film */}
+            <div ref={videoWrap} className="absolute inset-0 [filter:brightness(0.8)_contrast(1.06)_saturate(0.9)]">
+              <video
+                className="h-full w-full object-cover"
+                src={HERO_VIDEO}
+                poster={px(IMG.heroExterior, 2200)}
+                autoPlay={!prefersReduced}
+                muted
+                loop
+                playsInline
+                preload="auto"
+                aria-label="M3M Brabus branded residences — cinematic film"
+              />
+            </div>
 
-      {/* Content — corner-anchored, whole-screen composition */}
-      <div ref={contentExit} className="relative z-10 flex h-full flex-col px-[var(--spacing-gutter)]">
-        <div className="pt-32 md:pt-36">
-          <p className="kicker flex items-center gap-3 overflow-hidden text-champagne-soft">
-            <span className="kicker-mask inline-flex items-center gap-3">
-              <span className="inline-block h-px w-10 bg-brass-soft" />
-              {PROJECT.developer} presents · with {PROJECT.partner}
-            </span>
-          </p>
-        </div>
+            {/* grades + glow + grain */}
+            <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,rgba(8,6,5,0.62)_0%,rgba(8,6,5,0.04)_30%,rgba(8,6,5,0.30)_58%,rgba(8,6,5,0.92)_100%)]" />
+            <div className="gold-glow pointer-events-none absolute -inset-1/4 [background:radial-gradient(38%_38%_at_26%_22%,rgba(201,168,106,0.16),transparent_66%)]" />
+            <div className="grain pointer-events-none absolute inset-0" />
 
-        <div ref={headingPar} className="mt-auto pb-10 md:pb-14">
-          <h1 className="font-display text-[clamp(3rem,11vw,10rem)] font-light leading-[0.9] tracking-[-0.02em] text-white">
-            <span className="block overflow-hidden">
-              <span className="hd-inner block">Branded</span>
-            </span>
-            <span className="block overflow-hidden">
-              <span
-                className="hd-inner gold-sweep block italic"
-                style={{
-                  color: "transparent",
-                  backgroundImage: "linear-gradient(100deg,#c2a15f 0%,#c2a15f 42%,#f3e6c4 50%,#c2a15f 58%,#c2a15f 100%)",
-                  backgroundSize: "250% 100%",
-                  backgroundPositionX: "120%",
-                  WebkitBackgroundClip: "text",
-                  backgroundClip: "text",
-                }}
-              >
-                residences.
-              </span>
-            </span>
-          </h1>
+            {/* content */}
+            <div className="relative z-10 flex h-full flex-col justify-between p-6 md:p-10 lg:p-14">
+              {/* top ledger */}
+              <div className="hero-fade flex items-center justify-between">
+                <span className="kicker text-champagne">{PROJECT.developer} · with {PROJECT.partner}</span>
+                <span className="mono hidden text-[0.6rem] tracking-[0.24em] text-ink-faint sm:block">Sector 58 · Gurgaon</span>
+              </div>
 
-          {/* Bottom meta row spans full width */}
-          <div className="mt-8 flex flex-col gap-8 border-t border-white/15 pt-8 md:flex-row md:items-end md:justify-between">
-            <p className="meta-inner max-w-sm text-sm leading-relaxed text-white/70 md:text-base">
-              {PROJECT.configs} at {PROJECT.location}, on Golf Course Extension Road.
-              Two homes per core — a limited collection for the few.
-            </p>
-            <div className="meta-inner flex flex-wrap gap-4" data-cursor="ENTER">
-              <Magnetic><Button variant="light" href="#enquire">Register Interest</Button></Magnetic>
-              <Magnetic>
-                <a href="#philosophy" className="group inline-flex items-center gap-3 px-2 py-4 font-sans text-[0.78rem] font-medium uppercase tracking-[0.14em] text-white/80 transition-colors hover:text-white">
-                  Begin the journey
-                  <span className="inline-block h-px w-8 bg-white/50 transition-all duration-500 group-hover:w-12 group-hover:bg-brass-soft" />
-                </a>
-              </Magnetic>
+              {/* bottom block */}
+              <div className="max-w-3xl">
+                <h1 className="font-display text-[clamp(2.3rem,6vw,6rem)] font-light leading-[0.94] tracking-[-0.03em] text-bone">
+                  <span className="ed-line"><span>The art of living,</span></span>
+                  <span className="ed-line">
+                    <span
+                      className="gold-sweep font-serif italic"
+                      style={{
+                        color: "transparent",
+                        backgroundImage: "linear-gradient(100deg,#a07c3f 0%,#c9a86a 42%,#f4e6c2 50%,#c9a86a 58%,#a07c3f 100%)",
+                        backgroundSize: "250% 100%",
+                        backgroundPositionX: "120%",
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                      }}
+                    >
+                      engineered.
+                    </span>
+                  </span>
+                </h1>
+
+                <div className="hero-fade mt-8 h-px w-full max-w-xs bg-gradient-to-r from-brass/70 via-line to-transparent" />
+
+                <div className="hero-fade mt-8">
+                  <button
+                    type="button"
+                    onClick={() => openEnquiry()}
+                    data-cursor="ENTER"
+                    className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-7 py-4"
+                  >
+                    <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover:scale-x-100" />
+                    <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover:text-obsidian">
+                      Register interest
+                    </span>
+                    <span className="relative z-10 text-brass transition-[transform,color] duration-500 group-hover:translate-x-1 group-hover:text-obsidian">→</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* scroll cue */}
+            <div className="hero-cue pointer-events-none absolute bottom-6 right-6 z-10 hidden items-center gap-2 md:flex lg:bottom-8 lg:right-8">
+              <span className="mono text-[0.56rem] tracking-[0.24em] text-ink-faint">Scroll to enter</span>
+              <span className="h-px w-8 bg-gradient-to-r from-brass to-transparent" />
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div ref={indicator} className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-3 md:flex">
-        <span className="relative block h-14 w-px bg-white/25">
-          <span className="ind-dot absolute -left-[2px] top-0 block h-[5px] w-[5px] rounded-full bg-brass-soft" />
-        </span>
       </div>
     </section>
   );

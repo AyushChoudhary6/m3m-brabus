@@ -39,7 +39,7 @@ export default function Philosophy() {
   );
 
   return (
-    <section id="philosophy" ref={root} className="relative overflow-hidden py-[16vh]">
+    <section id="philosophy" ref={root} className="relative overflow-hidden py-[10vh]">
       {/* Oversized ghost word */}
       <div className="ph-drift pointer-events-none absolute -right-[10%] top-[6%] select-none font-display text-[24vw] italic leading-none text-ink/[0.035]">
         Vision

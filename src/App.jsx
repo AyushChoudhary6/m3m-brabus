@@ -8,6 +8,8 @@ import Home from "./pages/Home.jsx";
 import Placeholder from "./pages/Placeholder.jsx";
 import CustomCursor from "./components/ui/CustomCursor.jsx";
 import ScrollProgress from "./components/ui/ScrollProgress.jsx";
+import { EnquiryProvider } from "./components/ui/Enquiry.jsx";
+import SideEnquiry from "./components/ui/SideEnquiry.jsx";
 import { NAV_LINKS } from "./lib/site.js";
 
 function ScrollToTop() {
@@ -21,21 +23,24 @@ function ScrollToTop() {
 export default function App() {
   return (
     <SmoothScroll>
-      <ScrollToTop />
-      <ScrollProgress />
-      <CustomCursor />
-      <Navbar />
-      <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          {NAV_LINKS.map((l) => (
-            <Route key={l.to} path={l.to} element={<Placeholder title={l.label} />} />
-          ))}
-          <Route path="*" element={<Placeholder title="Page" />} />
-        </Routes>
-      </main>
-      <Footer />
-      <MobileCTA />
+      <EnquiryProvider>
+        <ScrollToTop />
+        <ScrollProgress />
+        <CustomCursor />
+        <Navbar />
+        <main className="noise">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            {NAV_LINKS.map((l) => (
+              <Route key={l.to} path={l.to} element={<Placeholder title={l.label} />} />
+            ))}
+            <Route path="*" element={<Placeholder title="Page" />} />
+          </Routes>
+        </main>
+        <Footer />
+        <MobileCTA />
+        <SideEnquiry />
+      </EnquiryProvider>
     </SmoothScroll>
   );
 }
