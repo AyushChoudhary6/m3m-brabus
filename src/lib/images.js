@@ -19,4 +19,6 @@ export const IMG = {
   bedroom: 31737843,        // modern luxury bedroom
   bedroomDecor: 33837741,   // luxury bedroom modern decor
   spa: 7031704,             // modern luxury spa zone
+  pool: 6667430,            // luxury indoor pool
+  gym: 29392546,            // dark modern gym
 };
