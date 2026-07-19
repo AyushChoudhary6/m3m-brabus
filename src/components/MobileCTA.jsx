@@ -1,0 +1,28 @@
+import { Phone, MessageCircle, Mail } from "lucide-react";
+import { PROJECT } from "../lib/site.js";
+
+/** Sticky bottom action bar — mobile only. */
+export default function MobileCTA() {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-canvas/95 backdrop-blur-xl lg:hidden">
+      <a
+        href={`tel:${PROJECT.phone}`}
+        className="flex items-center justify-center gap-2 py-4 font-sans text-[0.72rem] font-medium uppercase tracking-[0.12em] text-ink"
+      >
+        <Phone size={15} /> Call
+      </a>
+      <a
+        href={`https://wa.me/${PROJECT.whatsapp}`}
+        className="flex items-center justify-center gap-2 border-x border-line py-4 font-sans text-[0.72rem] font-medium uppercase tracking-[0.12em] text-ink"
+      >
+        <MessageCircle size={15} /> WhatsApp
+      </a>
+      <a
+        href="#enquire"
+        className="flex items-center justify-center gap-2 bg-ink py-4 font-sans text-[0.72rem] font-medium uppercase tracking-[0.12em] text-canvas"
+      >
+        <Mail size={15} /> Enquire
+      </a>
+    </div>
+  );
+}
