@@ -12,7 +12,37 @@ export const useEnquiry = () =>
   useContext(EnquiryCtx) || { openEnquiry: () => {}, openBrochure: () => {} };
 
 const AUTO_DELAY = 40000; // 40 seconds
-const BROCHURE_URL = "/brochure/m3m-brabus-brochure.pdf"; // drop the real PDF here
+// NOTE: public/ is served case-sensitively — this must match the filename exactly.
+const BROCHURE_URL = "/brochure/M3M-Brabus-Brochure.pdf";
+
+/**
+ * Fetch the brochure and save it as a real file.
+ *
+ * A plain <a download> on a missing path silently saves the SPA's index.html
+ * with a .pdf extension ("Failed to load PDF document"). Fetching first lets us
+ * verify it's actually a PDF and fall back to "we'll email it" instead.
+ * @returns {Promise<boolean>} true if a real PDF was delivered
+ */
+async function downloadBrochure() {
+  try {
+    const res = await fetch(BROCHURE_URL, { cache: "no-store" });
+    const type = res.headers.get("content-type") || "";
+    if (!res.ok || !type.includes("pdf")) return false;
+    const blob = await res.blob();
+    if (blob.size < 1024) return false; // too small to be a real brochure
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "M3M-Brabus-Brochure.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    return true;
+  } catch {
+    return false;
+  }
+}
 const KEY_LEAD = "mb-lead"; // submitted a real enquiry — don't auto-invite on future visits
 
 const ls = {
@@ -82,6 +112,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
+  const [gotFile, setGotFile] = useState(true);
   const set = (k) => (e) => {
     const v = sanitizeField(k, e.target.value);
     setForm((f) => ({ ...f, [k]: v }));
@@ -96,6 +127,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
     setSending(false);
     setError("");
     setErrors({});
+    setGotFile(true);
     setForm((f) => ({ ...f, config: subject && subject.includes("BHK") ? subject : f.config }));
     const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -122,12 +154,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
       setSent(true);
       if (isBrochure) {
         trackBrochure(subject || "modal");
-        const a = document.createElement("a");
-        a.href = BROCHURE_URL;
-        a.download = "M3M-Brabus-Brochure.pdf";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        setGotFile(await downloadBrochure());
       }
     } catch {
       setError("err.send");
@@ -181,7 +208,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
                 <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-ink-soft">
 {t("enq.thanksBody")}
                 </p>
-                {isBrochure && (
+                {isBrochure && (gotFile ? (
                   <a
                     href={BROCHURE_URL}
                     download
@@ -189,7 +216,11 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
                   >
                     Download didn't start? Click here
                   </a>
-                )}
+                ) : (
+                  <p className="mx-auto mt-6 max-w-xs text-sm leading-relaxed text-brass">
+                    The brochure will be emailed to you shortly.
+                  </p>
+                ))}
                 <button onClick={onClose} className="mt-8 mono text-[0.66rem] tracking-[0.2em] text-brass transition-colors hover:text-brass-soft">
                   {t("nav.close")}
                 </button>

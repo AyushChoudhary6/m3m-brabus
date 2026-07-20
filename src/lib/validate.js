@@ -3,6 +3,16 @@
 // the rules (and the wording) stay identical everywhere.
 // ============================================================
 
+/**
+ * Email shape, built label-by-label rather than as a loose "something@something.tld".
+ *   local  — dot-separated chunks, so ".a@", "a.@" and "a..b@" are all rejected
+ *   domain — each label must start AND end alphanumeric, so "-gmail.com",
+ *            "gmail-.com" and "gmail..com" are rejected
+ *   tld    — letters only, 2+ (rejects "a@gmail.c" and "a@gmail.123")
+ */
+const EMAIL_RE =
+  /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
+
 /** Strip characters that can never be valid for a field, as the user types. */
 export function sanitizeField(key, value = "") {
   if (key === "name") return value.replace(/[0-9_]/g, "").slice(0, 60);
@@ -64,7 +74,7 @@ export function validateField(key, value = "", { requireEmail = false } = {}) {
 
   if (key === "email") {
     if (!v) return requireEmail ? "err.emailRequired" : "";
-    if (!/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(v)) return "err.emailInvalid";
+    if (v.length > 254 || !EMAIL_RE.test(v)) return "err.emailInvalid";
     return "";
   }
 
