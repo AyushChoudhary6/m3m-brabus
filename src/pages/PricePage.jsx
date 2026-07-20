@@ -2,7 +2,8 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { ArrowUpRight, Phone } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowUpRight, Phone, Download } from "lucide-react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
@@ -10,6 +11,7 @@ import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { useEnquiry } from "../components/ui/Enquiry.jsx";
+import { track } from "../lib/analytics.js";
 import { PROJECT, RESIDENCES, FAQS } from "../lib/site.js";
 import { IMG, px } from "../lib/images.js";
 
@@ -29,14 +31,6 @@ const DRIVERS = [
     d: `Residences run ${PROJECT.sizes}. The spread between the smallest and the largest home is the single largest factor in the final number.`,
   },
   {
-    k: "Floor rise",
-    d: "Higher floors are conventionally charged above lower ones. The rise, and the floor it starts from, are set in the published price sheet.",
-  },
-  {
-    k: "Orientation & view",
-    d: "Every residence is open on three sides, but aspect still differs — corner placement and the outlook a home commands are priced through a preferential location charge.",
-  },
-  {
     k: "Inventory released",
     d: "This is an ultra-low-density collection. What is available in a given release, and when you enter it, both bear on the number quoted to you.",
   },
@@ -46,38 +40,49 @@ const DRIVERS = [
   },
 ];
 
-const SHEET = [
+/* The cost sheet, split the way it is actually settled: what the developer
+   charges, and what the state collects through the transaction. The split is
+   the point — it is where "all-inclusive" quotes quietly stop. Order follows
+   how a Gurugram sheet is typed up: unit cost, then premiums, then deposits. */
+const DEVELOPER_LINES = [
   {
     t: "Basic sale price",
-    d: "The cost of the residence itself, quoted per sq.ft on the saleable area and multiplied out to the unit total.",
+    d: "A per sq.ft rate applied to the super (saleable) area — not the carpet area you walk on. It is the single largest line, and the one every other charge is judged against.",
   },
   {
-    t: "Preferential location charge (PLC)",
-    d: "A premium levied on the more sought-after placements — corner homes, particular aspects, particular floors.",
+    t: "Preferential location charge",
+    d: "A premium on the placements people compete for: corner homes, a particular aspect, an unobstructed outlook. Usually quoted per sq.ft, so it scales with the size of the residence.",
   },
   {
-    t: "Car parking",
-    d: "Dedicated covered parking is allotted per residence and charged as a separate line.",
+    t: "Floor rise",
+    d: "A per sq.ft increment charged above a defined base floor. Two things matter — the rate, and the floor it starts counting from. A sheet that omits the second is incomplete.",
   },
   {
     t: "Club membership",
-    d: "A one-time charge for access to the grand clubhouse, pool, spa and gym, listed apart from the unit cost.",
+    d: "A one-time charge for the clubhouse, pool, spa and gym. It is separate from the unit cost and separate again from the annual subscription that follows possession.",
   },
   {
-    t: "Maintenance & IFMS",
-    d: "An interest-free maintenance security, plus the recurring per sq.ft upkeep of the common estate.",
+    t: "IFMS / maintenance deposit",
+    d: "An interest-free maintenance security held against the common estate, taken once at possession. Distinct from the recurring per sq.ft monthly maintenance, quoted separately.",
   },
   {
-    t: "Statutory taxes",
-    d: "GST and any applicable government levies, calculated at the rates prevailing on the date of each payment.",
+    t: "Car parking",
+    d: "Covered parking is allotted per residence and billed as its own line. Additional bays, where released, are charged again at the rate in the sheet.",
   },
+  {
+    t: "Power backup",
+    d: "A one-time charge per KVA of standby load provisioned to the home, with running charges billed later on consumption. Larger residences carry a larger sanctioned load.",
+  },
+];
+
+const STATUTORY_LINES = [
   {
     t: "Stamp duty & registration",
-    d: "Payable to the State of Haryana at conveyance, at the rate in force at that time — not a developer charge.",
+    d: "Payable to the State of Haryana at conveyance, at the rate in force on that date. It is a government levy collected through the transaction, not a charge the developer sets.",
   },
   {
-    t: "Payment schedule",
-    d: "The milestone-by-milestone breakdown of when each instalment falls due across the build.",
+    t: "GST on under-construction",
+    d: "Applicable while the residence is under construction, at the rate prevailing on the date of each instalment. A completed home with an occupation certificate is treated differently.",
   },
 ];
 
@@ -97,7 +102,13 @@ const FAQ = [
 
 export default function PricePage() {
   const root = useRef(null);
-  const { openEnquiry } = useEnquiry();
+  const { openEnquiry, openBrochure } = useEnquiry();
+
+  /* Every price CTA is a lead, so each one is labelled before it fires. */
+  const cta = (label, run) => () => {
+    track("cta_click", { location: "price_page", label });
+    run();
+  };
 
   useGSAP(
     () => {
@@ -274,25 +285,40 @@ export default function PricePage() {
                 them — with the RERA and possession position stated as it stands on that date.
               </p>
 
-              <div className="rise mt-9 flex flex-wrap items-center gap-5">
+              {/* Three ways to act. Deliberately NOT labelled "download price list":
+                  the page's whole argument is that no price list exists yet, and a
+                  button promising one would undo it. The gated PDF that does exist
+                  is offered for what it actually contains. */}
+              <div className="rise mt-9 flex flex-wrap items-center gap-4">
                 <button
                   type="button"
-                  onClick={() => openEnquiry("Price")}
+                  onClick={cta("cost_sheet", () => openEnquiry("Cost sheet"))}
                   data-cursor="OPEN"
-                  className="group/cta relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-7 py-4"
+                  className="group/cta relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-7 py-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
                 >
                   <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
                   <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-                    Request the price sheet
+                    Request the cost sheet
                   </span>
                   <ArrowUpRight size={15} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
                 </button>
+                <button
+                  type="button"
+                  onClick={cta("brochure", () => openBrochure("Price page"))}
+                  data-cursor="DOWNLOAD"
+                  className="group inline-flex items-center gap-2.5 rounded-full border border-line px-7 py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors duration-500 hover:border-brass/50 hover:text-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+                >
+                  <Download size={14} className="text-brass" />
+                  Brochure &amp; floor plans
+                </button>
                 <a
                   href={`tel:${PROJECT.phone}`}
+                  onClick={() => track("cta_click", { location: "price_page", label: "call" })}
+                  aria-label={`Talk to a consultant on ${PROJECT.phone}`}
                   className="mono inline-flex items-center gap-2 text-[0.68rem] tracking-[0.18em] text-ink-soft transition-colors hover:text-ink"
                 >
                   <Phone size={13} className="text-brass" />
-                  {PROJECT.phone}
+                  Talk to a consultant · {PROJECT.phone}
                 </a>
               </div>
 
@@ -319,24 +345,83 @@ export default function PricePage() {
       <section className="sheet container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">03</span>
-          <span className="kicker">What the price sheet will carry</span>
+          <span className="kicker">What the cost sheet carries</span>
         </div>
-        <p className="mb-8 max-w-[58ch] leading-relaxed text-ink-soft">
-          A luxury price list is never a single number. When the official sheet is issued it will be
-          itemised roughly as below — each line explained to you before anything is signed. The
-          amounts against them are not published today, so none are shown here.
+        <p className="mb-10 max-w-[62ch] leading-relaxed text-ink-soft">
+          A price at this level is never one number. The document that answers the question is a cost
+          sheet, and it is itemised — which is why two quotes on the same residence can differ
+          without either being wrong. These are the lines it carries. The amounts against them are
+          not published today, so none are shown here.
         </p>
-        <dl className="border-t border-line">
-          {SHEET.map((s) => (
-            <div key={s.t} className="sheet-row grid grid-cols-1 gap-2 border-b border-line py-5 sm:grid-cols-[minmax(0,16rem)_1fr] sm:gap-10">
-              <dt className="font-display text-lg text-ink">{s.t}</dt>
-              <dd className="max-w-[60ch] text-sm leading-relaxed text-ink-soft">{s.d}</dd>
+
+        <p className="mono text-[0.56rem] tracking-[0.2em] text-brass">Charged by the developer</p>
+        <dl className="mt-4 border-t border-line">
+          {DEVELOPER_LINES.map((l, i) => (
+            <div
+              key={l.t}
+              className="sheet-row grid grid-cols-1 gap-x-10 gap-y-2 border-b border-line py-5 sm:grid-cols-[minmax(0,15rem)_1fr_auto]"
+            >
+              <dt className="flex items-baseline gap-3 font-display text-lg font-light leading-snug text-ink">
+                <span className="idx shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                {l.t}
+              </dt>
+              <dd className="max-w-[58ch] text-sm leading-relaxed text-ink-soft">{l.d}</dd>
+              <dd className="mono self-baseline text-[0.56rem] tracking-[0.18em] text-ink-faint sm:text-right">
+                On request
+              </dd>
             </div>
           ))}
         </dl>
-        <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          Line items are indicative of a standard schedule · Applicable charges and rates are
-          confirmed only in the official price list
+
+        <p className="mono mt-12 text-[0.56rem] tracking-[0.2em] text-brass">Payable to the government</p>
+        <dl className="mt-4 border-t border-line">
+          {STATUTORY_LINES.map((l, i) => (
+            <div
+              key={l.t}
+              className="sheet-row grid grid-cols-1 gap-x-10 gap-y-2 border-b border-line py-5 sm:grid-cols-[minmax(0,15rem)_1fr_auto]"
+            >
+              <dt className="flex items-baseline gap-3 font-display text-lg font-light leading-snug text-ink">
+                <span className="idx shrink-0">{String(DEVELOPER_LINES.length + i + 1).padStart(2, "0")}</span>
+                {l.t}
+              </dt>
+              <dd className="max-w-[58ch] text-sm leading-relaxed text-ink-soft">{l.d}</dd>
+              <dd className="mono self-baseline text-[0.56rem] tracking-[0.18em] text-ink-faint sm:text-right">
+                At prevailing rate
+              </dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* the distinction that decides whether two quotes are even comparable —
+            the most useful thing a buyer can take away from this page */}
+        <div className="rise mt-12 rounded-[1.25rem] border border-line bg-cream p-6 md:p-9">
+          <h3 className="max-w-[34ch] font-display text-xl font-light leading-snug text-ink md:text-2xl">
+            &ldquo;All-inclusive&rdquo; and &ldquo;plus government charges&rdquo; are not the same quote
+          </h3>
+          <p className="mt-4 max-w-[64ch] leading-relaxed text-ink-soft">
+            An all-inclusive figure normally folds the developer&rsquo;s own lines — basic price,
+            location charge, floor rise, club, parking, power backup, maintenance deposit — into a
+            single number. It rarely includes stamp duty, registration or GST, because those are
+            statutory and move with the rate in force on the day you pay. A quote described as
+            &ldquo;plus government charges&rdquo; is stating the same thing openly. Before you compare
+            two numbers, establish which of the two you are holding.
+          </p>
+        </div>
+
+        <div className="rise mt-9 flex flex-wrap items-center gap-x-8 gap-y-3">
+          <Link
+            to="/payment-plan"
+            className="group inline-flex items-center gap-2 border-b border-brass/40 pb-1 font-sans text-[0.7rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors hover:border-brass"
+          >
+            When each instalment falls due
+            <ArrowUpRight size={13} className="transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </Link>
+        </div>
+
+        <p className="mono mt-8 text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
+          Line items are indicative of a standard schedule in this segment · No price is officially
+          published for {PROJECT.name}, and any figure shared on enquiry is subject to confirmation
+          by {PROJECT.developer}
         </p>
       </section>
 
@@ -356,7 +441,7 @@ export default function PricePage() {
         </div>
       </section>
 
-      <RelatedPages links={["/residences", "/overview", "/contact"]} />
+      <RelatedPages links={["/payment-plan", "/residences", "/contact"]} />
       <CtaBand title="Ask for the" accent="price list." subject="Price" />
     </div>
   );

@@ -2,13 +2,17 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { ArrowUpRight } from "lucide-react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
 import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
+import { useEnquiry } from "../components/ui/Enquiry.jsx";
+import { track } from "../lib/analytics.js";
 import { PROJECT, RESIDENCES } from "../lib/site.js";
+import { OFFICIAL_SOURCE } from "../lib/facts.js";
 import { IMG, px } from "../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -36,7 +40,7 @@ const ASSESSED = [
   },
   {
     k: "Address",
-    v: "Sector 58, on Golf Course Extension Road — an established luxury corridor with direct links to Golf Course Road, Cyber City, NH-8 and Sohna Road, and metro connectivity nearby. Exact drive times are not published by the developer, so we do not quote any.",
+    v: "Sector 58, on Golf Course Extension Road — an established luxury corridor with direct links to Golf Course Road, Cyber City, NH-8 and Sohna Road, and metro connectivity nearby. The belt was laid out after Gurugram's older spines and reads that way on the ground: wider frontage, newer sanctioned plans, and recent luxury stock concentrated along it rather than inserted between older buildings. A road planned as a whole ages differently from one retrofitted. Exact drive times are not published by the developer, so we do not quote any.",
   },
   {
     k: "Specification",
@@ -47,15 +51,15 @@ const ASSESSED = [
 const STRENGTHS = [
   {
     t: "Light and air are designed in, not optional",
-    d: "Three open sides per residence means daylight and cross-ventilation reach each room. This is a decision made at the structural stage and cannot be retrofitted — it is the strongest verifiable differentiator in the plan.",
+    d: "Three open sides per residence means daylight and cross-ventilation reach each room rather than only the corner ones. In a market that routinely trades ventilation for floor-plate efficiency, it is the plan's most easily verified advantage — you can stand in a room and test it.",
   },
   {
-    t: "Scale that is genuinely rare",
-    d: "Approximately 5,000 to 7,000 sq.ft per home. Buyers moving from a farmhouse or an independent floor tend to find this the deciding factor, because most vertical inventory in Gurugram does not reach it.",
+    t: "Scale that cannot be added later",
+    d: `Homes of ${PROJECT.sizes} are fixed at the structural grid on the day a building is sanctioned. No interior work turns two ordinary flats into one properly planned home, because the columns, the cores and the service risers do not move. Scarcity here is a product of construction rather than of marketing.`,
   },
   {
-    t: "A coherent brand thesis",
-    d: "BRABUS is a marque built on bespoke engineering and restraint rather than ornament. Applied to interiors, that ethos reads as materials and precision, which ages considerably better than decorative luxury.",
+    t: "A marque sets a floor under the finish",
+    d: `${PROJECT.partner} is built on bespoke engineering and restraint rather than ornament, and a name of that standing has more to lose from a poor handover than any single project earns. Applied to interiors, the ethos reads as materials and precision — legible long after the sales campaign has closed.`,
   },
   {
     t: "Amenity depth within the address",
@@ -75,6 +79,10 @@ const VERIFY = [
   {
     t: "RERA registration",
     d: "Ask for the registration number and check it yourself on the Haryana RERA portal. Confirm the registered project name, promoter entity, sanctioned plan and the declared completion date — not the marketing timeline.",
+  },
+  {
+    t: "The sanctioned plan itself",
+    d: "Density, heights and open space only become real once they appear on the approved drawing. Ask to see the sanctioned plan, not the brochure's rendering of it, and check that the layout you were shown is the layout that was sanctioned.",
   },
   {
     t: "The price sheet in writing",
@@ -114,6 +122,7 @@ const RECONSIDER = [
 
 export default function ReviewsPage() {
   const root = useRef(null);
+  const { openEnquiry } = useEnquiry();
 
   useGSAP(
     () => {
@@ -169,8 +178,19 @@ export default function ReviewsPage() {
             This page is an assessment by our editorial team, not a collection of customer reviews.
             We do not host ratings, quotes or testimonials for {PROJECT.name}, and we do not publish
             aggregate scores. Every claim below is drawn from the official {PROJECT.developer} listing
-            or is explicitly flagged as unpublished.
+            or is explicitly flagged as unpublished. You are welcome to check it against the source
+            yourself — a review of this kind is only worth reading if it is traceable.
           </p>
+          {/* the page's whole credibility rests on traceability, so the source is linked, not cited */}
+          <a
+            href={OFFICIAL_SOURCE}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mono mt-4 inline-flex items-center gap-1.5 text-[0.58rem] tracking-[0.18em] text-brass transition-colors hover:text-brass-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
+          >
+            Facts as published by {PROJECT.developer}
+            <ArrowUpRight size={12} />
+          </a>
         </div>
       </section>
 
@@ -253,9 +273,28 @@ export default function ReviewsPage() {
             ))}
           </div>
         </div>
-        <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          Enquire and we will send each of these the moment it is officially released
-        </p>
+        {/* a gap is only useful to a reader if there is a way to close it —
+            the passive note that stood here asked nothing of anyone */}
+        <div className="blk mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+          <button
+            type="button"
+            onClick={() => {
+              track("reviews_documents");
+              openEnquiry("Reviews — unpublished figures");
+            }}
+            data-cursor="ASK"
+            className="group/cta relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-7 py-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
+          >
+            <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
+            <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
+              Be sent each figure as it is released
+            </span>
+            <ArrowUpRight size={15} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
+          </button>
+          <span className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">
+            Official documents only · no estimates circulated
+          </span>
+        </div>
       </section>
 
       {/* what to verify */}
@@ -264,6 +303,12 @@ export default function ReviewsPage() {
           <span className="idx">04</span>
           <span className="kicker">What to verify before you buy</span>
         </div>
+        <p className="blk mb-8 max-w-[62ch] leading-relaxed text-ink-soft">
+          Reasoning is not diligence. Everything argued above is checkable, but none of it is proof —
+          an assessment survives only on contact with documents. Each item below names the paper to
+          ask for rather than the reassurance to accept, and if any one of them is not yet available,
+          that is itself an answer worth having early.
+        </p>
         <ol className="border-t border-line">
           {VERIFY.map((v, i) => (
             <li
@@ -286,6 +331,18 @@ export default function ReviewsPage() {
           <span className="idx">05</span>
           <span className="kicker">Who it suits</span>
         </div>
+
+        {/* the resale question is the one buyers ask last and worry about first;
+            with no pricing published it can only be answered structurally, and
+            answering it honestly means stating the downside in the same breath */}
+        <p className="blk mb-[clamp(2rem,5vh,3rem)] max-w-[70ch] leading-relaxed text-ink-soft">
+          A home of this size self-selects its market: end-users buying to live in it rather than to
+          trade it. That pool is narrow, and honesty requires saying that a narrow pool cuts both
+          ways — it steadies a building, and it slows a sale. What supports resale in this segment is
+          not the volume of demand but the scarcity of alternatives; a seller with one of very few
+          comparable homes on the corridor is not competing against fifty identical listings.
+        </p>
+
         <div className="grid gap-x-14 gap-y-10 md:grid-cols-2">
           <div className="blk border-t border-line pt-6">
             <h2 className="font-display text-2xl font-light text-ink md:text-3xl">

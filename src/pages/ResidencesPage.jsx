@@ -8,24 +8,19 @@ import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
 import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
+import ConfigTable from "../components/sections/ConfigTable.jsx";
 import Media from "../components/ui/Media.jsx";
 import { RESIDENCES, PROJECT } from "../lib/site.js";
 import { px } from "../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/* Distinct from the homepage: alternating full-width residence rows, a
-   side-by-side comparison, and the specification schedule. */
-const COMPARE = [
-  { k: "Residence size", a: "≈ 5,000 sq.ft", b: "≈ 7,000 sq.ft" },
-  { k: "Bedrooms", a: "Four", b: "Five" },
-  { k: "Orientation", a: "Open on three sides", b: "Open on three sides" },
-  { k: "Character", a: "A sanctuary in the sky", b: "Villa-scale living" },
-  { k: "Arrival", a: "Private lift lobby", b: "Private foyer & lift lobby" },
-  { k: "Flooring", a: "Italian marble", b: "Italian marble" },
-  { k: "Climate", a: "VRV air conditioning", b: "VRV air conditioning" },
-  { k: "Automation", a: "Smart-home ready", b: "Smart-home integration" },
-];
+/* Three ways of reading the same collection, in the order a buyer uses them:
+   the alternating residence rows to fall for a home, ConfigTable to compare the
+   two side by side, then the specification schedule for what is actually in
+   them. The comparison is a real <table> in its own component because it is the
+   page's conversion point — carpet area and availability are unpublished, and
+   each unknown is offered as an enquiry rather than guessed at. */
 
 const SPEC_SCHEDULE = [
   { t: "Flooring", d: "Italian marble to the living and dining areas, with premium finishes carried through the home." },
@@ -60,10 +55,6 @@ export default function ResidencesPage() {
             yPercent: 8, ease: "none",
             scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
           });
-        });
-        gsap.from(q(".cmp-row"), {
-          autoAlpha: 0, y: 18, duration: 0.7, ease: "power3.out", stagger: 0.05,
-          scrollTrigger: { trigger: q(".cmp")[0], start: "top 85%" },
         });
         gsap.from(q(".spec"), {
           autoAlpha: 0, y: 22, duration: 0.8, ease: "power3.out", stagger: 0.06,
@@ -137,29 +128,8 @@ export default function ResidencesPage() {
         ))}
       </section>
 
-      {/* comparison */}
-      <section className="cmp container-lux py-[clamp(3rem,9vh,6rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">Side by side</span>
-        </div>
-        <div className="overflow-x-auto">
-          <div className="min-w-[560px]">
-            <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-6 border-b border-line pb-4">
-              <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">Specification</span>
-              <span className="font-display text-lg text-ink">4 BHK</span>
-              <span className="font-display text-lg text-ink">5 BHK</span>
-            </div>
-            {COMPARE.map((c) => (
-              <div key={c.k} className="cmp-row grid grid-cols-[1.2fr_1fr_1fr] items-baseline gap-6 border-b border-line-soft py-4">
-                <span className="mono text-[0.62rem] tracking-[0.14em] text-ink-faint">{c.k}</span>
-                <span className="text-sm text-ink">{c.a}</span>
-                <span className="text-sm text-ink">{c.b}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* comparison — semantic table, with the two unpublished figures gated */}
+      <ConfigTable index="02" kicker="Side by side" />
 
       {/* specification schedule */}
       <section className="spec-grid container-lux pb-[clamp(4rem,12vh,8rem)]">

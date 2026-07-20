@@ -2,14 +2,16 @@ import { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { Phone, Mail, MapPin, MessageCircle, ArrowRight } from "lucide-react";
+import { Phone, Mail, MapPin, MessageCircle, ArrowRight, ArrowUpRight, CalendarCheck, FileDown } from "lucide-react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
 import RelatedPages from "../components/sections/RelatedPages.jsx";
+import { useEnquiry } from "../components/ui/Enquiry.jsx";
 import { submitLead, markLeadCaptured } from "../lib/leads.js";
 import { startTimer } from "../lib/spam.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../lib/validate.js";
+import { trackSiteVisit } from "../lib/analytics.js";
 import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT, RESIDENCES } from "../lib/site.js";
 
@@ -31,6 +33,7 @@ const VISIT = [
 export default function Contact() {
   const root = useRef(null);
   const { t } = useI18n();
+  const { openBrochure, openVisit } = useEnquiry();
   // `company` is the honeypot (spam.js HONEYPOT_NAME); it has to live in state,
   // because only what is in `form` reaches submitLead.
   const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", message: "", company: "" });
@@ -79,6 +82,10 @@ export default function Contact() {
           autoAlpha: 0, y: 24, duration: 0.9, ease: "power3.out", stagger: 0.08,
           scrollTrigger: { trigger: q(".vs-grid")[0], start: "top 86%" },
         });
+        gsap.from(q(".act"), {
+          autoAlpha: 0, y: 20, duration: 0.8, ease: "power3.out", stagger: 0.08,
+          scrollTrigger: { trigger: q(".act-grid")[0], start: "top 90%" },
+        });
       });
     },
     { scope: root },
@@ -89,6 +96,32 @@ export default function Contact() {
     { icon: MessageCircle, k: "WhatsApp", v: "Message the team", href: `https://wa.me/${PROJECT.whatsapp}` },
     { icon: Mail, k: "Email", v: PROJECT.email, href: `mailto:${PROJECT.email}` },
     { icon: MapPin, k: "Site address", v: PROJECT.address, href: "/location" },
+  ];
+
+  /* The three steps below explain a site visit without ever letting anyone book
+     one, and the brochure was reachable only from the footer links. Both are
+     given here as actions of equal weight: the form is for a considered
+     enquiry, these two are for the reader who has already decided and only
+     needs to choose how. The brochure fires its own brochure_download event on
+     submit inside the modal — firing one here as well would count a click that
+     never became a lead. */
+  const ACTIONS = [
+    {
+      k: "Schedule a site visit",
+      detail: "Choose your day",
+      why: "Scale, aspect and the quiet of a low-density plan are only real when you stand in them.",
+      icon: CalendarCheck,
+      cursor: "VISIT",
+      onSelect: () => { trackSiteVisit("Contact page"); openVisit("Contact page"); },
+    },
+    {
+      k: "Download the brochure",
+      detail: "Instant download",
+      why: "Floor plans, specifications and the amenity list, to read slowly and away from the screen.",
+      icon: FileDown,
+      cursor: "DOWNLOAD",
+      onSelect: () => openBrochure("Contact page"),
+    },
   ];
 
   return (
@@ -230,6 +263,50 @@ export default function Contact() {
             </article>
           ))}
         </div>
+
+        {/* gap-px over a hairline ground rules the pair for free */}
+        <ul className="act-grid mt-[clamp(2.5rem,7vh,4rem)] grid list-none grid-cols-1 gap-px border border-line bg-line p-0 sm:grid-cols-2">
+          {ACTIONS.map((a) => (
+            <li key={a.k} className="act flex">
+              <button
+                type="button"
+                onClick={a.onSelect}
+                data-cursor={a.cursor}
+                className="group/act relative flex w-full flex-col overflow-hidden bg-canvas p-7 text-left transition-colors duration-500 hover:bg-brass/[0.035] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass md:p-8"
+              >
+                <span className="flex items-start justify-between gap-4">
+                  <span className="text-brass" aria-hidden="true">
+                    <a.icon size={20} strokeWidth={1.4} />
+                  </span>
+                  <ArrowUpRight
+                    size={15}
+                    aria-hidden="true"
+                    className="text-ink-faint transition-all duration-500 ease-lux group-hover/act:-translate-y-0.5 group-hover/act:translate-x-0.5 group-hover/act:text-brass"
+                  />
+                </span>
+                <span className="mt-5 block font-display text-2xl leading-snug text-ink transition-colors duration-500 group-hover/act:text-brass-soft">
+                  {a.k}
+                </span>
+                <span className="mono mt-2 block text-[0.58rem] tracking-[0.18em] text-ink-faint">
+                  {a.detail}
+                </span>
+                <span className="mt-4 block max-w-[38ch] leading-relaxed text-ink-soft">
+                  {a.why}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-px w-0 bg-brass transition-all duration-700 ease-lux group-hover/act:w-full"
+                />
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        {/* the promise the rest of the site keeps, restated at the door */}
+        <p className="mono mt-8 max-w-[70ch] text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
+          No price, RERA number or possession date has been published for this project ·
+          You will be sent each one the day {PROJECT.developer} issues it, and nothing before
+        </p>
       </section>
       <RelatedPages links={["/brochure", "/residences", "/price"]} />
     </div>

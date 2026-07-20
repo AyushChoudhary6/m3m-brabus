@@ -67,6 +67,32 @@ const PRINCIPLES = [
   },
 ];
 
+/* Deliberately generic — this is how to check a promoter, not a claim about
+   this one. Every item is a document the buyer can obtain independently, which
+   is why it costs us nothing in credibility to publish it. */
+const DUE_DILIGENCE = [
+  {
+    k: "i",
+    t: "RERA registration of the promoter",
+    d: "Search the promoter's name on the Haryana RERA portal, not the project's marketing name. The registration names the legal entity, the sanctioned scope and the declared completion date — and a project without a live registration cannot lawfully be advertised or sold.",
+  },
+  {
+    k: "ii",
+    t: "Delivery record on completed projects",
+    d: "Ask for the list of the developer's completed addresses, then verify them yourself: occupation certificates issued, the gap between the RERA-declared date and the date keys were actually handed over, and what residents say once the sales team has moved on.",
+  },
+  {
+    k: "iii",
+    t: "A litigation and encumbrance search",
+    d: "Have an advocate run the title chain, the encumbrance certificate on the land parcel and a case search against the promoter entity. Consumer-forum and NCLT matters are public record and take an afternoon to pull.",
+  },
+  {
+    k: "iv",
+    t: "The entity actually named on the agreement",
+    d: "The brand on the hoarding and the company on the builder–buyer agreement are frequently not the same. Read the allotment letter for the signing entity, the land-owning company and any development-management arrangement before you pay anything beyond the booking amount.",
+  },
+];
+
 const ENQUIRY_FLOW = [
   {
     n: "01",
@@ -105,6 +131,11 @@ export default function AboutPage() {
         gsap.from(q(".rise"), {
           autoAlpha: 0, y: 24, duration: 0.9, ease: "power3.out", stagger: 0.07,
           scrollTrigger: { trigger: q(".rise")[0], start: "top 86%" },
+        });
+
+        gsap.from(q(".dd"), {
+          autoAlpha: 0, y: 20, duration: 0.8, ease: "power3.out", stagger: 0.07,
+          scrollTrigger: { trigger: q(".dd-grid")[0], start: "top 86%" },
         });
 
         gsap.from(q(".pri"), {
@@ -256,6 +287,50 @@ export default function AboutPage() {
               Artist's impression · Indicative only
             </figcaption>
           </figure>
+        </div>
+
+        {/* The coda to the section above. Having just declined to vouch for the
+            developer in adjectives, the honest next move is to hand over the
+            checks a buyer should run for themselves — on this promoter or any
+            other. Unnumbered because it continues 02 rather than opening 03. */}
+        <div className="dd-grid mt-[clamp(3.5rem,9vh,6rem)]">
+          <div className="dd flex items-baseline gap-5">
+            <span className="idx">—</span>
+            <span className="kicker">What to verify about any developer</span>
+          </div>
+          <p className="dd mt-6 max-w-[58ch] leading-relaxed text-ink-soft">
+            Four checks worth running before a booking amount leaves your account — on this address
+            or on any other. None of them require a broker's permission, and each one is a document
+            you can obtain independently.
+          </p>
+
+          <ul className="mt-10 grid gap-x-14 gap-y-0 border-t border-line md:grid-cols-2">
+            {DUE_DILIGENCE.map((c) => (
+              <li key={c.k} className="dd group flex gap-6 border-b border-line py-6">
+                <span className="idx pt-1.5">{c.k}</span>
+                <div>
+                  <h3 className="font-display text-lg text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-xl">
+                    {c.t}
+                  </h3>
+                  <p className="mt-2 max-w-[48ch] text-sm leading-relaxed text-ink-soft">{c.d}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* Points at the RERA page and at the ledger in 04 rather than
+              restating the registration position, which both already carry. */}
+          <p className="dd mt-8 max-w-[58ch] text-sm leading-relaxed text-ink-faint">
+            Where {PROJECT.name} itself stands on the first of those is set out on the{" "}
+            <Link
+              to="/rera"
+              className="border-b border-brass/40 text-brass transition-colors hover:border-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass"
+            >
+              RERA page
+            </Link>
+            ; the ledger further down this page records every other figure the listing has yet to
+            publish.
+          </p>
         </div>
       </section>
 

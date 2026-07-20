@@ -11,25 +11,27 @@ import { track } from "../../lib/analytics.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/* CHAPTER 26 — CONFIGURATION
-   The two published unit types, side by side. Everything on this table comes
-   from CONFIGURATIONS in the facts layer: M3M publishes 4 BHK and 5 BHK and
-   nothing else, so there are two rows and no Penthouse.
+/* CONFIGURATION — the side-by-side table on /residences.
+   Everything here comes from CONFIGURATIONS in the facts layer: M3M publishes
+   4 BHK and 5 BHK and nothing else, so there are two rows and no Penthouse.
 
-   Carpet area is deliberately absent from the official listing. Rather than
-   print a blank cell — or worse, a plausible-looking number — the cell becomes
-   a request button, so the one figure a serious buyer always asks for is also
-   the site's best conversion point.
+   Deliberately NOT a feature comparison. The residence write-ups immediately
+   above this table already list marble, VRV, lift lobby and the rest at length;
+   repeating them in a column would be the same point made twice. What the
+   editorial rows cannot carry is the decision data — carpet area and what is
+   still available — so the table restricts itself to that.
+
+   Carpet area and inventory position are both absent from the official
+   listing. Rather than print a blank cell — or worse, a plausible-looking
+   number — each becomes a request button, so the two figures a serious buyer
+   always asks for are also the page's best conversion points.
 
    One semantic <table> serves both breakpoints: below md it is restyled into
    stacked cards with CSS (`max-md:` + `content-[attr(data-label)]`) rather than
    duplicated as a second markup tree, which would make screen readers read the
    whole collection twice. */
 
-/** " · "-delimited feature strings read better as a list than as a sentence. */
-const splitFeatures = (s) => s.split("·").map((f) => f.trim()).filter(Boolean);
-
-const HEADS = ["Configuration", "Size", "Carpet Area", "Features", "Status"];
+const HEADS = ["Configuration", "Size", "Carpet area", "Availability"];
 
 /* Shared cell rhythm: generous vertical padding, hairline rule, and on mobile
    the label the hidden <thead> would otherwise have supplied. */
@@ -40,7 +42,7 @@ const CELL =
   "max-md:before:text-[0.55rem] max-md:before:uppercase max-md:before:tracking-[0.2em] " +
   "max-md:before:text-ink-faint max-md:before:content-[attr(data-label)]";
 
-export default function ConfigTable() {
+export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
   const root = useRef(null);
   const { openEnquiry } = useEnquiry();
 
@@ -74,11 +76,11 @@ export default function ConfigTable() {
   };
 
   return (
-    <section id="configuration" ref={root} className="container-lux py-[clamp(5rem,13vh,9rem)]">
-      <div className="mb-[clamp(2.5rem,6vh,4rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
+    <section id="configuration" ref={root} className="container-lux py-[clamp(3rem,9vh,6rem)]">
+      <div className="mb-[clamp(2rem,5vh,3.5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
         <div className="cfg-rise flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">Configuration</span>
+          <span className="idx">{index}</span>
+          <span className="kicker">{kicker}</span>
         </div>
         <h2 className="cfg-rise max-w-[24ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
           Two residences. <span className="font-serif italic text-brass">Nothing in between.</span>
@@ -89,11 +91,11 @@ export default function ConfigTable() {
 
       {/* horizontal scroll is the desktop fallback; on mobile the rows are cards */}
       <div className="cfg-table overflow-x-auto">
-        <table className="w-full border-collapse text-left max-md:block md:min-w-[52rem]">
+        <table className="w-full border-collapse text-left max-md:block md:min-w-[42rem]">
           <caption className="mono mb-7 text-left text-[0.58rem] leading-relaxed tracking-[0.18em] text-ink-faint max-md:block">
-            {PROJECT.name} — the configurations and size range are as published by{" "}
-            {PROJECT.developer}; features are indicative. Sizes are total area. Carpet areas
-            and current availability are not published and are shared on request.
+            {PROJECT.name} — configurations and sizes as published by {PROJECT.developer}. Sizes are
+            total area. Carpet areas and the current availability position are not published, and
+            are shared on request.
           </caption>
 
           <thead className="max-md:sr-only">
@@ -137,42 +139,29 @@ export default function ConfigTable() {
                 </td>
 
                 {/* not published — an unknown is offered, never invented */}
-                <td data-label="Carpet Area" className={CELL}>
+                <td data-label="Carpet area" className={CELL}>
                   {c.carpet ? (
                     <span className="font-display text-lg font-light text-ink">{c.carpet}</span>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => request(`Carpet area — ${c.config}`)}
-                      aria-label={`Request the carpet area for the ${c.config} residence`}
-                      data-cursor="REQUEST"
-                      className="inline-flex items-center gap-1.5 font-display text-lg font-light text-brass transition-colors duration-500 hover:text-brass-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
-                    >
-                      On request
-                      <ArrowUpRight size={15} className="transition-transform duration-500 group-hover:translate-x-0.5" />
-                    </button>
-                  )}
-                  {!c.carpet && (
-                    <span className="mt-1.5 block text-xs leading-relaxed text-ink-faint">
-                      Not published
-                    </span>
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => request(`Carpet area — ${c.config}`)}
+                        aria-label={`Request the carpet area for the ${c.config} residence`}
+                        data-cursor="REQUEST"
+                        className="inline-flex items-center gap-1.5 font-display text-lg font-light text-brass transition-colors duration-500 hover:text-brass-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
+                      >
+                        On request
+                        <ArrowUpRight size={15} className="transition-transform duration-500 group-hover:translate-x-0.5" />
+                      </button>
+                      <span className="mt-1.5 block text-xs leading-relaxed text-ink-faint">
+                        Not published
+                      </span>
+                    </>
                   )}
                 </td>
 
-                <td data-label="Features" className={`${CELL} md:max-w-[26rem]`}>
-                  <ul className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                    {splitFeatures(c.features).map((f, fi, all) => (
-                      <li key={f} className="flex items-center gap-3 text-sm leading-snug text-ink-soft">
-                        {f}
-                        {fi < all.length - 1 && (
-                          <span aria-hidden="true" className="h-px w-3 bg-line" />
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </td>
-
-                <td data-label="Status" className={CELL}>
+                <td data-label="Availability" className={CELL}>
                   {/* No inventory position is published, so we ask rather than
                       assert one — an unknown becomes an enquiry. */}
                   {c.status ? (
@@ -183,8 +172,8 @@ export default function ConfigTable() {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => openEnquiry(`Availability · ${c.config}`)}
-                      className="mono inline-flex items-center gap-2 rounded-full border border-brass/30 px-3.5 py-1.5 text-[0.56rem] tracking-[0.18em] text-brass transition-colors hover:border-brass hover:bg-brass/[0.06]"
+                      onClick={() => request(`Availability · ${c.config}`)}
+                      className="mono inline-flex items-center gap-2 rounded-full border border-brass/30 px-3.5 py-1.5 text-[0.56rem] tracking-[0.18em] text-brass transition-colors hover:border-brass hover:bg-brass/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
                     >
                       Ask availability
                     </button>

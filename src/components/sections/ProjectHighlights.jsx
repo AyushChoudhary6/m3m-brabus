@@ -5,22 +5,26 @@ import { useGSAP } from "@gsap/react";
 import { ArrowUpRight } from "lucide-react";
 import Fact from "../ui/Fact.jsx";
 import { useEnquiry } from "../ui/Enquiry.jsx";
-import { PROJECT_FACTS, OFFICIAL_SOURCE, hasValue } from "../../lib/facts.js";
+import { PROJECT_FACTS, PRICE, OFFICIAL_SOURCE, hasValue } from "../../lib/facts.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/* Ch. 25 — the first scannable proof block, directly beneath the hero.
-   Half of what a buyer asks for on arrival has not been published by M3M.
-   Rather than pad the grid with estimates, the unpublished entries are
-   given the warmer ground and the gold type: an unknown is presented as
-   the reason to make contact, not as a hole in the page. */
+/* Ch. 25 — the scannable proof block that closes the overview page.
+   Half of what a buyer asks for has not been published by M3M. Rather
+   than pad the grid with estimates, the unpublished entries are given the
+   warmer ground and the gold type: an unknown is presented as the reason
+   to make contact, not as a hole in the page.
 
-const KNOWN_COUNT = PROJECT_FACTS.filter(hasValue).length;
+   Price lives outside PROJECT_FACTS in facts.js because it drives the
+   price page separately — but it is the figure asked for first, so it is
+   appended here rather than left as the one question the grid ducks. */
+const FACTS = [...PROJECT_FACTS, PRICE];
+const KNOWN_COUNT = FACTS.filter(hasValue).length;
 
 /* Qualifiers are honest but wordy, and wordy kills a scan grid. They are
    lifted out to numbered footnotes directly beneath, so the grid stays
    readable at five columns without a single caveat being dropped. */
-const NOTED = PROJECT_FACTS.filter((f) => f.note);
+const NOTED = FACTS.filter((f) => f.note);
 const NOTE_INDEX = new Map(NOTED.map((f, i) => [f.key, i + 1]));
 
 export default function ProjectHighlights() {
@@ -55,12 +59,12 @@ export default function ProjectHighlights() {
     <section
       ref={root}
       aria-labelledby="project-highlights-heading"
-      className="border-y border-line bg-canvas py-[clamp(3.5rem,10vh,6.5rem)]"
+      className="border-t border-line py-[clamp(3.5rem,10vh,6.5rem)]"
     >
       <div className="container-lux">
         <div className="ph-rise mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">Quick project highlights</span>
+          <span className="idx">03</span>
+          <span className="kicker">Key facts</span>
         </div>
 
         <div className="mb-[clamp(2rem,5vh,3rem)] grid gap-x-16 gap-y-5 lg:grid-cols-[1fr_0.9fr] lg:items-end">
@@ -71,7 +75,7 @@ export default function ProjectHighlights() {
             What is on record — <span className="font-serif italic text-brass">and what is not yet.</span>
           </h2>
           <p className="ph-rise max-w-[46ch] leading-relaxed text-ink-soft">
-            {KNOWN_COUNT} of the {PROJECT_FACTS.length} figures asked for first are published by M3M,
+            {KNOWN_COUNT} of the {FACTS.length} figures asked for first are published by M3M,
             and are stated here exactly as issued. The rest are not out — so they are marked in gold
             rather than guessed at. Ask for any one and it is sent to you the day it exists.
           </p>
@@ -79,7 +83,7 @@ export default function ProjectHighlights() {
 
         {/* gap-px over a hairline ground draws the grid rules for free */}
         <ul className="ph-grid grid list-none grid-cols-2 gap-px border border-line bg-line p-0 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {PROJECT_FACTS.map(({ note, ...fact }) => {
+          {FACTS.map(({ note, ...fact }) => {
             const known = hasValue(fact);
             const marker = NOTE_INDEX.get(fact.key);
             return (

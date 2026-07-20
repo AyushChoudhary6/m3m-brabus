@@ -88,13 +88,13 @@ export default function Navbar() {
             : "border-b border-transparent bg-transparent py-6"
         )}
       >
-        <div className="flex items-center justify-between px-[var(--spacing-gutter)]">
-          <Link to="/" className="nav-logo flex items-baseline gap-2 leading-none">
+        <div className="flex items-center justify-between gap-6 px-[var(--spacing-gutter)]">
+          <Link to="/" className="nav-logo flex shrink-0 items-baseline gap-2 leading-none">
             <span className="font-display text-2xl tracking-[-0.01em] text-ink">M3M</span>
             <span className="font-serif text-2xl italic text-brass">Brabus</span>
           </Link>
 
-          <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 lg:flex xl:gap-7">
+          <ul className="hidden min-w-0 flex-1 items-center justify-center gap-4 xl:flex 2xl:gap-6">
             {NAV_LINKS.map((l) => (
               <li key={l.to} className="nav-item">
                 <Link
@@ -108,7 +108,7 @@ export default function Navbar() {
             ))}
           </ul>
 
-          <div className="nav-cta flex items-center gap-5">
+          <div className="nav-cta flex shrink-0 items-center gap-4 xl:gap-5">
             {/* language switch */}
             <button
               type="button"
@@ -123,7 +123,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => openEnquiry()}
-              className="mono hidden text-[0.8rem] tracking-[0.16em] text-ink-soft transition-colors hover:text-ink md:inline"
+              className="mono hidden text-[0.8rem] tracking-[0.16em] text-ink-soft transition-colors hover:text-ink md:inline xl:hidden"
             >
               {t("nav.enquire")}
             </button>

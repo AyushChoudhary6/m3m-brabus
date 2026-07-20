@@ -5,7 +5,7 @@
 // with YAML frontmatter under src/content/blog/*.md, so a non-developer
 // can edit them in /admin. The exported API is unchanged — POSTS,
 // CATEGORIES, getPost, relatedPosts — and every post object still carries
-// the exact fields BlogIndex.jsx, BlogPost.jsx and RelatedBlogs.jsx read.
+// the exact fields BlogIndex.jsx and BlogPost.jsx read.
 //
 // Vite inlines the markdown at build time (`query: "?raw", eager: true`),
 // so there is no fetch, no runtime file access and nothing for the

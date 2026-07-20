@@ -7,22 +7,12 @@ import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
 import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
+import ProjectHighlights from "../components/sections/ProjectHighlights.jsx";
 import Media from "../components/ui/Media.jsx";
 import { STATS, HIGHLIGHTS, PROJECT } from "../lib/site.js";
 import { IMG, px } from "../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
-
-const FACTS = [
-  { k: "Developer", v: PROJECT.developer },
-  { k: "Inspired by", v: PROJECT.partner },
-  { k: "Configurations", v: PROJECT.configs },
-  { k: "Residence sizes", v: PROJECT.sizes },
-  { k: "Address", v: PROJECT.address },
-  { k: "Price", v: PROJECT.price },
-  { k: "Possession", v: PROJECT.possession },
-  { k: "RERA", v: PROJECT.rera },
-];
 
 export default function Overview() {
   const root = useRef(null);
@@ -46,6 +36,12 @@ export default function Overview() {
             onUpdate: () => { el.textContent = Math.round(obj.v); },
             scrollTrigger: { trigger: el, start: "top 90%" },
           });
+        });
+
+        // the brief sits well below the stats, so it gets its own trigger
+        gsap.from(q(".br-rise"), {
+          autoAlpha: 0, y: 24, duration: 0.9, ease: "power3.out", stagger: 0.08,
+          scrollTrigger: { trigger: q(".brief")[0], start: "top 82%" },
         });
 
         q(".hl").forEach((el) => {
@@ -114,6 +110,37 @@ export default function Overview() {
         </div>
       </section>
 
+      {/* the argument — what the project is, and who it is written for.
+          Deliberately silent on configuration, size and the three-side plan:
+          the page header states those once, and 02 below carries the rest. */}
+      <section className="brief container-lux pb-[clamp(4rem,11vh,7rem)]">
+        <div className="br-rise mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
+          <span className="idx">01</span>
+          <span className="kicker">The project, in brief</span>
+        </div>
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
+          <h2 className="br-rise max-w-[14ch] font-display text-[clamp(1.9rem,4.4vw,3.2rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
+            A branded residence, <span className="font-serif italic text-brass">in the truest sense.</span>
+          </h2>
+          <div>
+            <p className="br-rise max-w-[54ch] leading-relaxed text-ink-soft">
+              {PROJECT.name} is developed by {PROJECT.developer} and shaped by the ethos of
+              {" "}{PROJECT.partner} — the German marque that built its name rebuilding finished motor
+              cars to a specification the factory never offered. The influence is meant to be felt in
+              the specification rather than read off a badge: bespoke, obsessive, made once.
+            </p>
+            <p className="br-rise mt-5 max-w-[54ch] leading-relaxed text-ink-soft">
+              It is written for a narrow readership — families who already own well and are buying a
+              last address rather than a next one, and principals who want the home to read the way
+              the car in the porch does. Consider it if you value provenance over frontage: an
+              {" "}{PROJECT.developer} address on Golf Course Extension Road, a global marque's
+              discipline carried into the interiors, and a floor plate large enough to live at villa
+              scale without leaving the skyline.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* highlights */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
@@ -133,21 +160,10 @@ export default function Overview() {
         </div>
       </section>
 
-      {/* key facts */}
-      <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">Key facts</span>
-        </div>
-        <dl className="border-t border-line">
-          {FACTS.map((f) => (
-            <div key={f.k} className="hl grid grid-cols-1 gap-1 border-b border-line py-5 sm:grid-cols-[minmax(0,14rem)_1fr] sm:gap-8">
-              <dt className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{f.k}</dt>
-              <dd className="text-ink">{f.v}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+      {/* Key facts. The flat definition list this replaces printed "Coming soon"
+          and "on request" as dead ends; the grid renders the same unpublished
+          figures through Fact, where each one becomes an enquiry instead. */}
+      <ProjectHighlights />
 
       <RelatedPages links={["/residences", "/price", "/amenities", "/location"]} />
       <CtaBand title="See it" accent="in person." subject="Overview" />

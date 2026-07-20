@@ -197,7 +197,7 @@ export default function MasterPlanPage() {
                 viewBox="0 0 640 400"
                 className="h-auto w-full min-w-[420px]"
                 role="img"
-                aria-label="Schematic diagram illustrating general master-plan principles: a site boundary with a north point, staggered tower footprints with spacing between them, a central amenity core, and a separated service route. Not the site plan of this project."
+                aria-label="Schematic diagram illustrating general master-plan principles: a site boundary with a north point, staggered tower footprints with spacing marked between them, one footprint shown open on three faces, a central amenity core, and a service route kept separate from resident movement. Not the site plan of this project."
               >
                 {/* site boundary */}
                 <rect
@@ -231,6 +231,19 @@ export default function MasterPlanPage() {
                   <rect x="272" y="82" width="94" height="66" rx="4" />
                   <rect x="452" y="112" width="94" height="66" rx="4" />
                 </g>
+
+                {/* Three open faces marked on the centre footprint. Section 03
+                    argues that "three sides open" is settled by the layout, not
+                    the specification — this is the only place the drawing can
+                    show what that argument is actually about. */}
+                <g className="dg-stroke" stroke="#e6d2a0" strokeOpacity="0.8" strokeWidth="1.1" fill="none">
+                  <path d="M319 82 L319 60 M314 68 L319 58 L324 68" />
+                  <path d="M272 102 L250 102 M256 97 L248 102 L256 107" />
+                  <path d="M366 102 L388 102 M382 97 L390 102 L382 107" />
+                </g>
+                <text x="334" y="62" fill="#e6d2a0" fontSize="10" letterSpacing="1.6" fontFamily="ui-monospace, monospace">
+                  THREE OPEN FACES
+                </text>
 
                 {/* spacing dimension between two footprints */}
                 <g className="dg-stroke" stroke="#a99d86" strokeOpacity="0.6" strokeWidth="0.9">
@@ -270,8 +283,9 @@ export default function MasterPlanPage() {
               </svg>
             </div>
             <figcaption className="mono mt-4 text-[0.56rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-              Illustrative schematic of planning principles only — orientation, spacing, a central
-              amenity core and segregated service movement. It is not the site plan of{" "}
+              Illustrative schematic of planning principles only — orientation, stagger, spacing,
+              three open faces, a central amenity core and segregated service movement. It is not
+              the site plan of{" "}
               {PROJECT.name}, is not to scale, and implies no tower count, no land area and no
               layout.
             </figcaption>
