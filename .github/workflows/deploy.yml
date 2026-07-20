@@ -1,0 +1,271 @@
+# ============================================================
+# Deploy — GitHub builds, Vercel hosts.
+#
+# The build happens HERE, not on Vercel. The site's crawlable HTML is produced
+# by driving headless Chrome over 30 routes (scripts/prerender.mjs); Vercel's
+# build container is not guaranteed to have a browser, and the runner already
+# needs one for CI. So we run `npm run build:static`, package dist/ as a Build
+# Output API directory, and ship it with `vercel deploy --prebuilt`, which
+# performs no build of its own.
+#
+#   pull_request      → preview deployment, URL commented on the PR
+#   push to main      → production deployment
+#
+# THIS WORKFLOW IS THE ONLY WAY THE SITE DEPLOYS. Vercel's own Git integration
+# is switched off in vercel.json (`git.deploymentEnabled: false`) and its
+# buildCommand is a hard failure with an explanatory message, because a build
+# in Vercel's container has no Chrome and would ship an SPA shell with all 30
+# prerendered pages missing — a regression that looks like a green deploy.
+#
+# NOTE ON HEADERS. `vercel deploy --prebuilt` takes every route and header from
+# .vercel/output/config.json and reads nothing from vercel.json. The packaging
+# step below translates vercel.json into that file; the post-deployment checks
+# then assert on the LIVE response that CSP, HSTS and friends actually arrived,
+# because that translation is the exact seam where they silently went missing
+# before.
+#
+# REQUIRED SECRETS (repository → Settings → Secrets and variables → Actions).
+# Never inline these:
+#   VERCEL_TOKEN       account or team token with deploy rights
+#   VERCEL_ORG_ID      from `vercel link`, or Vercel → team → Settings
+#   VERCEL_PROJECT_ID  from `vercel link`, or Vercel → project → Settings
+#
+# QA APPROVAL GATE: the production job declares `environment: production`. That
+# only becomes a gate once a human configures required reviewers on that
+# environment in repository settings. Until then this deploys straight through
+# on merge — the workflow cannot enforce it by itself.
+# ============================================================
+name: Deploy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  # Superseding a preview is free. Cancelling a production deploy halfway is
+  # not, so main queues instead.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+  pull-requests: write # to leave the preview URL as a comment
+  deployments: write
+
+jobs:
+  deploy:
+    name: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # Secrets are not exposed to workflows triggered by forked PRs, so the
+    # Vercel CLI would fail with an unhelpful auth error. Skip instead.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.url }}
+
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      TARGET: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+        with:
+          chrome-version: stable
+
+      # Pulls project settings and environment variables into .vercel/.
+      # Does not build anything.
+      - name: vercel pull
+        run: npx vercel@latest pull --yes --environment=$TARGET --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      # `vercel pull` writes .vercel/.env.<target>.local, which Vite does not
+      # read. Without this copy, any VITE_* variable configured in the Vercel
+      # dashboard (VITE_GA_ID, for one) would be silently absent from the
+      # bundle — the build would still succeed, just with analytics disabled.
+      - name: Expose Vercel env to Vite
+        run: |
+          set -euo pipefail
+          src=".vercel/.env.${TARGET}.local"
+          if [ -f "$src" ]; then
+            cp "$src" ".env.${TARGET}.local"
+            cp "$src" ".env.local"
+            echo "copied $(grep -c '^VITE_' "$src" || echo 0) VITE_* var(s) to .env.local"
+          else
+            echo "no $src — building without dashboard env vars"
+          fi
+
+      - name: Build + prerender
+        run: npm run build:static
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://m3m-brabus.com' }}
+
+      # Same gates as CI. Deploying output that fails them would put a
+      # fabricated figure, or a page with two canonicals, in front of users.
+      - name: Verify prerendered output
+        run: node .github/workflows/scripts/verify-prerender.mjs dist
+
+      - name: Fabrication guard
+        run: node .github/workflows/scripts/verify-no-fabrication.mjs dist
+
+      - name: Package as Vercel Build Output
+        run: node .github/workflows/scripts/make-vercel-output.mjs dist
+
+      - name: Deploy prebuilt
+        id: deploy
+        run: |
+          set -euo pipefail
+          if [ "$TARGET" = "production" ]; then
+            url=$(npx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          else
+            url=$(npx vercel@latest deploy --prebuilt --token="$VERCEL_TOKEN")
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed to $url"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      # ── Post-deployment validation ────────────────────────────────────────
+      # Smoke test against the live deployment, not the local build: this is
+      # what catches a routing config that serves the wrong index.html.
+      #
+      # NOTE: if Vercel Deployment Protection is enabled, preview URLs answer
+      # 401 to an unauthenticated request and this step will fail. Either
+      # disable protection for previews or add a protection-bypass token.
+      - name: Post-deployment checks
+        run: |
+          set -euo pipefail
+          url="${{ steps.deploy.outputs.url }}"
+          fails=0
+
+          for path in / /price /residences /rera /blogs/rera-checklist-before-booking-in-gurgaon /sitemap.xml; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 5 "$url$path")
+            if [ "$code" != "200" ]; then
+              echo "✗ $path → HTTP $code"
+              fails=$((fails + 1))
+            else
+              echo "✓ $path → 200"
+            fi
+          done
+
+          # An unknown path must 404, not soft-404 with the homepage at 200.
+          code=$(curl -sS -o /dev/null -w '%{http_code}' "$url/no-such-page-ci-probe")
+          [ "$code" = "404" ] && echo "✓ unknown path → 404" || { echo "✗ unknown path → HTTP $code"; fails=$((fails + 1)); }
+
+          # The two-canonicals regression, verified on the served HTML rather
+          # than on the build artefact.
+          for path in / /price /rera; do
+            # grep exits 1 on no match and pipefail would abort the step, but
+            # zero canonicals is a result to report, not a crash.
+            n=$(curl -sS "$url$path" | grep -o 'rel="canonical"' | wc -l | tr -d ' ') || n=0
+            [ "$n" = "1" ] && echo "✓ $path → 1 canonical" || { echo "✗ $path → $n canonicals"; fails=$((fails + 1)); }
+          done
+
+          # ── Security headers, asserted on the wire ───────────────────────
+          # These live in vercel.json, which a --prebuilt deployment never
+          # reads. They only exist in production if make-vercel-output.mjs
+          # translated them into .vercel/output/config.json correctly, and the
+          # failure mode is silent, so it is checked here rather than trusted.
+          hdr() { printf '%s' "$3" | grep -i "^$2:" >/dev/null 2>&1 \
+            && echo "✓ $1 → $2" \
+            || { echo "✗ $1 → missing $2"; fails=$((fails + 1)); }; }
+
+          for path in / /price /renders/tower.jpg; do
+            h=$(curl -sSI "$url$path")
+            hdr "$path" "content-security-policy" "$h"
+            hdr "$path" "strict-transport-security" "$h"
+            hdr "$path" "x-content-type-options" "$h"
+            hdr "$path" "x-frame-options" "$h"
+            hdr "$path" "referrer-policy" "$h"
+            hdr "$path" "permissions-policy" "$h"
+            # Exactly one CSP: two policies are intersected by the browser and
+            # would break the page in ways no console message explains.
+            n=$(printf '%s' "$h" | grep -ci '^content-security-policy:' || true)
+            [ "$n" = "1" ] || { echo "✗ $path → $n CSP headers (want 1)"; fails=$((fails + 1)); }
+          done
+
+          # 'unsafe-inline' in script-src would mean someone "fixed" a CSP
+          # violation by disabling the policy.
+          curl -sSI "$url/" | grep -i '^content-security-policy:' | grep -q "script-src 'self'" \
+            && echo "✓ / → script-src is strict" \
+            || { echo "✗ / → script-src is not 'self'-only"; fails=$((fails + 1)); }
+
+          # The immutable asset policy, and the route-scoped LCP preload that
+          # replaced the (CSP-blocked) inline script in index.html.
+          asset=$(curl -sS "$url/" | grep -o '/assets/index-[A-Za-z0-9_-]*\.js' | head -1)
+          curl -sSI "$url$asset" | grep -qi '^cache-control:.*immutable' \
+            && echo "✓ $asset → immutable" \
+            || { echo "✗ $asset → not immutable"; fails=$((fails + 1)); }
+          curl -sSI "$url/" | grep -qi '^link:.*renders/tower.jpg.*rel=preload' \
+            && echo "✓ / → LCP preload Link header" \
+            || { echo "✗ / → no LCP preload Link header"; fails=$((fails + 1)); }
+
+          # ── CMS ─────────────────────────────────────────────────────────
+          # /admin is not a prerendered route and the bundle is self-hosted, so
+          # both are easy to lose without noticing until an editor complains.
+          for path in /admin /admin/config.yml; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' "$url$path")
+            [ "$code" = "200" ] && echo "✓ $path → 200" || { echo "✗ $path → HTTP $code"; fails=$((fails + 1)); }
+          done
+          bundle=$(curl -sS "$url/admin" | grep -o '/admin/sveltia-cms-[0-9.]*\.js' | head -1)
+          if [ -n "$bundle" ]; then
+            code=$(curl -sS -o /dev/null -w '%{http_code}' "$url$bundle")
+            [ "$code" = "200" ] && echo "✓ $bundle → 200" || { echo "✗ $bundle → HTTP $code"; fails=$((fails + 1)); }
+          else
+            echo "✗ /admin does not reference a self-hosted CMS bundle"; fails=$((fails + 1))
+          fi
+
+          # ── OAuth relay ─────────────────────────────────────────────────
+          # Functions are packaged into .vercel/output/functions; a 404 here
+          # means they were not, and CMS sign-in is impossible. Any other
+          # status is fine — without GitHub credentials it answers 500 with an
+          # explanatory popup page, which is a working function.
+          code=$(curl -sS -o /dev/null -w '%{http_code}' "$url/api/auth")
+          [ "$code" != "404" ] && echo "✓ /api/auth → HTTP $code (deployed)" \
+            || { echo "✗ /api/auth → 404, function not deployed"; fails=$((fails + 1)); }
+          n=$(curl -sSI "$url/api/auth" | grep -ci '^x-frame-options:' || true)
+          [ "$n" -le 1 ] || { echo "✗ /api/auth → $n X-Frame-Options headers"; fails=$((fails + 1)); }
+
+          [ "$fails" -eq 0 ] || { echo "post-deployment validation failed ($fails)"; exit 1; }
+
+      - name: Comment preview URL on the PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.deploy.outputs.url }}';
+            const marker = '<!-- vercel-preview -->';
+            const body = `${marker}\n**Preview deployment:** ${url}\n\nBuilt and prerendered in CI (30 routes), fabrication guard passed.`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }

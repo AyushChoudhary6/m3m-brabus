@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import * as Icons from "lucide-react";
+import { icon } from "../../lib/icons.js";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import Media from "../ui/Media.jsx";
 import { useEnquiry } from "../ui/Enquiry.jsx";
@@ -115,7 +115,7 @@ export default function Amenities() {
 
         <div ref={list} className="am-list border-t border-line">
           {AMENITY_CATEGORIES.map((c, i) => {
-            const Icon = Icons[c.icon] || Icons.Diamond;
+            const Icon = icon(c.icon);
             const isOpen = openId === c.id;
 
             return (

@@ -1,4 +1,5 @@
-import * as Icons from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { icon } from "../../lib/icons.js";
 import { useEnquiry } from "./Enquiry.jsx";
 
 /* A single project fact (Ch. 25).
@@ -7,7 +8,7 @@ import { useEnquiry } from "./Enquiry.jsx";
    lead instead of a fabricated number or an awkward blank. */
 export default function Fact({ fact, className = "" }) {
   const { openEnquiry } = useEnquiry();
-  const Icon = Icons[fact.icon] || Icons.Diamond;
+  const Icon = icon(fact.icon);
   const known = Boolean(fact.value);
 
   return (
@@ -29,7 +30,7 @@ export default function Fact({ fact, className = "" }) {
             className="mt-1.5 inline-flex items-center gap-1.5 font-display text-lg font-light leading-snug text-brass transition-colors hover:text-brass-soft"
           >
             {fact.cta || "On request"}
-            <Icons.ArrowUpRight size={15} className="transition-transform duration-500 group-hover:translate-x-0.5" />
+            <ArrowUpRight size={15} className="transition-transform duration-500 group-hover:translate-x-0.5" />
           </button>
         )}
 

@@ -2,12 +2,17 @@ import { useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { submitLead, markLeadCaptured } from "../../lib/leads.js";
+import { startTimer } from "../../lib/spam.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../../lib/validate.js";
 import { useI18n } from "../../lib/i18n.jsx";
 import { RESIDENCES } from "../../lib/site.js";
 
 const FIELD =
   "w-full border-b border-line bg-transparent py-4 text-ink placeholder:text-ink-faint outline-none transition-colors focus:border-brass";
+
+/* Ch. 78 — the clock behind the "too-fast" signal, and the key submitLead() is
+   handed so spam.js reads back this form's clock and not another's. */
+const FORM_KEY = "Welcome Home section";
 
 /* CHAPTER 07 — WELCOME HOME
    A quiet, editorial enquiry that resolves into a serif confirmation.
@@ -18,7 +23,9 @@ export default function WelcomeHome() {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ name: "", phone: "", email: "", config: "" });
+  // `company` is the honeypot (spam.js HONEYPOT_NAME); it has to live in state,
+  // because only what is in `form` reaches submitLead.
+  const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", company: "" });
   const [errors, setErrors] = useState({});
   const set = (k) => (e) => {
     const v = sanitizeField(k, e.target.value);
@@ -27,6 +34,8 @@ export default function WelcomeHome() {
   };
   const blur = (k) => () => setErrors((x) => ({ ...x, [k]: validateField(k, form[k]) }));
   const fieldCls = (k) => `${FIELD} ${errors[k] ? "border-oxblood" : ""}`;
+  /* First focus or keystroke starts the clock. startTimer() is idempotent. */
+  const touch = () => startTimer(FORM_KEY);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -36,7 +45,8 @@ export default function WelcomeHome() {
     setSending(true);
     setError("");
     try {
-      await submitLead({ ...form, source: "Welcome Home section" });
+      // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
+      await submitLead({ ...form, source: "Welcome Home section", formKey: FORM_KEY });
       markLeadCaptured();
       setSent(true);
     } catch {
@@ -90,8 +100,19 @@ export default function WelcomeHome() {
               </p>
             </div>
 
-            <form onSubmit={submit} className="space-y-6">
-              <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hidden" />
+            <form onSubmit={submit} onFocus={touch} onInput={touch} className="space-y-6">
+              {/* Honeypot — invisible to people and to screen readers, skipped by
+                  the tab order and by autofill, but an ordinary input to a bot. */}
+              <input
+                type="text"
+                name="company"
+                value={form.company}
+                onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="hidden"
+              />
               <div>
                 <input className={fieldCls("name")} placeholder={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
                 {errors.name && <p className="mt-1.5 text-[0.72rem] text-oxblood">{t(errors.name)}</p>}

@@ -1,0 +1,140 @@
+# ============================================================
+# CI — what a pull request has to survive before it can ship.
+#
+# This repo is a static SPA with no server, no TypeScript and no test runner,
+# so the pipeline is honest about what it can prove:
+#
+#   lint      real — oxlint, the project's existing linter
+#   build     real — `vite build` must succeed
+#   prerender real — 30 routes driven through headless Chrome, then asserted
+#   facts     real — the built HTML is grepped for figures M3M has not published
+#   typecheck NOT REAL — no TypeScript in the project (job is skipped)
+#   tests     NOT REAL — no test framework in the project (job is skipped)
+#
+# The two skipped jobs are left visible rather than deleted: a green "tests"
+# check that runs nothing is worse than no check at all, because it is
+# believed. See the TODOs on each.
+# ============================================================
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A second push to the same branch makes the first run irrelevant.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  lint:
+    name: Lint (oxlint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm # keyed on package-lock.json
+
+      - run: npm ci
+
+      # oxlint fails on `error`-level rules only. The repo currently carries a
+      # handful of warnings (only-export-components, an unused param), so
+      # --deny-warnings would fail every PR on pre-existing debt.
+      # TODO: once those are cleared, tighten this to
+      #   npm run lint -- --max-warnings=0
+      # so the count can never climb again.
+      - name: oxlint
+        run: npm run lint
+
+  typecheck:
+    name: Type check (not yet real)
+    runs-on: ubuntu-latest
+    # NOT IMPLEMENTED. The project is plain JSX — there is no tsconfig and no
+    # `tsc` to run, so this job is skipped rather than faked.
+    # TODO: the repo already depends on @types/react and @types/react-dom. To
+    # make this real, add a checkJs tsconfig and run `tsc --noEmit`; the JSDoc
+    # already written across src/lib would start being verified for free.
+    if: false
+    steps:
+      - run: echo "no TypeScript in this project"
+
+  unit-tests:
+    name: Unit tests (not yet real)
+    runs-on: ubuntu-latest
+    # NOT IMPLEMENTED. There is no test runner and there are no test files.
+    # This job exists to make that absence visible in the checks list instead
+    # of quietly passing.
+    # TODO: highest-value first targets, all pure and easy to cover —
+    #   src/lib/validate.js (phone/email rules), src/lib/spam.js (false
+    #   positives cost a lead), src/lib/leads.js payload shaping.
+    if: false
+    steps:
+      - run: echo "no test framework in this project"
+
+  verify-build:
+    name: Build + prerender + facts guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      # ── Build validation ────────────────────────────────────────────────
+      # Plain build first: if this fails, the prerender failure below would
+      # only be noise.
+      - name: vite build
+        run: npm run build
+
+      # ── Prerender ───────────────────────────────────────────────────────
+      # scripts/prerender.mjs shells out to CHROME_PATH and already passes
+      # --no-sandbox, which is what the runner needs.
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+        with:
+          chrome-version: stable
+
+      - name: Build + prerender 30 routes
+        run: npm run build:static
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          # Canonicals and sitemap <loc> are absolute, so the origin matters.
+          SITE_URL: https://m3m-brabus.com
+
+      # ── Assertions ──────────────────────────────────────────────────────
+      # prerender.mjs warns about some of this itself; this step is the one
+      # that turns it into a hard, itemised failure.
+      - name: Verify prerendered output
+        run: node .github/workflows/scripts/verify-prerender.mjs dist
+
+      # The site's whole promise is that it publishes no figure M3M has not.
+      # Enforced here rather than trusted to review.
+      - name: Fabrication guard
+        run: node .github/workflows/scripts/verify-no-fabrication.mjs dist
+
+      # Only the HTML — dist also holds a 7 MB video and the renders.
+      - name: Upload prerendered HTML on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prerendered-html
+          path: |
+            dist/**/*.html
+            dist/sitemap.xml
+          retention-days: 7
+          if-no-files-found: ignore

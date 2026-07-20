@@ -1,34 +1,47 @@
 // ============================================================
-// Blog index. Each post lives in its own file under src/content/blog/
-// and default-exports a Post object. Imports are static so Vite can
-// tree-shake and the prerenderer can render every post at build time.
+// Blog index.
 //
-// A Post:
-//   slug        string  — must match the filename and scripts/routes.mjs
-//   title       string  — <h1> and <title>; lead with the search phrase
-//   description string  — meta description, 140–160 chars
-//   date        string  — ISO "YYYY-MM-DD", used for Article JSON-LD
-//   updated     string  — ISO, optional
-//   category    string  — one of CATEGORIES below
-//   readMins    number  — honest estimate
-//   hero        string  — path under /renders or /public
-//   excerpt     string  — one-sentence card summary
-//   body        Block[] — see BlogBody.jsx for the renderer
+// Ch. 71–73: posts moved from hand-written JS modules to markdown files
+// with YAML frontmatter under src/content/blog/*.md, so a non-developer
+// can edit them in /admin. The exported API is unchanged — POSTS,
+// CATEGORIES, getPost, relatedPosts — and every post object still carries
+// the exact fields BlogIndex.jsx, BlogPost.jsx and RelatedBlogs.jsx read.
 //
-// A Block is exactly one of:
-//   { h2: string } | { p: string } | { ul: string[] } | { ol: string[] }
-//   | { quote: string } | { note: string }   (note = highlighted caveat)
+// Vite inlines the markdown at build time (`query: "?raw", eager: true`),
+// so there is no fetch, no runtime file access and nothing for the
+// prerenderer to wait on. Parsing happens once, in src/lib/cms.js.
+//
+// Eager, not lazy, and that is a considered choice: BlogPost.jsx reads
+// `getPost(slug).body` synchronously during render, so the bodies must be
+// present the moment the module evaluates. This matches the previous
+// behaviour exactly — the six posts were already statically imported — so
+// it is not a regression in bundle size, just a different file format.
+//
+// FRONTMATTER (see public/admin/config.yml — the two must agree):
+//   title       string   <h1> and <title>; lead with the search phrase
+//   description string   meta description, 140–160 chars
+//   date        string   ISO "YYYY-MM-DD", used for Article JSON-LD
+//   updated     string   ISO, optional
+//   category    string   one of CATEGORIES below
+//   readMins    number   honest estimate
+//   hero        string   path under /renders
+//   excerpt     string   one-sentence card summary
+//   draft       boolean  true ⇒ omitted from production builds
+//
+// The slug is the filename and nothing else. Renaming a file changes a
+// live URL that is already in the sitemap and in scripts/routes.mjs.
 //
 // CONTENT RULE: posts must not invent statistics, prices, appreciation
 // figures, possession dates or RERA numbers. Advice and explanation only.
 // ============================================================
 
-import branded from "../content/blog/branded-residences-explained.js";
-import gcer from "../content/blog/golf-course-extension-road-guide.js";
-import fourVsFive from "../content/blog/4-bhk-vs-5-bhk-which-to-buy.js";
-import reraChecklist from "../content/blog/rera-checklist-before-booking-in-gurgaon.js";
-import nriGuide from "../content/blog/nri-guide-to-buying-property-in-gurgaon.js";
-import siteVisit from "../content/blog/what-to-check-during-a-site-visit.js";
+import { loadEntries, isPublished } from "./cms.js";
+
+const FILES = import.meta.glob("../content/blog/*.md", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
 
 export const CATEGORIES = [
   "Branded Residences",
@@ -39,14 +52,12 @@ export const CATEGORIES = [
 ];
 
 /** Newest first. */
-export const POSTS = [
-  branded,
-  gcer,
-  fourVsFive,
-  reraChecklist,
-  nriGuide,
-  siteVisit,
-].sort((a, b) => (a.date < b.date ? 1 : -1));
+export const POSTS = loadEntries(FILES, {
+  required: ["title", "description", "date", "category", "hero", "excerpt"],
+})
+  .filter(isPublished)
+  .map((p) => ({ ...p, readMins: Number(p.readMins) || 6 }))
+  .sort((a, b) => (a.date < b.date ? 1 : -1));
 
 export const getPost = (slug) => POSTS.find((p) => p.slug === slug) || null;
 

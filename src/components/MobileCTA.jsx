@@ -1,7 +1,9 @@
+import { useLocation } from "react-router-dom";
 import { Phone, MessageCircle, CalendarCheck, Download } from "lucide-react";
 import { useEnquiry } from "./ui/Enquiry.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT } from "../lib/site.js";
+import { whatsappUrl } from "../lib/whatsapp.js";
 import { trackCall, trackWhatsApp, trackSiteVisit, trackBrochure } from "../lib/analytics.js";
 
 /**
@@ -12,16 +14,16 @@ import { trackCall, trackWhatsApp, trackSiteVisit, trackBrochure } from "../lib/
  * beside it: a two-line cell stays legible where a horizontal one would either
  * truncate or shrink the tap target. Each cell is kept at 52px + safe-area so
  * the whole bar never exceeds the 6rem (bottom-24) offset WhatsAppFloat lifts
- * itself to on scroll — the two never occupy the same pixels.
+ * itself to on scroll — the two never occupy the same pixels. At 360px the bar
+ * is 4 × 90px cells and the float sits clear above it, right-aligned.
+ *
+ * The WhatsApp ask is built per route by src/lib/whatsapp.js.
  */
-
-const WA_MESSAGE = encodeURIComponent(
-  `Hi, I'm interested in ${PROJECT.name} (${PROJECT.location}) — please share the brochure, pricing and floor plans.`,
-);
 
 export default function MobileCTA() {
   const { openVisit, openBrochure } = useEnquiry();
   const { t, lang } = useI18n();
+  const { pathname } = useLocation();
 
   /* Prefer the shared dictionary, but two of these four labels have no key in
      translations.js yet — fall back locally rather than render a raw key. */
@@ -51,7 +53,7 @@ export default function MobileCTA() {
       </a>
 
       <a
-        href={`https://wa.me/${PROJECT.whatsapp}?text=${WA_MESSAGE}`}
+        href={whatsappUrl({ pathname })}
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => trackWhatsApp("mobile_bar")}

@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, useRef } f
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
 import { submitLead, markLeadCaptured } from "../../lib/leads.js";
+import { startTimer, resetTimer } from "../../lib/spam.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../../lib/validate.js";
 import { useI18n } from "../../lib/i18n.jsx";
 import { trackLead, trackBrochure } from "../../lib/analytics.js";
@@ -112,11 +113,20 @@ export function EnquiryProvider({ children }) {
 const FIELD =
   "w-full border-b border-line bg-transparent py-3.5 text-ink placeholder:text-ink-faint outline-none transition-colors focus:border-brass";
 
+/* Ch. 78 — the clock behind the "too-fast" signal. Deliberately NOT derived from
+   `source`: the same modal is reused for enquiry / brochure / visit and the
+   subject changes as the visitor clicks around, so a source-derived key would
+   silently start a second, later clock mid-fill. submitLead() is handed the same
+   literal, so spam.js reads back the clock this form actually started. */
+const FORM_KEY = "enquiry-modal";
+
 function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
   const isBrochure = intent === "brochure";
   const isVisit = intent === "visit";
   const { t } = useI18n();
-  const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", visitDate: "" });
+  // `company` is the honeypot (see spam.js HONEYPOT_NAME). It lives in state so
+  // its value actually reaches submitLead — as an uncontrolled input it never did.
+  const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", visitDate: "", company: "" });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -129,6 +139,9 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
   };
   const blur = (k) => () => setErrors((x) => ({ ...x, [k]: validateField(k, form[k]) }));
   const fieldCls = (k) => `${FIELD} ${errors[k] ? "border-oxblood" : ""}`;
+  /* First focus or first keystroke anywhere in the form starts the clock.
+     startTimer() is idempotent, so firing on every event is free. */
+  const touch = () => startTimer(FORM_KEY);
 
   useEffect(() => {
     if (!open) return;
@@ -145,6 +158,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
+      resetTimer(FORM_KEY); // a closed modal's clock is stale; the next open restarts it
     };
   }, [open, subject, onClose]);
 
@@ -157,7 +171,8 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
     setError("");
     try {
       const source = isVisit ? `Site visit · ${subject}` : isBrochure ? `Brochure · ${subject}` : auto ? "Timed invite" : subject ? `Modal · ${subject}` : "Modal";
-      await submitLead({ ...form, source, message: form.visitDate ? `Preferred visit date: ${form.visitDate}` : "" });
+      // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
+      await submitLead({ ...form, source, formKey: FORM_KEY, message: form.visitDate ? `Preferred visit date: ${form.visitDate}` : "" });
       markLeadCaptured(); // never auto-invite again
       trackLead(source, form.config);
       setSent(true);
@@ -256,8 +271,20 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
                     : auto ? t("enq.autoBody") : `${PROJECT.configs} · ${PROJECT.location}. ${t("enq.body")}`}
                 </p>
 
-                <form onSubmit={submit} className="mt-7 space-y-5">
-                  <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hidden" />
+                <form onSubmit={submit} onFocus={touch} onInput={touch} className="mt-7 space-y-5">
+                  {/* Honeypot. Hidden from sight and from assistive tech, out of the
+                      tab order and out of autofill — but a plain, fillable input to a
+                      bot walking the DOM. Its value must be in state to reach spam.js. */}
+                  <input
+                    type="text"
+                    name="company"
+                    value={form.company}
+                    onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="hidden"
+                  />
                   <div>
                     <input className={fieldCls("name")} placeholder={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
                     {errors.name && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.name)}</p>}

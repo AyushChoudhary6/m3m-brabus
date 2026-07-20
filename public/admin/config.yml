@@ -1,0 +1,282 @@
+# ============================================================
+# M3M Brabus — CMS configuration
+#
+# Loaded by Sveltia CMS (public/admin/index.html). Everything below is
+# plain Decap CMS configuration: if you ever swap the one <script> tag in
+# index.html for decap-cms.js, this file works unchanged.
+#
+# THE BOUNDARY THIS FILE ENFORCES
+# There is deliberately NO collection pointing at src/lib/site.js or
+# src/lib/facts.js. Those are code, and they are the two files that hold
+# the line on what this project will and will not publish: no price, no
+# RERA number, no possession date, no land area, no tower or floor count,
+# no carpet area, no penthouse — because the official M3M listing states
+# none of them. Making them editable in a CMS would put a text box in
+# front of exactly the mistake this site is built to avoid. Changing a
+# published fact is a code change, reviewed in a pull request, on purpose.
+#
+# What an editor CAN change is prose and contact details. See
+# docs/CMS-GUIDE.md.
+# ============================================================
+
+backend:
+  name: github
+  # ▼ OWNER ACTION — set to the GitHub repository this site deploys from.
+  repo: OWNER/REPO
+  branch: main
+  # Origin that serves /api/auth and /api/callback. On Vercel this is the
+  # production domain of this same project.
+  # ▼ OWNER ACTION — set to the live domain.
+  base_url: https://REPLACE-WITH-PRODUCTION-DOMAIN
+  auth_endpoint: api/auth
+  # Squash the editorial-workflow branch into one tidy commit on publish.
+  squash_merges: true
+  commit_messages:
+    create: 'content: create {{collection}} "{{slug}}"'
+    update: 'content: update {{collection}} "{{slug}}"'
+    delete: 'content: delete {{collection}} "{{slug}}"'
+    uploadMedia: 'content: upload {{path}}'
+    deleteMedia: 'content: delete {{path}}'
+    openAuthoring: 'content: {{message}}'
+
+# Ch. 73 — Draft / In review / Ready. Every change becomes a branch and a
+# pull request instead of a direct commit to main, so nothing reaches the
+# live site without passing through review and the normal deploy.
+publish_mode: editorial_workflow
+
+# Images live beside the renders the site already ships. `public_folder`
+# is the URL the site serves them from, which is why the two differ.
+media_folder: public/renders/uploads
+public_folder: /renders/uploads
+
+# ▼ OWNER ACTION — set to the live domain (drives the "View live" links).
+site_url: https://REPLACE-WITH-PRODUCTION-DOMAIN
+logo_url: /favicon.svg
+
+collections:
+  # ----------------------------------------------------------
+  # Blog
+  # ----------------------------------------------------------
+  - name: blog
+    label: Blog posts
+    label_singular: Blog post
+    description: >-
+      Guides and explainers. Advice and explanation only — never a price, a
+      possession date, a RERA number, an appreciation figure or a statistic
+      that cannot be sourced.
+    folder: src/content/blog
+    extension: md
+    format: yaml-frontmatter
+    create: true
+    delete: false
+    identifier_field: title
+    slug: '{{slug}}'
+    summary: '{{title}}'
+    sortable_fields: [date, title, category]
+    # Opens the published page on the live site. The built-in side-by-side
+    # preview pane is off: it cannot reproduce the site's typography or
+    # block styling, and a preview that lies is worse than none.
+    preview_path: blogs/{{slug}}
+    editor:
+      preview: false
+    view_filters:
+      - { label: Drafts, field: draft, pattern: true }
+      - { label: Published, field: draft, pattern: false }
+    fields:
+      - label: Title
+        name: title
+        widget: string
+        required: true
+        hint: >-
+          The <h1> and the browser-tab title. Lead with the phrase a buyer
+          would actually search for.
+      - label: Meta description
+        name: description
+        widget: string
+        required: true
+        pattern: ['^.{110,180}$', 'Aim for 140–160 characters — this is the line Google prints under the result.']
+      - label: Card summary
+        name: excerpt
+        widget: text
+        required: true
+        hint: One sentence. Shown on the blog index and in "Continue reading" cards.
+      - label: Category
+        name: category
+        widget: select
+        required: true
+        # Must match CATEGORIES in src/lib/blog.js. A new category needs a
+        # developer, because the filter row on /blogs reads that list.
+        options:
+          - Branded Residences
+          - Location Guide
+          - Buyer Guide
+          - Legal & RERA
+          - NRI
+      - label: Published date
+        name: date
+        widget: datetime
+        required: true
+        date_format: YYYY-MM-DD
+        time_format: false
+        picker_utc: true
+        format: YYYY-MM-DD
+      - label: Last updated
+        name: updated
+        widget: datetime
+        required: false
+        date_format: YYYY-MM-DD
+        time_format: false
+        picker_utc: true
+        format: YYYY-MM-DD
+        hint: Leave blank unless you have materially revised the piece.
+      - label: Reading time (minutes)
+        name: readMins
+        widget: number
+        required: true
+        value_type: int
+        min: 1
+        max: 40
+        default: 7
+        hint: An honest estimate, not a flattering one.
+      - label: Hero image
+        name: hero
+        widget: image
+        required: true
+        choose_url: false
+        media_library:
+          config: { multiple: false }
+      - label: Draft
+        name: draft
+        widget: boolean
+        required: false
+        default: true
+        hint: >-
+          While this is on, the post is invisible on the live site even after
+          the change is merged. Switch it off when the piece is ready.
+      - label: Body
+        name: body
+        widget: markdown
+        required: true
+        # The renderer (src/components/ui/BlogBody.jsx) supports exactly six
+        # block types and no inline formatting. The toolbar is limited to
+        # what will actually render; bold, italic and links are stripped to
+        # plain text, so they are not offered.
+        buttons: [heading-two, bulleted-list, numbered-list, quote]
+        editor_components: []
+        modes: [rich_text, raw]
+        hint: >-
+          Headings, paragraphs, bullet lists, numbered lists and quotations.
+          For a highlighted caveat box, use a quote whose first line is
+          exactly "[!NOTE]".
+
+  # ----------------------------------------------------------
+  # FAQs
+  # ----------------------------------------------------------
+  # NOT YET LIVE. src/pages/FaqsPage.jsx still renders its own hard-coded
+  # list; a developer must point it at FAQS in src/lib/cms.js before an
+  # entry made here appears on /faqs. See docs/CMS-GUIDE.md.
+  - name: faqs
+    label: FAQs
+    label_singular: FAQ
+    description: >-
+      One question per entry. Where the answer is "not published", say so —
+      that is the house answer, and it is the correct one.
+    folder: src/content/faqs
+    extension: md
+    format: yaml-frontmatter
+    create: true
+    delete: true
+    identifier_field: question
+    slug: '{{slug}}'
+    summary: '{{question}}'
+    sortable_fields: [order, category, question]
+    editor:
+      preview: false
+    fields:
+      - label: Question
+        name: question
+        widget: string
+        required: true
+      - label: Answer
+        name: answer
+        widget: text
+        required: true
+        hint: >-
+          Plain prose. Never a price, a possession date, a RERA number or a
+          carpet area — if the official listing does not publish it, the
+          answer is that it is not published and is shared on request.
+      - label: Section
+        name: category
+        widget: select
+        required: true
+        options:
+          - { label: About the Project, value: about }
+          - { label: Configurations & Floor Plans, value: configurations }
+          - { label: Price & Payment, value: price }
+          - { label: Location & Connectivity, value: location }
+          - { label: Amenities, value: amenities }
+          - { label: 'Legal, RERA & Possession', value: legal }
+          - { label: Buying Process & NRI, value: buying }
+      - label: Order within section
+        name: order
+        widget: number
+        required: false
+        value_type: int
+        default: 10
+      - label: Draft
+        name: draft
+        widget: boolean
+        required: false
+        default: true
+
+  # ----------------------------------------------------------
+  # Site settings — contact details and the two status lines
+  # ----------------------------------------------------------
+  # NOT YET LIVE. The site still reads these from PROJECT in src/lib/site.js;
+  # a developer must switch those consumers to CMS_SETTINGS in src/lib/cms.js.
+  #
+  # These five fields are here and no others, because these are the only
+  # ones with no factual risk: how to reach the sales team, and two
+  # sentences whose entire content is that a figure has not been published.
+  - name: settings
+    label: Site settings
+    files:
+      - name: contact
+        label: Contact & status lines
+        file: src/content/settings/contact.md
+        extension: md
+        format: yaml-frontmatter
+        editor:
+          preview: false
+        fields:
+          - label: Phone number
+            name: phone
+            widget: string
+            required: true
+            pattern: ['^\+?[0-9 ()-]{8,20}$', 'Digits, spaces, +, ( ) and - only.']
+          - label: WhatsApp number
+            name: whatsapp
+            widget: string
+            required: true
+            pattern: ['^[0-9]{10,15}$', 'Country code and number, digits only — e.g. 919876543210.']
+          - label: Email address
+            name: email
+            widget: string
+            required: true
+            pattern: ['^[^@\s]+@[^@\s]+\.[^@\s]{2,}$', 'A valid email address.']
+          - label: RERA status line
+            name: reraStatus
+            widget: string
+            required: true
+            default: RERA registration — on request
+            # A hard guard, not a hint: a registration number is digits, and
+            # this project does not publish one. Enforced in the editor only
+            # — anyone with direct git write access can still bypass it, so
+            # review is still the real control.
+            pattern: ['^[^0-9]*$', 'This line must not contain a number. M3M has not published a RERA registration number for this project.']
+          - label: Possession status line
+            name: possessionStatus
+            widget: string
+            required: true
+            default: Announced on request
+            pattern: ['^[^0-9]*$', 'This line must not contain a number or a year. No possession date has been announced.']

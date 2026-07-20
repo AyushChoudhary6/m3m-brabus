@@ -1,0 +1,114 @@
+# ============================================================
+# What never gets uploaded to Vercel.
+#
+# Applies to CLI uploads (`vercel`, `vercel build`). The Git integration
+# ignores this file and uses the repo contents instead, so anything that
+# must never ship has to be gitignored as well.
+#
+# ------------------------------------------------------------
+# DEPLOYMENT NOTES — why vercel.json says what it says.
+#
+# They live here because vercel.json is validated against a strict JSON
+# schema: it permits neither comments nor unknown keys, so a deploy fails
+# outright if you try to annotate it in place.
+#
+# 1. ROUTING. The build emits a real directory per route
+#    (dist/price/index.html and 29 siblings). Vercel checks the filesystem
+#    BEFORE applying `rewrites`, so /price is served from its prerendered
+#    file and never reaches the SPA fallback — which is what would silently
+#    replace 30 crawlable pages with an empty shell. The fallback source is
+#    deliberately `/((?!.*\.).*)`: only extensionless paths fall through to
+#    index.html, so a missing image or script still returns an honest 404
+#    instead of HTML with a 200. Note that after prerendering, dist/index.html
+#    IS the homepage, so an unknown URL renders the homepage markup and then
+#    swaps to the client-side 404 — a soft 404, acceptable here because every
+#    real route is prerendered.
+#
+# 2. trailingSlash:false matches the canonicals <Seo> emits (no trailing
+#    slash). Vercel 308-redirects /price/ to /price, so there is one URL per
+#    page and the canonical always agrees with what the server serves.
+#
+# 3. CSP. Derived from what the app actually loads:
+#      script-src   self + googletagmanager/google-analytics (gtag, only when
+#                   VITE_GA_ID is set). NO 'unsafe-inline', NO 'unsafe-eval' —
+#                   the production bundle contains zero eval/new Function
+#                   (verified against dist/assets/index-*.js), and GSAP,
+#                   Framer Motion, Lenis and Leaflet all run fine without it.
+#                   The prerendered <script type="application/ld+json"> blocks
+#                   are data, not executable scripts: the HTML spec abandons
+#                   "prepare the script" before the CSP inline check for
+#                   non-JavaScript types, and even in a browser that reported
+#                   a violation the element stays in the DOM, so structured
+#                   data survives either way.
+#      style-src    self + 'unsafe-inline' — a real concession, made
+#                   knowingly. The prerendered HTML is a Chrome DOM dump, so
+#                   every inline style React, GSAP and Leaflet wrote is baked
+#                   into the markup as a literal style="…" attribute. Hashes
+#                   cannot cover values that change per render, and a nonce
+#                   needs a server to mint one per request — this is a static
+#                   site, so there is none. 'unsafe-inline' for styles is the
+#                   only option that keeps the site looking right; it is much
+#                   weaker than script 'unsafe-inline' but it is not free.
+#      connect-src  BOTH script.google.com and script.googleusercontent.com.
+#                   The Apps Script endpoint 302s to the latter and CSP
+#                   re-checks every redirect hop — drop either origin and
+#                   lead capture dies silently.
+#      img-src      self + images.pexels.com (indicative stock via
+#                   src/lib/images.js) + *.basemaps.cartocdn.com (the CARTO
+#                   dark_all tiles Leaflet loads in LivingMap).
+#      font-src     self only — @fontsource ships the woff2 files into
+#                   /assets, so there is no external font origin.
+#
+# 4. PERMISSIONS-POLICY. autoplay and fullscreen are allowed for self: the
+#    hero video autoplays and FloorPlan calls requestFullscreen. Geolocation
+#    is denied — the map uses hardcoded coordinates and the site never asks
+#    the browser where you are.
+#
+# 5. CACHING. /assets/* is content-hashed by Vite, so it is immutable for a
+#    year. /renders and the brochure PDF keep stable filenames and can be
+#    replaced in place, so they revalidate hourly and lean on the edge +
+#    stale-while-revalidate. HTML revalidates on every request so copy
+#    changes appear immediately.
+#
+# 6. PRERENDERING DOES NOT RUN ON VERCEL. buildCommand is `npm run build`
+#    (plain vite build), NOT `npm run build:static` — scripts/prerender.mjs
+#    drives a real Chrome binary and Vercel's build image has none. Deploying
+#    as configured ships the SPA WITHOUT the 30 prerendered pages. See the
+#    handover notes for the two ways to fix this (bundle a Chromium and set
+#    CHROME_PATH, or prerender in CI and `vercel deploy --prebuilt`).
+# ============================================================
+
+# --- Never build from, or upload, these ---
+node_modules
+.git
+.github
+.vercel
+
+# Build output. Vercel builds from source; shipping a stale dist/ would
+# deploy yesterday's site.
+dist
+dist-ssr
+
+# --- Secrets. Env vars belong in the Vercel dashboard, never in an upload. ---
+.env
+.env.*
+*.local
+*.pem
+
+# --- Repo furniture with no place in a deployment ---
+# Anchored, and NOT a blanket *.md: src/content/blog/*.md is real content,
+# inlined at build time by import.meta.glob(..., "?raw") in src/lib/blog.js.
+# Ignoring markdown wholesale would build a site with six empty blog posts.
+/README.md
+.oxlintrc.json
+.vscode
+.idea
+.DS_Store
+*.log
+npm-debug.log*
+
+# --- Oversized media ---
+# 103 MB source master, already gitignored and referenced by nothing —
+# Hero plays the compressed /hero-brabus.mp4. Uploading it would blow past
+# Vercel's per-file limit and add nothing.
+public/BrabusIslandVilla_H264_WEB.mp4

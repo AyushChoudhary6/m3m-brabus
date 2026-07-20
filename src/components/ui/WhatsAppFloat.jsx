@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { MessageCircle, Phone } from "lucide-react";
 import { trackWhatsApp, trackCall } from "../../lib/analytics.js";
+import { whatsappUrl } from "../../lib/whatsapp.js";
 import { PROJECT } from "../../lib/site.js";
 
 /**
  * Floating WhatsApp + call buttons (PRD Ch.17 — mobile: floating WhatsApp,
  * call button). In Indian luxury real estate one-tap WhatsApp routinely
  * out-converts forms, so it gets a permanent, zero-friction position.
+ *
+ * The message is built per route by src/lib/whatsapp.js — pathname is passed
+ * explicitly so a client-side navigation rebuilds the link instead of leaving
+ * the visitor asking for whatever page they first landed on.
  */
-const MESSAGE = encodeURIComponent(
-  "Hi, I'd like details on M3M Brabus (Sector 58, Gurgaon) — price, floor plans and brochure.",
-);
 
 export default function WhatsAppFloat() {
+  const { pathname } = useLocation();
   const [up, setUp] = useState(false);
 
   // lift above the mobile action bar once the user starts scrolling
@@ -30,7 +34,7 @@ export default function WhatsAppFloat() {
       } bottom-24 lg:bottom-8`}
     >
       <a
-        href={`https://wa.me/${PROJECT.whatsapp}?text=${MESSAGE}`}
+        href={whatsappUrl({ pathname })}
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => trackWhatsApp("float")}

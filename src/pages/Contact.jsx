@@ -8,6 +8,7 @@ import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
 import RelatedPages from "../components/sections/RelatedPages.jsx";
 import { submitLead, markLeadCaptured } from "../lib/leads.js";
+import { startTimer } from "../lib/spam.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../lib/validate.js";
 import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT, RESIDENCES } from "../lib/site.js";
@@ -16,6 +17,10 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const FIELD =
   "w-full border-b border-line bg-transparent py-3.5 text-ink placeholder:text-ink-faint outline-none transition-colors focus:border-brass";
+
+/* Ch. 78 — the clock behind the "too-fast" signal, and the key submitLead() is
+   handed so spam.js reads back this form's clock and not another's. */
+const FORM_KEY = "Contact page";
 
 const VISIT = [
   { k: "01", t: "Book a slot", d: "Share your details and the team will confirm a time that suits you — weekdays or weekends." },
@@ -26,7 +31,9 @@ const VISIT = [
 export default function Contact() {
   const root = useRef(null);
   const { t } = useI18n();
-  const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", message: "" });
+  // `company` is the honeypot (spam.js HONEYPOT_NAME); it has to live in state,
+  // because only what is in `form` reaches submitLead.
+  const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", message: "", company: "" });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -38,6 +45,8 @@ export default function Contact() {
   };
   const blur = (k) => () => setErrors((x) => ({ ...x, [k]: validateField(k, form[k]) }));
   const fieldCls = (k) => `${FIELD} ${errors[k] ? "border-oxblood" : ""}`;
+  /* First focus or keystroke starts the clock. startTimer() is idempotent. */
+  const touch = () => startTimer(FORM_KEY);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -47,7 +56,8 @@ export default function Contact() {
     setSending(true);
     setError("");
     try {
-      await submitLead({ ...form, source: "Contact page" });
+      // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
+      await submitLead({ ...form, source: "Contact page", formKey: FORM_KEY });
       markLeadCaptured();
       setSent(true);
     } catch {
@@ -147,8 +157,19 @@ export default function Contact() {
                 <h2 className="mt-3 font-display text-[clamp(1.8rem,3.4vw,2.4rem)] font-light leading-[1.05] text-ink">
                   Tell us what you're <span className="font-serif italic text-brass">looking for.</span>
                 </h2>
-                <form onSubmit={submit} className="mt-7 space-y-5">
-                  <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hidden" />
+                <form onSubmit={submit} onFocus={touch} onInput={touch} className="mt-7 space-y-5">
+                  {/* Honeypot — invisible to people and to screen readers, skipped by
+                      the tab order and by autofill, but an ordinary input to a bot. */}
+                  <input
+                    type="text"
+                    name="company"
+                    value={form.company}
+                    onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="hidden"
+                  />
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
                       <input className={fieldCls("name")} placeholder={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />

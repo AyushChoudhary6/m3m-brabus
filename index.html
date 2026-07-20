@@ -2,16 +2,47 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#0e0b08" />
 
-    <!--
-      Page metadata (title, description, canonical, Open Graph, JSON-LD) is
-      rendered per-route by <Seo> using React 19's native document metadata,
-      and baked into static HTML by `npm run prerender`. Keeping it out of here
-      avoids duplicate <title>/<meta> tags in the prerendered output.
-    -->
+    <!-- Title/description/canonical/OG/JSON-LD are rendered per route by <Seo>
+         and baked in by `npm run prerender`; putting them here would duplicate
+         them. Comments in this file ship on all 30 prerendered pages, so they
+         are kept short. -->
+
+    <!-- Pexels is the only third-party origin touched during initial load:
+         /residences and /amenities fetch a stock shot eagerly above the fold.
+         No `crossorigin` — a plain <img> is a no-CORS fetch and would not reuse
+         a CORS-flagged socket. Deliberately not preconnected: googletagmanager
+         (analytics no-ops until VITE_GA_ID is set), script.google.com (lead
+         endpoint, submit only), basemaps.cartocdn.com (map tiles, below fold). -->
+    <link rel="preconnect" href="https://images.pexels.com" />
+
+    <!-- Above-the-fold faces only: Fraunces sets the hero headline, Inter the
+         eyebrow, fact ledger and buttons. Just the latin `wght` files —
+         @fontsource also ships latin-ext/vietnamese/greek/cyrillic subsets
+         whose unicode-ranges this copy never reaches, and the hero italic is
+         synthesised from the normal face, so neither is worth ~150 kB of
+         speculative preload. Paths point into node_modules so Vite rewrites
+         them to the same hashed asset the stylesheet requests — a hand-written
+         filename would preload a URL the build does not contain. `crossorigin`
+         is required on font preloads even same-origin, or the browser fetches
+         the file twice. -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href="./node_modules/@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href="./node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2" />
+
+    <!-- NO INLINE SCRIPT HERE, EVER. CSP is script-src 'self' with no
+         'unsafe-inline', nonce or hash, so an inline script in this shell is
+         refused on all 30 prerendered pages. One used to sit here injecting
+         the hero poster's LCP preload on "/"; it never ran in production.
+         Its job now belongs to a route-scoped Link response header in
+         vercel.json (source "/"), which the browser acts on before parsing
+         any markup and which the other 29 pages never receive. Anything
+         needing component state instead of the URL belongs in React 19's
+         link hoisting from the route component. -->
   </head>
   <body class="noise">
     <div id="root"></div>

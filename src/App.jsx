@@ -1,36 +1,42 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SmoothScroll from "./lib/SmoothScroll.jsx";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import MobileCTA from "./components/MobileCTA.jsx";
-import Home from "./pages/Home.jsx";
-import Overview from "./pages/Overview.jsx";
-import ResidencesPage from "./pages/ResidencesPage.jsx";
-import Brabus from "./pages/Brabus.jsx";
-import Amenities from "./pages/Amenities.jsx";
-import LocationPage from "./pages/LocationPage.jsx";
-import Gallery from "./pages/Gallery.jsx";
-import Contact from "./pages/Contact.jsx";
-import PricePage from "./pages/PricePage.jsx";
-import FloorPlanPage from "./pages/FloorPlanPage.jsx";
-import PaymentPlanPage from "./pages/PaymentPlanPage.jsx";
-import BrochurePage from "./pages/BrochurePage.jsx";
-import ReviewsPage from "./pages/ReviewsPage.jsx";
-import PossessionPage from "./pages/PossessionPage.jsx";
-import ReraPage from "./pages/ReraPage.jsx";
-import MasterPlanPage from "./pages/MasterPlanPage.jsx";
-import SpecificationsPage from "./pages/SpecificationsPage.jsx";
-import ConstructionStatusPage from "./pages/ConstructionStatusPage.jsx";
-import FaqsPage from "./pages/FaqsPage.jsx";
-import GuidesPage from "./pages/GuidesPage.jsx";
-import AboutPage from "./pages/AboutPage.jsx";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.jsx";
-import DisclaimerPage from "./pages/DisclaimerPage.jsx";
-import BlogIndex from "./pages/BlogIndex.jsx";
-import BlogPost from "./pages/BlogPost.jsx";
-import Placeholder from "./pages/Placeholder.jsx";
+import Home from "./pages/Home.jsx"; // eager: the LCP route must not flash a fallback
+import NotFound from "./pages/NotFound.jsx";
+import ErrorBoundary from "./components/ui/ErrorBoundary.jsx";
+
+/* Ch. 80 — route-level code splitting. Every page below is its own chunk, so a
+   visitor landing on /rera no longer downloads Leaflet, the map, and 29 other
+   pages before first paint. Home stays eager because it is the LCP route and
+   the most common entry point. */
+const Overview = lazy(() => import("./pages/Overview.jsx"));
+const ResidencesPage = lazy(() => import("./pages/ResidencesPage.jsx"));
+const Brabus = lazy(() => import("./pages/Brabus.jsx"));
+const Amenities = lazy(() => import("./pages/Amenities.jsx"));
+const LocationPage = lazy(() => import("./pages/LocationPage.jsx"));
+const Gallery = lazy(() => import("./pages/Gallery.jsx"));
+const Contact = lazy(() => import("./pages/Contact.jsx"));
+const PricePage = lazy(() => import("./pages/PricePage.jsx"));
+const FloorPlanPage = lazy(() => import("./pages/FloorPlanPage.jsx"));
+const PaymentPlanPage = lazy(() => import("./pages/PaymentPlanPage.jsx"));
+const BrochurePage = lazy(() => import("./pages/BrochurePage.jsx"));
+const ReviewsPage = lazy(() => import("./pages/ReviewsPage.jsx"));
+const PossessionPage = lazy(() => import("./pages/PossessionPage.jsx"));
+const ReraPage = lazy(() => import("./pages/ReraPage.jsx"));
+const MasterPlanPage = lazy(() => import("./pages/MasterPlanPage.jsx"));
+const SpecificationsPage = lazy(() => import("./pages/SpecificationsPage.jsx"));
+const ConstructionStatusPage = lazy(() => import("./pages/ConstructionStatusPage.jsx"));
+const FaqsPage = lazy(() => import("./pages/FaqsPage.jsx"));
+const GuidesPage = lazy(() => import("./pages/GuidesPage.jsx"));
+const AboutPage = lazy(() => import("./pages/AboutPage.jsx"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage.jsx"));
+const DisclaimerPage = lazy(() => import("./pages/DisclaimerPage.jsx"));
+const BlogIndex = lazy(() => import("./pages/BlogIndex.jsx"));
+const BlogPost = lazy(() => import("./pages/BlogPost.jsx"));
 import CustomCursor from "./components/ui/CustomCursor.jsx";
 import ScrollProgress from "./components/ui/ScrollProgress.jsx";
 import { EnquiryProvider } from "./components/ui/Enquiry.jsx";
@@ -65,6 +71,11 @@ export default function App() {
         <CustomCursor />
         <Navbar />
         <main className="noise">
+          {/* A render error in one page must not blank the whole site. */}
+          <ErrorBoundary>
+            {/* No spinner: the fallback is deliberately an empty, correctly-sized
+                shell so a fast chunk load never flashes a loading state. */}
+            <Suspense fallback={<div className="min-h-svh" />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/overview" element={<Overview />} />
@@ -93,8 +104,10 @@ export default function App() {
             <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="/blogs" element={<BlogIndex />} />
             <Route path="/blogs/:slug" element={<BlogPost />} />
-            <Route path="*" element={<Placeholder title="Page" />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </main>
         <Footer />
         <MobileCTA />

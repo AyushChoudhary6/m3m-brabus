@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { submitLead, markLeadCaptured } from "../../lib/leads.js";
+import { startTimer } from "../../lib/spam.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../../lib/validate.js";
 import { useI18n } from "../../lib/i18n.jsx";
 import { trackLead } from "../../lib/analytics.js";
@@ -13,11 +14,17 @@ import { RESIDENCES, PROJECT } from "../../lib/site.js";
 const FIELD =
   "w-full border-b border-line bg-transparent py-2.5 text-sm text-ink placeholder:text-ink-faint outline-none transition-colors focus:border-brass";
 
+/* Ch. 78 — the clock behind the "too-fast" signal, and the key submitLead()
+   is handed so spam.js reads back this form's clock and not another's. */
+const FORM_KEY = "Side panel";
+
 export default function SideEnquiry() {
   const { t } = useI18n();
   const [open, setOpen] = useState(true);
   const [cardW, setCardW] = useState(340);
-  const [form, setForm] = useState({ name: "", phone: "", email: "", config: "" });
+  // `company` is the honeypot (spam.js HONEYPOT_NAME); it has to live in state,
+  // because only what is in `form` reaches submitLead.
+  const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", company: "" });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -31,6 +38,10 @@ export default function SideEnquiry() {
   };
   const blur = (k) => () => setErrors((x) => ({ ...x, [k]: validateField(k, form[k]) }));
   const fieldCls = (k) => `${FIELD} ${errors[k] ? "border-oxblood" : ""}`;
+  /* First focus or keystroke in the panel starts the clock. Idempotent, so it is
+     safe to fire on every event. The panel is docked open on landing, so the
+     clock deliberately starts on interaction, not on mount. */
+  const touch = () => startTimer(FORM_KEY);
 
   useLayoutEffect(() => {
     const measure = () => cardRef.current && setCardW(cardRef.current.offsetWidth);
@@ -58,7 +69,8 @@ export default function SideEnquiry() {
     setSending(true);
     setError("");
     try {
-      await submitLead({ ...form, source: "Side panel" });
+      // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
+      await submitLead({ ...form, source: "Side panel", formKey: FORM_KEY });
       markLeadCaptured();
       trackLead("Side panel", form.config);
       setSent(true);
@@ -115,8 +127,19 @@ export default function SideEnquiry() {
                 {PROJECT.configs} · {PROJECT.location}
               </p>
 
-              <form onSubmit={submit} className="mt-5 space-y-3.5">
-                <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hidden" />
+              <form onSubmit={submit} onFocus={touch} onInput={touch} className="mt-5 space-y-3.5">
+                {/* Honeypot — invisible to people and to screen readers, skipped by
+                    the tab order and by autofill, but an ordinary input to a bot. */}
+                <input
+                  type="text"
+                  name="company"
+                  value={form.company}
+                  onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="hidden"
+                />
                 <div>
                   <input className={fieldCls("name")} placeholder={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
                   {errors.name && <p className="mt-1 text-[0.68rem] text-oxblood">{t(errors.name)}</p>}

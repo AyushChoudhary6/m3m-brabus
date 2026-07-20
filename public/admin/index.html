@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The editor is not content. Keep it out of the index entirely — a
+         crawlable /admin invites credential-stuffing and adds a page that
+         says nothing about the project. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="same-origin" />
+    <title>M3M Brabus · Content editor</title>
+    <link rel="icon" href="/favicon.svg" />
+    <style>
+      /* Shown only until the CMS bundle takes over the document. */
+      :root { color-scheme: dark; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        background: #0d0b0a;
+        color: #c9c3bb;
+        font: 400 14px/1.7 ui-sans-serif, system-ui, -apple-system, sans-serif;
+        letter-spacing: 0.02em;
+      }
+      #boot {
+        position: fixed; inset: 0;
+        display: grid; place-content: center; justify-items: center;
+        gap: 0.9rem; text-align: center; padding: 2rem;
+      }
+      #boot p { margin: 0; max-width: 44ch; }
+      #boot .k {
+        font: 500 0.62rem/1 ui-monospace, SFMono-Regular, monospace;
+        letter-spacing: 0.22em; text-transform: uppercase; color: #b08d57;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="boot">
+      <p class="k">M3M Brabus · Editor</p>
+      <p>Loading the content editor. If this message stays for more than a few seconds, check your connection and reload.</p>
+    </div>
+
+    <!--
+      Sveltia CMS — a drop-in replacement for Decap CMS that reads the same
+      config.yml and speaks the same GitHub backend and OAuth protocol.
+      Chosen over Decap because it is actively maintained and much faster to
+      load, while leaving the escape hatch open: to move to Decap, replace this
+      one tag (and vendor decap-cms.js the same way) and change nothing else.
+
+      ── WHY THIS IS SELF-HOSTED, NOT LOADED FROM unpkg ──────────────────────
+      The site CSP is `script-src 'self'`, with no 'unsafe-inline' and no CDN
+      origins. Loading the editor from https://unpkg.com was refused by the
+      browser, and /admin sat on the boot message above forever with a single
+      CSP violation in the console. The two ways out were to punch unpkg into
+      script-src, or to serve the bundle from our own origin. We serve it
+      ourselves: an editor with write access to the content repository is the
+      last place to accept a script from a CDN that can change under us, and
+      keeping script-src at bare 'self' means /admin is protected by exactly
+      the same rule as the rest of the site.
+
+      ── PINNED VERSION ─────────────────────────────────────────────────────
+      File:    ./sveltia-cms-0.172.1.js
+      Source:  https://unpkg.com/@sveltia/cms@0.172.1/dist/sveltia-cms.js
+      SHA-256: b4b952d4c4810a4d197fd244343fbf64ebf95dc5c4dc743682497374ba386332
+      Size:    1,975,337 bytes
+
+      TO UPGRADE — deliberately, never automatically:
+        1. curl -sSfL -o public/admin/sveltia-cms-<v>.js \
+             https://unpkg.com/@sveltia/cms@<v>/dist/sveltia-cms.js
+        2. shasum -a 256 public/admin/sveltia-cms-<v>.js
+        3. update the src below, this comment, and delete the old file
+        4. sign in at /admin on a preview deployment and save one draft before
+           merging — this bundle is the whole editor, there is no partial
+           failure mode
+
+      The version is in the FILENAME, not a query string, so upgrading changes
+      the URL and no cache anywhere can serve the old bundle.
+
+      ── WHAT THE /admin CSP IN vercel.json ALLOWS, AND WHY ──────────────────
+        script-src  'self' only — this file plus the bundle above. The bundle
+                    contains no eval() and no new Function(), verified against
+                    0.172.1, so no 'unsafe-eval'.
+        style-src   'unsafe-inline' + fonts.googleapis.com — Sveltia is a
+                    Svelte app that injects its stylesheet at runtime, and the
+                    rich-text editor pulls a Google Fonts stylesheet for the
+                    markdown preview pane.
+        font-src    fonts.gstatic.com, for the faces that stylesheet names.
+        connect-src api.github.com (the REST + GraphQL backend) and
+                    www.githubstatus.com (queried only when the backend errors,
+                    to tell an editor "GitHub is down" instead of "unknown
+                    error"). github.com is NOT here: the OAuth hop is a popup
+                    NAVIGATION to /api/auth, which 302s to github.com, and CSP
+                    does not govern navigation.
+        img-src     avatars.githubusercontent.com for the signed-in user's
+                    avatar (the URL arrives at runtime in the API response, so
+                    it cannot be narrowed further), plus blob: for previews of
+                    media fetched through the API.
+        worker-src / child-src  blob:, for the syntax-highlighting worker the
+                    bundled Prism can spawn.
+
+      KNOWN, ACCEPTED CSP REFUSALS on /admin — both are caught by the bundle
+      and neither breaks editing:
+        · a fetch of https://unpkg.com/@sveltia/cms/package.json, Sveltia's
+          "a newer version exists" check. It is wrapped in try/catch, and the
+          banner it feeds only renders when the page was loaded FROM unpkg,
+          which this one is not. We upgrade via the recipe above instead.
+        · https://unpkg.com/prismjs@1.30.0/… grammar files, loaded on demand
+          only when a code block is typed into the markdown editor. The blog
+          renderer (src/components/ui/BlogBody.jsx) does not support code
+          blocks, so nothing an editor can publish depends on this.
+    -->
+    <script type="module" src="/admin/sveltia-cms-0.172.1.js"></script>
+  </body>
+</html>

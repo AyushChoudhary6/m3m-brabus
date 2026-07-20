@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import Seo from "../components/ui/Seo.jsx";
 import Hero from "../components/sections/Hero.jsx";
 import ProjectHighlights from "../components/sections/ProjectHighlights.jsx";
@@ -10,7 +11,6 @@ import PriceSnapshot from "../components/sections/PriceSnapshot.jsx";
 import FloorPlan from "../components/sections/FloorPlan.jsx";
 import Lifestyle from "../components/sections/Lifestyle.jsx";
 import LocationAdvantages from "../components/sections/LocationAdvantages.jsx";
-import LivingMap from "../components/sections/LivingMap.jsx";
 import MasterPlanPreview from "../components/sections/MasterPlanPreview.jsx";
 import Exhibition from "../components/sections/Exhibition.jsx";
 import WhyInvest from "../components/sections/WhyInvest.jsx";
@@ -19,6 +19,11 @@ import ConstructionStatus from "../components/sections/ConstructionStatus.jsx";
 import Faq from "../components/sections/Faq.jsx";
 import RelatedBlogs from "../components/sections/RelatedBlogs.jsx";
 import FinalCta from "../components/sections/FinalCta.jsx";
+
+/* Leaflet is ~145 kB (42 kB gz) and the map sits well below the fold, so it is
+   split out and fetched only when the reader gets there. The prerenderer waits
+   8s before dumping the DOM, so the map is still present in the crawlable HTML. */
+const LivingMap = lazy(() => import("../components/sections/LivingMap.jsx"));
 
 /* The homepage as an editorial journey, ordered to Volume 2 · Ch. 22.
    Each section carries its own cathedral whitespace; the page is a single
@@ -65,7 +70,9 @@ export default function Home() {
       <FloorPlan />           {/* 06 · Floor plan preview */}
       <Lifestyle />           {/* 07 · Amenities */}
       <LocationAdvantages />  {/* 08 · Location advantages */}
-      <LivingMap />           {/* 08 · The address, mapped */}
+      <Suspense fallback={<div className="min-h-[60vh]" />}>
+        <LivingMap />        {/* 08 · The address, mapped */}
+      </Suspense>
       <MasterPlanPreview />   {/* 09 · Master plan preview */}
       <Exhibition />          {/* 10 · Gallery */}
       <WhyInvest />           {/* 11 · Why invest */}
