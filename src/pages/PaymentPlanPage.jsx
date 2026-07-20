@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { Plus, ArrowUpRight } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+import Accordion from "../components/ui/Accordion.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
@@ -96,7 +96,6 @@ const PAY_FAQS = [
 export default function PaymentPlanPage() {
   const root = useRef(null);
   const { openEnquiry } = useEnquiry();
-  const [open, setOpen] = useState(0);
 
   useGSAP(
     () => {
@@ -317,44 +316,9 @@ export default function PaymentPlanPage() {
           <span className="idx">04</span>
           <span className="kicker">Payment & home loan questions</span>
         </div>
-        <div className="divide-y divide-line border-y border-line">
-          {PAY_FAQS.map((f, i) => {
-            const isOpen = open === i;
-            return (
-              <div key={f.q}>
-                <button
-                  type="button"
-                  onClick={() => setOpen(isOpen ? -1 : i)}
-                  className="flex w-full items-center justify-between gap-6 py-6 text-left"
-                >
-                  <span className={`font-display text-lg transition-colors md:text-xl ${isOpen ? "text-ink" : "text-ink-soft"}`}>
-                    {f.q}
-                  </span>
-                  <motion.span
-                    animate={{ rotate: isOpen ? 45 : 0 }}
-                    transition={{ duration: 0.3 }}
-                    className={isOpen ? "text-brass" : "text-ink-faint"}
-                  >
-                    <Plus size={20} />
-                  </motion.span>
-                </button>
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <p className="max-w-2xl pb-7 leading-relaxed text-ink-soft">{f.a}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </div>
+        {/* Same rule as the homepage FAQ: the answers back the FAQPage JSON-LD
+            above, so they are collapsed by height and never unmounted. */}
+        <Accordion items={PAY_FAQS} />
       </section>
 
       <RelatedPages links={["/overview", "/residences", "/contact"]} />

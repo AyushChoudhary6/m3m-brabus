@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Reveal, RevealGroup, RevealItem } from "../ui/Reveal.jsx";
 import { HIGHLIGHTS } from "../../lib/site.js";
 
@@ -16,15 +15,14 @@ export default function Highlights() {
         <RevealGroup className="grid gap-px overflow-hidden rounded-sm border border-line bg-line md:grid-cols-2">
           {HIGHLIGHTS.map((h, i) => (
             <RevealItem key={h.title}>
-              <motion.div
-                whileHover={{ backgroundColor: "#ffffff" }}
-                className="group relative h-full bg-canvas p-9 md:p-12"
-              >
+              {/* The hover wash is a plain CSS transition — no JS needed, and
+                  the global reduced-motion rule already flattens it. */}
+              <div className="group relative h-full bg-canvas p-9 transition-colors duration-300 ease-lux hover:bg-white md:p-12">
                 <span className="font-display text-lg italic text-brass">0{i + 1}</span>
                 <h3 className="mt-5 text-2xl text-ink">{h.title}</h3>
                 <p className="mt-4 max-w-md leading-relaxed text-ink-soft">{h.body}</p>
                 <span className="absolute bottom-0 left-0 h-px w-0 bg-brass transition-all duration-700 ease-lux group-hover:w-full" />
-              </motion.div>
+              </div>
             </RevealItem>
           ))}
         </RevealGroup>

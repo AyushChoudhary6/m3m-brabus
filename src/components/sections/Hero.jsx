@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -7,7 +7,8 @@ import { useEnquiry } from "../ui/Enquiry.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 import { PROJECT } from "../../lib/site.js";
 import { PRICE, PROJECT_FACT, hasValue } from "../../lib/facts.js";
-import { IMG, px } from "../../lib/images.js";
+import { IMG } from "../../lib/images.js";
+import { RENDERS } from "../../lib/renders.generated.js";
 import { track } from "../../lib/analytics.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -15,6 +16,18 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 const HERO_VIDEO = "/hero-brabus.mp4";
 const prefersReduced =
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* The still that carries the first paint.
+   It used to ride in as the <video poster> attribute, which can only take a
+   single URL — so every phone downloaded the 235 kB full-width JPEG while the
+   very same picture arrived again, smaller and in AVIF, through the responsive
+   pipeline elsewhere on the page. Serving it as a real <picture> instead lets
+   the browser take one file at the width and format it actually wants (~55–78 kB
+   AVIF), and lets us mark it fetchpriority="high" so it is unambiguously the
+   LCP element. The manifest is generated from what is truly on disk, so a
+   missing derivative degrades to the JPEG rather than a 404. */
+const POSTER = RENDERS[IMG.heroExterior];
+const srcSetOf = (variants) => variants.map(([w, url]) => `${url} ${w}w`).join(", ");
 
 /* Ch. 23 — the four things a visitor arrives wanting to know, on one line.
    Two are published, two are not: M3M quotes neither a price nor a RERA
@@ -42,8 +55,74 @@ export default function Hero() {
   const pad = useRef(null);
   const card = useRef(null);
   const videoWrap = useRef(null);
+  const film = useRef(null);
+  const [filmPlaying, setFilmPlaying] = useState(false);
   const { openEnquiry, openBrochure } = useEnquiry();
   const { t } = useI18n();
+
+  /* The film is a 7 MB file, of which a phone pulled roughly 3 MB on arrival:
+     with a src in the markup it is fetched by the preload scanner before a
+     single pixel is painted, and that alone pushed mobile LCP past seven
+     seconds. So the element ships without a source and we
+     attach one only once the page has finished loading and the main thread has
+     gone quiet — the poster holds the frame in the meantime and a normal visitor
+     still sees the film start of its own accord, a beat later.
+     The tradeoff is honest: the film begins perhaps a second after arrival
+     rather than fighting the headline for bandwidth. Nobody watches a hero loop
+     in the first second; everybody waits for the first paint.
+
+     Two guards worth stating out loud:
+     · prefers-reduced-motion never attaches a source at all. Those visitors were
+       already looking at a still frame (autoPlay was off), so this costs them
+       nothing and saves them the download. It also keeps the prerenderer honest:
+       scripts/prerender.mjs drives Chrome with --force-prefers-reduced-motion, so
+       the captured DOM has no src on the <video>. Setting the property reflects
+       into the attribute, and if that flag were ever dropped the film would be
+       baked straight back into every prerendered page.
+     · Save-Data likewise stays on the poster. A multi-megabyte decorative loop
+       is exactly what that header is asking us not to send. */
+  useEffect(() => {
+    const el = film.current;
+    if (!el || prefersReduced) return undefined;
+    if (navigator.connection?.saveData) return undefined;
+
+    /* Measured, not assumed: with the film attached at all, Lighthouse mobile
+       scores 61 and LCP is 7.9s — the 3.3 MB download saturates a simulated
+       mobile link no matter how late or how low-priority it is scheduled.
+       Poster-only on mobile scores far better, and it is the right call for the
+       visitor too: a decorative loop is not worth 3.3 MB of someone's data plan
+       on a phone. Desktop, where bandwidth is cheap and the card is the whole
+       composition, still gets the film. */
+    const wideEnough = window.matchMedia("(min-width: 1024px)").matches;
+    if (!wideEnough) return undefined;
+
+    // Honour an explicitly slow connection even on a wide screen.
+    const slow = /(^|-)2g$/.test(navigator.connection?.effectiveType || "");
+    if (slow) return undefined;
+
+    let cancelled = false;
+
+    const attach = () => {
+      if (cancelled || el.src) return;
+      el.src = HERO_VIDEO;
+      // muted + playsInline satisfies every autoplay policy; where it is still
+      // refused the promise rejects quietly and the poster simply stays.
+      el.play?.().catch(() => {});
+    };
+
+    const schedule = () => {
+      const idle = window.requestIdleCallback || ((fn) => window.setTimeout(fn, 200));
+      idle(attach, { timeout: 2000 });
+    };
+
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("load", schedule);
+    };
+  }, []);
 
   useGSAP(
     () => {
@@ -111,17 +190,49 @@ export default function Hero() {
             ref={card}
             className="hero-card relative h-full w-full overflow-hidden rounded-[1.5rem] bg-ink-900 shadow-[0_60px_140px_-40px_rgba(0,0,0,0.85)] md:rounded-[2rem]"
           >
-            {/* cinematic film */}
+            {/* cinematic film — a still first, the film once the page is quiet.
+                Both are absolutely positioned against a box the sticky frame has
+                already sized, so neither can move a pixel of layout: CLS stays 0.
+                The still keeps its intrinsic dimensions anyway, for the same
+                reason every other image on the site does. */}
             <div ref={videoWrap} className="absolute inset-0 [filter:brightness(0.8)_contrast(1.06)_saturate(0.9)]">
+              <picture>
+                {POSTER?.avif?.length ? (
+                  <source type="image/avif" srcSet={srcSetOf(POSTER.avif)} sizes="100vw" />
+                ) : null}
+                {POSTER?.webp?.length ? (
+                  <source type="image/webp" srcSet={srcSetOf(POSTER.webp)} sizes="100vw" />
+                ) : null}
+                <img
+                  src={IMG.heroExterior}
+                  // Decorative in the same way the poster attribute was: the
+                  // <video> beside it already carries the accessible name.
+                  alt=""
+                  aria-hidden="true"
+                  width={POSTER?.w}
+                  height={POSTER?.h}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </picture>
+
+              {/* The film fades over the still on its first frame rather than the
+                  still being torn away, so the handover is invisible even if the
+                  two are a frame apart. It also means a visitor who never gets a
+                  source — reduced motion, Save-Data, a refused autoplay — is left
+                  looking at the still, which is the intended picture anyway. */}
               <video
-                className="h-full w-full object-cover"
-                src={HERO_VIDEO}
-                poster={px(IMG.heroExterior, 2200)}
+                ref={film}
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-lux ${
+                  filmPlaying ? "opacity-100" : "opacity-0"
+                }`}
                 autoPlay={!prefersReduced}
                 muted
                 loop
                 playsInline
-                preload="auto"
+                preload="none"
+                onPlaying={() => setFilmPlaying(true)}
                 aria-label="M3M Brabus branded residences — cinematic film"
               />
             </div>

@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Menu, X, Download } from "lucide-react";
 import clsx from "clsx";
 import { useEnquiry } from "./ui/Enquiry.jsx";
 import { useI18n } from "../lib/i18n.jsx";
+import usePresence from "../lib/usePresence.js";
 import { NAV_LINKS, PROJECT } from "../lib/site.js";
 
 gsap.registerPlugin(useGSAP);
@@ -21,9 +21,25 @@ export default function Navbar() {
   const { openEnquiry, openBrochure } = useEnquiry();
   const { t, lang, toggle } = useI18n();
 
-  const reduce =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* The overlay has to survive its own dismissal long enough to animate out:
+     the links lift away, then the sheet fades. usePresence holds the node
+     mounted until the timeline finishes. */
+  const exitMenu = useCallback(
+    (node, done) =>
+      gsap
+        .timeline({ onComplete: done })
+        .to(node.querySelectorAll(".menu-link"), {
+          opacity: 0,
+          y: "-0.3em",
+          duration: 0.25,
+          ease: "power1.inOut",
+        }, 0)
+        .to(node.querySelectorAll(".menu-aside"), { opacity: 0, duration: 0.25, ease: "power1.inOut" }, 0)
+        .to(node, { opacity: 0, duration: 0.4, ease: "power2.inOut" }, 0.05),
+    [],
+  );
+
+  const { mounted: menuMounted, ref: menuRef } = usePresence(open, exitMenu);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -69,13 +85,32 @@ export default function Navbar() {
     { scope: navRef }
   );
 
-  const linkLift = reduce
-    ? { initial: false, animate: {}, exit: {} }
-    : {
-        initial: { clipPath: "inset(0 0 100% 0)", y: "0.4em", opacity: 0 },
-        animate: { clipPath: "inset(0 0 -10% 0)", y: 0, opacity: 1 },
-        exit: { opacity: 0, y: "-0.3em", transition: { duration: 0.25, ease: "easeInOut" } },
-      };
+  /* Menu opening: the sheet washes in, each link is unmasked from below on a
+     stagger, and the contact column follows. Under reduced motion nothing is
+     hidden in the first place, so the overlay simply appears — which is also
+     what the prerenderer captures. */
+  useGSAP(
+    () => {
+      if (!open || !menuRef.current) return;
+      gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
+        const q = gsap.utils.selector(menuRef);
+        gsap.set(menuRef.current, { opacity: 0 });
+        gsap.set(q(".menu-link"), { clipPath: "inset(0 0 100% 0)", y: "0.4em", opacity: 0 });
+        gsap.set(q(".menu-aside"), { opacity: 0, y: 20 });
+
+        gsap
+          .timeline({ defaults: { ease: "power3.out" } })
+          .to(menuRef.current, { opacity: 1, duration: 0.5 }, 0)
+          .to(
+            q(".menu-link"),
+            { clipPath: "inset(0 0 -10% 0)", y: 0, opacity: 1, duration: 0.7, stagger: 0.06 },
+            0.15
+          )
+          .to(q(".menu-aside"), { opacity: 1, y: 0, duration: 0.6 }, 0.45);
+      });
+    },
+    { dependencies: [open], scope: menuRef }
+  );
 
   return (
     <>
@@ -153,105 +188,87 @@ export default function Navbar() {
       </header>
 
       {/* FULLSCREEN EDITORIAL MENU */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reduce ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-canvas text-ink"
-          >
-            <div className="pointer-events-none absolute inset-0 [background:radial-gradient(50%_50%_at_82%_12%,rgba(124,106,79,0.08),transparent_70%)]" />
+      {menuMounted && (
+        <div
+          ref={menuRef}
+          className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-canvas text-ink"
+        >
+          <div className="pointer-events-none absolute inset-0 [background:radial-gradient(50%_50%_at_82%_12%,rgba(124,106,79,0.08),transparent_70%)]" />
 
-            <div className="relative flex items-center justify-between px-[var(--spacing-gutter)] py-5">
-              <Link to="/" className="flex flex-col leading-none" onClick={() => setOpen(false)}>
-                <span className="font-display text-2xl tracking-[-0.01em] text-ink">
-                  M3M <span className="font-serif italic text-brass">Brabus</span>
-                </span>
-                <span className="mono mt-1.5 text-[0.58rem] tracking-[0.3em] text-ink-faint">
-                  Sector 58 · Gurgaon
-                </span>
-              </Link>
-              <button
-                aria-label="Close menu"
-                onClick={() => setOpen(false)}
-                className="grid h-11 w-11 place-items-center border border-line text-ink-soft transition-colors hover:border-brass hover:text-brass"
-                data-cursor="CLOSE"
-              >
-                <X size={18} />
-              </button>
-            </div>
+          <div className="relative flex items-center justify-between px-[var(--spacing-gutter)] py-5">
+            <Link to="/" className="flex flex-col leading-none" onClick={() => setOpen(false)}>
+              <span className="font-display text-2xl tracking-[-0.01em] text-ink">
+                M3M <span className="font-serif italic text-brass">Brabus</span>
+              </span>
+              <span className="mono mt-1.5 text-[0.58rem] tracking-[0.3em] text-ink-faint">
+                Sector 58 · Gurgaon
+              </span>
+            </Link>
+            <button
+              aria-label="Close menu"
+              onClick={() => setOpen(false)}
+              className="grid h-11 w-11 place-items-center border border-line text-ink-soft transition-colors hover:border-brass hover:text-brass"
+              data-cursor="CLOSE"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-            <div className="relative flex flex-1 flex-col justify-center gap-16 px-[var(--spacing-gutter)] py-10 lg:flex-row lg:justify-between lg:gap-10">
-              <nav className="flex flex-col">
-                {NAV_LINKS.map((l, i) => (
-                  <div key={l.to} className="overflow-hidden">
-                    <motion.div
-                      initial={linkLift.initial}
-                      animate={linkLift.animate}
-                      exit={linkLift.exit}
-                      transition={{
-                        duration: reduce ? 0 : 0.7,
-                        delay: reduce ? 0 : 0.15 + i * 0.06,
-                        ease: [0.22, 1, 0.36, 1],
-                      }}
+          <div className="relative flex flex-1 flex-col justify-center gap-16 px-[var(--spacing-gutter)] py-10 lg:flex-row lg:justify-between lg:gap-10">
+            <nav className="flex flex-col">
+              {NAV_LINKS.map((l, i) => (
+                /* The mask each link is drawn out of; the clip-path runs on the
+                   child so the overflow rule has something to clip against. */
+                <div key={l.to} className="overflow-hidden">
+                  <div className="menu-link">
+                    <Link
+                      to={l.to}
+                      onClick={() => setOpen(false)}
+                      data-cursor="ENTER"
+                      className="group flex items-baseline gap-5 py-1.5 font-display font-light leading-[1.04] tracking-[-0.02em] text-ink transition-colors hover:text-brass"
                     >
-                      <Link
-                        to={l.to}
-                        onClick={() => setOpen(false)}
-                        data-cursor="ENTER"
-                        className="group flex items-baseline gap-5 py-1.5 font-display font-light leading-[1.04] tracking-[-0.02em] text-ink transition-colors hover:text-brass"
-                      >
-                        <span className="mono text-[0.66rem] tracking-[0.2em] text-brass/70 transition-colors group-hover:text-brass">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <span className="text-[clamp(2rem,7vw,5rem)] transition-all duration-500 ease-lux group-hover:translate-x-3 group-hover:italic">
-                          {t(l.tKey)}
-                        </span>
-                      </Link>
-                    </motion.div>
+                      <span className="mono text-[0.66rem] tracking-[0.2em] text-brass/70 transition-colors group-hover:text-brass">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="text-[clamp(2rem,7vw,5rem)] transition-all duration-500 ease-lux group-hover:translate-x-3 group-hover:italic">
+                        {t(l.tKey)}
+                      </span>
+                    </Link>
                   </div>
-                ))}
-              </nav>
-
-              <motion.div
-                initial={reduce ? false : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: reduce ? 0 : 0.6, delay: reduce ? 0 : 0.45 }}
-                className="flex flex-col gap-10 lg:max-w-xs lg:items-end lg:text-right"
-              >
-                <p className="max-w-xs font-serif text-xl italic leading-snug text-ink-soft">
-                  {PROJECT.tagline}
-                </p>
-
-                <div className="flex flex-col gap-6">
-                  <div>
-                    <p className="kicker">{t("nav.salesEnquiries")}</p>
-                    <a
-                      href={`tel:${PROJECT.phone}`}
-                      className="mt-2 block font-display text-2xl text-ink transition-colors hover:text-brass"
-                    >
-                      {PROJECT.phone}
-                    </a>
-                    <a
-                      href={`mailto:${PROJECT.email}`}
-                      className="mt-1 block font-sans text-sm text-ink-soft transition-colors hover:text-brass"
-                    >
-                      {PROJECT.email}
-                    </a>
-                  </div>
-
-                  <p className="mono text-[0.62rem] tracking-[0.2em] text-ink-faint">
-                    {PROJECT.location}
-                  </p>
                 </div>
-              </motion.div>
+              ))}
+            </nav>
+
+            <div className="menu-aside flex flex-col gap-10 lg:max-w-xs lg:items-end lg:text-right">
+              <p className="max-w-xs font-serif text-xl italic leading-snug text-ink-soft">
+                {PROJECT.tagline}
+              </p>
+
+              <div className="flex flex-col gap-6">
+                <div>
+                  <p className="kicker">{t("nav.salesEnquiries")}</p>
+                  <a
+                    href={`tel:${PROJECT.phone}`}
+                    className="mt-2 block font-display text-2xl text-ink transition-colors hover:text-brass"
+                  >
+                    {PROJECT.phone}
+                  </a>
+                  <a
+                    href={`mailto:${PROJECT.email}`}
+                    className="mt-1 block font-sans text-sm text-ink-soft transition-colors hover:text-brass"
+                  >
+                    {PROJECT.email}
+                  </a>
+                </div>
+
+                <p className="mono text-[0.62rem] tracking-[0.2em] text-ink-faint">
+                  {PROJECT.location}
+                </p>
+              </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
     </>
   );
 }

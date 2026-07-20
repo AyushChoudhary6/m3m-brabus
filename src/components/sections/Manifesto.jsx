@@ -79,11 +79,13 @@ export default function Manifesto() {
         <figure className="rise">
           <div ref={imgWrap} className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-line md:aspect-[5/6]">
             <div className="mf-img-inner ed-breath absolute inset-0 scale-[1.06]">
-              <Media src={px(IMG.lobby, 1600)} alt="BRABUS engineering craftsmanship" sizes="(max-width:1024px) 100vw, 46vw" />
+              <Media src={px(IMG.lobby, 1600)} alt="M3M Brabus — the double-height marble lobby at Sector 58, Gurugram" sizes="(max-width:1024px) 100vw, 46vw" />
             </div>
             <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_50%,rgba(8,6,5,0.6))]" />
             <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
-            <span className="mono absolute left-5 bottom-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">With BRABUS — Precision engineering</span>
+            {/* Caption the frame, not the argument. This is the lobby render; no
+                image of the engineering itself has been published. */}
+            <span className="mono absolute left-5 bottom-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">The Lobby</span>
           </div>
         </figure>
 

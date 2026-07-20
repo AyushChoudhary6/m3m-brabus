@@ -1,25 +1,68 @@
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import Media from "../ui/Media.jsx";
-import { IMG, px } from "../../lib/images.js";
+import { ArrowUpRight } from "lucide-react";
+import { icon } from "../../lib/icons.js";
+import { AMENITY_CATEGORY, AMENITY_COUNT } from "../../lib/amenities.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/* CHAPTER 04 — THE LIFESTYLE  (horizontal scroll)
-   The tour travels sideways: a tall section + a sticky viewport translate a
-   track of framed amenity plates as you scroll — the whole world drifts past
-   like a tracking shot. Native swipe on touch. */
-const AMENITIES = [
-  { n: "The Club", id: IMG.lobbyWarm, d: "A members-only sanctuary for work, leisure and conversation." },
-  { n: "Spa & Wellness", id: IMG.spa, d: "Hammam, sauna and treatment suites — a ritual of stillness." },
-  { n: "The Olympic Pool", id: IMG.pool, d: "A temperature-controlled pool beneath cascading light." },
-  { n: "Performance Gym", id: IMG.gym, d: "A precision fitness suite — engineered like a machine." },
-  { n: "The Theatre", id: IMG.bedroomDecor, d: "An acoustically-tuned screening room for the after-hours." },
-  { n: "The Sky Lounge", id: IMG.duplexLiving, d: "Elevated decks and champagne above the skyline." },
-  { n: "Private Dining", id: IMG.livingRoom, d: "Signature restaurants and a chef's table for the evening." },
-];
+/* CHAPTER 05 — THE LIFESTYLE  (horizontal scroll)
+   The tour still travels sideways: a tall section + a sticky viewport
+   translate a track of plates as you scroll, and native swipe carries it on
+   touch. What changed is what the plates are made of.
+
+   They used to be photographs. Only three renders exist for this project —
+   towers, arrival, lobby — so all seven panels resolved to the SAME marble
+   lobby frame, captioned "Spa & Wellness", "Performance Gym", "The Theatre".
+   An official-looking render under the wrong caption is a worse claim than a
+   stock photo ever was: it asserts that this is the project's gym. It is not,
+   and we have no picture of one. Two of those captions were inventions in
+   their own right — no screening room and no sky lounge have been announced
+   (see the `gated` notes in lib/amenities.js), and "Olympic" was a length
+   nobody published. Both panels are gone.
+
+   So the plates are typographic. The frame, the sequence numerals and the
+   scrub all survive; the picture is replaced by type, a hairline and a
+   decorative field that claims nothing. The three real renders already appear
+   once each, correctly captioned, in Exhibition further down the homepage —
+   borrowing the lobby a third time here would buy nothing.
+
+   Content is unchanged and unchanged-able: each panel names an occasion and
+   lists the facilities lib/amenities.js traces to the official listing.
+   Nothing here is authored — the names come from the fact layer, so the day a
+   facility is added or withdrawn this section follows without an edit. */
+
+/* Seven occasions, each mapping exactly onto one category's published items.
+   `smart-living` is deliberately absent: what is published under it (smart
+   home, VRV) sits inside the residence, not in the private world outside it,
+   and it is carried by the Residences chapter instead. */
+const PANELS = [
+  { cat: "clubhouse", n: "The Club", d: "A multi-level club and lounge, with the gym inside it." },
+  { cat: "wellness", n: "The Water", d: "A pool held at temperature through the year, and the still rooms beside it." },
+  { cat: "lifestyle", n: "The Table", d: "A restaurant within the gates, and a hall for the evening the house cannot hold." },
+  { cat: "outdoor", n: "The Grounds", d: "Gardens and green courts held between the towers, not squeezed around them." },
+  { cat: "sports", n: "The Court", d: "Games indoors and out, and a run laid through the landscape." },
+  { cat: "kids", n: "The Children's Ground", d: "Play kept inside the security line rather than beyond it." },
+  { cat: "security", n: "The Gate", d: "Manned gates, cameras throughout, and covered parking to each residence." },
+].map(({ cat, n, d }) => {
+  const c = AMENITY_CATEGORY[cat];
+  // A renamed or retired category should surface as a build-time failure, not
+  // as a silently empty plate in the tour.
+  if (!c) throw new Error(`Lifestyle: no amenity category "${cat}"`);
+  return { n, d, icon: c.icon, items: c.items };
+});
+
+const TOTAL = PANELS.length + 1; // the index card closes the sequence
+
+/* Decorative only — a warm field that shifts from plate to plate so the track
+   reads as a sequence of materials rather than seven identical cards. It
+   depicts nothing, which is the entire point. */
+const field = (i) =>
+  `radial-gradient(120% 95% at ${14 + (i % 3) * 33}% ${i % 2 ? 6 : 94}%, rgba(201,168,106,0.11), transparent 62%),` +
+  `linear-gradient(${150 + i * 9}deg, rgba(241,234,217,0.035), transparent 48%)`;
 
 export default function Lifestyle() {
   const root = useRef(null);
@@ -59,10 +102,12 @@ export default function Lifestyle() {
   );
 
   return (
-    <section ref={root} id="lifestyle" className="relative md:h-[260vh]">
+    /* 280vh, up from 260: the track gained a plate, and the scrub pace is the
+       ratio of travel to section height. Same feel, one card longer. */
+    <section ref={root} id="lifestyle" className="relative md:h-[280vh]">
       <div className="flex flex-col md:sticky md:top-0 md:h-svh md:overflow-hidden">
         {/* header */}
-        <div className="container-lux pt-[clamp(4rem,11vh,7rem)] md:pt-[14vh]">
+        <div className="container-lux pt-[clamp(4rem,11vh,7rem)] md:pt-[13vh]">
           <div className="grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
             <div className="flex items-baseline gap-5">
               <span className="idx">05</span>
@@ -72,8 +117,15 @@ export default function Lifestyle() {
               A private world <span className="font-serif italic text-brass">within the walls.</span>
             </h2>
           </div>
-          <div className="mt-8 hidden h-px w-full max-w-40 origin-left bg-line md:block">
-            <div className="life-bar h-px w-full origin-left scale-x-0 bg-brass" />
+
+          <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <div className="hidden h-px w-full max-w-40 origin-left bg-line md:block">
+              <div className="life-bar h-px w-full origin-left scale-x-0 bg-brass" />
+            </div>
+            {/* Said once, plainly, rather than implied by a missing picture. */}
+            <p className="mono max-w-[46ch] text-[0.56rem] leading-relaxed tracking-[0.16em] text-ink-faint">
+              Described, not depicted — no amenity photography has been released for this address
+            </p>
           </div>
         </div>
 
@@ -84,28 +136,105 @@ export default function Lifestyle() {
             dir="ltr"
             className="flex gap-5 overflow-x-auto px-[var(--spacing-gutter)] pb-6 [-ms-overflow-style:none] [scrollbar-width:none] md:gap-8 md:overflow-visible md:pb-0 md:pr-[6vw] [&::-webkit-scrollbar]:hidden"
           >
-            {AMENITIES.map((a, i) => (
-              <article
-                key={a.n}
-                className="amen group w-[78vw] flex-none sm:w-[58vw] md:w-[30vw] lg:w-[26vw]"
-                data-cursor="VIEW"
-              >
-                <div className="relative aspect-[3/4] overflow-hidden rounded-[1.25rem] border border-line transition-colors duration-500 group-hover:border-brass/40">
-                  <div className="absolute inset-0 scale-[1.04] transition-transform duration-[1600ms] ease-lux group-hover:scale-[1.1]">
-                    <Media src={px(a.id, 1200)} alt={`${a.n} — M3M Brabus amenities, Sector 58 Gurgaon`} sizes="(max-width:768px) 78vw, 28vw" />
-                  </div>
-                  <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_48%,rgba(8,6,5,0.72))]" />
-                  <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
-                  <span className="mono absolute left-4 top-4 text-[0.56rem] tracking-[0.2em] text-brass-soft">
-                    {String(i + 1).padStart(2, "0")} / {String(AMENITIES.length).padStart(2, "0")}
+            {PANELS.map((p, i) => {
+              const Icon = icon(p.icon);
+              return (
+                <article
+                  key={p.n}
+                  className="amen group relative flex min-h-[max(26rem,calc(78vw*4/3))] w-[78vw] flex-none flex-col overflow-hidden rounded-[1.25rem] border border-line bg-paper transition-colors duration-500 hover:border-brass/40 sm:min-h-[calc(58vw*4/3)] sm:w-[58vw] md:min-h-[calc(30vw*4/3)] md:w-[30vw] lg:min-h-[calc(26vw*4/3)] lg:w-[26vw]"
+                >
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 opacity-90 transition-opacity duration-700 ease-lux group-hover:opacity-100"
+                    style={{ background: field(i) }}
+                  />
+                  {/* watermark numeral — the sequence, set large and nearly out */}
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -bottom-6 right-1 select-none font-display text-[7.5rem] font-light leading-none tracking-[-0.04em] text-brass/[0.07] transition-transform duration-[1600ms] ease-lux group-hover:-translate-y-2 md:text-[9rem]"
+                  >
+                    {String(i + 1).padStart(2, "0")}
                   </span>
-                  <div className="absolute inset-x-0 bottom-0 p-5">
-                    <h3 className="font-display text-xl text-bone md:text-2xl">{a.n}</h3>
-                    <p className="mt-1.5 max-w-[30ch] text-[0.82rem] leading-relaxed text-ink/70">{a.d}</p>
+                  <div className="pointer-events-none absolute inset-0 rounded-[1.25rem] ring-1 ring-inset ring-brass/10" />
+
+                  <div className="relative flex h-full flex-col p-5 md:p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="mono text-[0.56rem] tracking-[0.2em] text-brass-soft">
+                        {String(i + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
+                      </span>
+                      <span className="text-ink-faint transition-colors duration-500 group-hover:text-brass" aria-hidden="true">
+                        <Icon size={19} strokeWidth={1.3} />
+                      </span>
+                    </div>
+
+                    <div className="mt-auto">
+                      {/* the rule does the work the image zoom used to */}
+                      <span
+                        aria-hidden="true"
+                        className="mb-5 block h-px w-10 origin-left bg-brass/50 transition-transform duration-[900ms] ease-lux group-hover:scale-x-[2.4]"
+                      />
+                      <h3 className="font-display text-xl leading-tight text-ink md:text-2xl">{p.n}</h3>
+                      <p className="mt-2 max-w-[32ch] text-[0.82rem] leading-relaxed text-ink-soft">{p.d}</p>
+
+                      <ul className="mt-5 border-t border-line-soft">
+                        {p.items.map((it) => (
+                          <li
+                            key={it.name}
+                            className="flex items-baseline gap-3 border-b border-line-soft py-2.5 text-[0.76rem] leading-snug text-ink-soft"
+                          >
+                            <span aria-hidden="true" className="mt-[0.5em] h-px w-3 shrink-0 bg-brass/60" />
+                            <span className="min-w-0">{it.name}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
+                </article>
+              );
+            })}
+
+            {/* The sequence closes on the record rather than on a picture:
+                the full count, and the page that carries the omissions too. */}
+            <Link
+              to="/amenities"
+              data-cursor="OPEN"
+              className="amen group relative flex min-h-[max(26rem,calc(78vw*4/3))] w-[78vw] flex-none flex-col overflow-hidden rounded-[1.25rem] border border-brass/25 bg-paper transition-colors duration-500 hover:border-brass/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass sm:min-h-[calc(58vw*4/3)] sm:w-[58vw] md:min-h-[calc(30vw*4/3)] md:w-[30vw] lg:min-h-[calc(26vw*4/3)] lg:w-[26vw]"
+            >
+              <div
+                aria-hidden="true"
+                className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(32%_32%_at_70%_10%,rgba(201,168,106,0.16),transparent_70%)]"
+              />
+              <div className="pointer-events-none absolute inset-0 rounded-[1.25rem] ring-1 ring-inset ring-brass/10" />
+
+              <div className="relative flex h-full flex-col p-5 md:p-6">
+                <span className="mono text-[0.56rem] tracking-[0.2em] text-brass-soft">
+                  {String(TOTAL).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
+                </span>
+
+                <div className="mt-auto">
+                  <span
+                    aria-hidden="true"
+                    className="mb-5 block h-px w-10 origin-left bg-brass/50 transition-transform duration-[900ms] ease-lux group-hover:scale-x-[2.4]"
+                  />
+                  <h3 className="max-w-[12ch] font-display text-xl font-light leading-tight text-ink md:text-2xl">
+                    {AMENITY_COUNT} named facilities,{" "}
+                    <span className="font-serif italic text-brass">and the gaps.</span>
+                  </h3>
+                  <p className="mt-3 max-w-[32ch] text-[0.82rem] leading-relaxed text-ink-soft">
+                    The complete set as published, grouped by occasion — with what M3M has not
+                    announced stated in the same breath.
+                  </p>
+                  <span className="mono mt-6 inline-flex items-center gap-2 border-b border-brass/40 pb-1 text-[0.62rem] tracking-[0.18em] text-brass transition-colors duration-500 group-hover:border-brass">
+                    The amenity index
+                    <ArrowUpRight
+                      size={13}
+                      aria-hidden="true"
+                      className="transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                    />
+                  </span>
                 </div>
-              </article>
-            ))}
+              </div>
+            </Link>
           </div>
         </div>
       </div>

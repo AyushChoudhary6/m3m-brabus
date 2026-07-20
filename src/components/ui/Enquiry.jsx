@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { createContext, useContext, useState, useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { X, ArrowRight } from "lucide-react";
 import { submitLead, markLeadCaptured } from "../../lib/leads.js";
 import { startTimer, resetTimer } from "../../lib/spam.js";
@@ -7,6 +8,8 @@ import { sanitizeField, validateField, validateLead, isClean } from "../../lib/v
 import { useI18n } from "../../lib/i18n.jsx";
 import { trackLead, trackBrochure } from "../../lib/analytics.js";
 import { RESIDENCES, PROJECT } from "../../lib/site.js";
+
+gsap.registerPlugin(useGSAP);
 
 const EnquiryCtx = createContext(null);
 export const useEnquiry = () =>
@@ -132,6 +135,63 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
   const [gotFile, setGotFile] = useState(true);
+  const backdropRef = useRef(null);
+  const panelRef = useRef(null);
+
+  /* The panel has to outlive `open` so its closing tween can play: React detaches
+     the node the instant the flag flips and GSAP cannot animate what is no longer
+     in the document. `mounted` latches on open and is released only by the exit
+     tween — or immediately, when motion is not wanted. */
+  const [mounted, setMounted] = useState(false);
+  useLayoutEffect(() => {
+    if (open) setMounted(true);
+  }, [open]);
+
+  useGSAP(
+    () => {
+      const backdrop = backdropRef.current;
+      const panel = panelRef.current;
+      if (!backdrop || !panel) return; // the exit has finished; nothing is in the DOM
+
+      /* A plain media query rather than gsap.matchMedia(): this runs again on every
+         open and every close, and each matchMedia() would leave behind a live
+         listener that only unwinds on unmount — and this modal never unmounts. */
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // reopening mid-exit (or closing mid-entrance) must not fight the running tween
+      gsap.killTweensOf([backdrop, panel]);
+
+      if (open) {
+        if (reduced) {
+          gsap.set(backdrop, { autoAlpha: 1 });
+          gsap.set(panel, { autoAlpha: 1, y: 0, scale: 1 });
+          return;
+        }
+        gsap.fromTo(backdrop, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: "power2.out" });
+        // power4.out is the quintic curve --ease-lux draws as cubic-bezier(.22,1,.36,1)
+        gsap.fromTo(
+          panel,
+          { autoAlpha: 0, y: 26, scale: 0.98 },
+          { autoAlpha: 1, y: 0, scale: 1, duration: 0.45, ease: "power4.out" },
+        );
+        return;
+      }
+
+      if (reduced) {
+        setMounted(false);
+        return;
+      }
+      gsap.to(panel, { autoAlpha: 0, y: 16, scale: 0.98, duration: 0.3, ease: "power2.in" });
+      gsap.to(backdrop, {
+        autoAlpha: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => setMounted(false), // only now may React take the node away
+      });
+    },
+    { dependencies: [open, mounted] },
+  );
+
   const set = (k) => (e) => {
     const v = sanitizeField(k, e.target.value);
     setForm((f) => ({ ...f, [k]: v }));
@@ -189,163 +249,156 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
 
   const kicker = sent ? t("enq.received") : isVisit ? "Site visit" : isBrochure ? "Brochure" : auto ? t("enq.invitation") : subject ? `${t("enq.enquiry")} · ${subject}` : t("enq.private");
 
+  // nothing rendered until the modal is asked for — the prerender captures no dialog
+  if (!mounted) return null;
+
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+    <div
+      ref={backdropRef}
+      onClick={onClose}
+      data-lenis-prevent
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-md"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div
+        ref={panelRef}
+        onClick={(e) => e.stopPropagation()}
+        className="relative my-auto w-full max-w-md overflow-hidden rounded-[1.4rem] border border-brass/25 bg-paper p-8 shadow-[0_50px_120px_-30px_rgba(0,0,0,0.9)] md:p-10"
+      >
+        <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.16),transparent_70%)]" />
+        <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brass/60 to-transparent" />
+
+        <button
           onClick={onClose}
-          data-lenis-prevent
-          className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-md"
-          aria-modal="true"
-          role="dialog"
+          aria-label="Close"
+          data-cursor="CLOSE"
+          className="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full border border-line text-ink-soft transition-colors hover:border-brass hover:text-brass"
         >
-          <motion.div
-            initial={{ opacity: 0, y: 26, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.98 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            onClick={(e) => e.stopPropagation()}
-            className="relative my-auto w-full max-w-md overflow-hidden rounded-[1.4rem] border border-brass/25 bg-paper p-8 shadow-[0_50px_120px_-30px_rgba(0,0,0,0.9)] md:p-10"
-          >
-            <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.16),transparent_70%)]" />
-            <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brass/60 to-transparent" />
+          <X size={16} />
+        </button>
 
-            <button
-              onClick={onClose}
-              aria-label="Close"
-              data-cursor="CLOSE"
-              className="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full border border-line text-ink-soft transition-colors hover:border-brass hover:text-brass"
-            >
-              <X size={16} />
-            </button>
-
-            {sent ? (
-              <div className="relative py-6 text-center">
-                <p className="kicker">{kicker}</p>
-                <h3 className="mt-4 font-display text-[clamp(2rem,7vw,3rem)] font-light leading-[0.95] text-ink">
-                  {t("enq.thankYou")} <span className="font-serif italic text-brass">{form.name.split(" ")[0] || "friend"}.</span>
-                </h3>
-                <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-ink-soft">
-{t("enq.thanksBody")}
-                </p>
-                {isBrochure && (gotFile ? (
-                  <a
-                    href={BROCHURE_URL}
-                    download
-                    className="mt-6 inline-block mono text-[0.66rem] tracking-[0.2em] text-brass underline underline-offset-4 hover:text-brass-soft"
-                  >
-                    Download didn't start? Click here
-                  </a>
-                ) : (
-                  <p className="mx-auto mt-6 max-w-xs text-sm leading-relaxed text-brass">
-                    The brochure will be emailed to you shortly.
-                  </p>
-                ))}
-                <button onClick={onClose} className="mt-8 mono text-[0.66rem] tracking-[0.2em] text-brass transition-colors hover:text-brass-soft">
-                  {t("nav.close")}
-                </button>
-              </div>
+        {sent ? (
+          <div className="relative py-6 text-center">
+            <p className="kicker">{kicker}</p>
+            <h3 className="mt-4 font-display text-[clamp(2rem,7vw,3rem)] font-light leading-[0.95] text-ink">
+              {t("enq.thankYou")} <span className="font-serif italic text-brass">{form.name.split(" ")[0] || "friend"}.</span>
+            </h3>
+            <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-ink-soft">
+              {t("enq.thanksBody")}
+            </p>
+            {isBrochure && (gotFile ? (
+              <a
+                href={BROCHURE_URL}
+                download
+                className="mt-6 inline-block mono text-[0.66rem] tracking-[0.2em] text-brass underline underline-offset-4 hover:text-brass-soft"
+              >
+                Download didn't start? Click here
+              </a>
             ) : (
-              <div className="relative">
-                <p className="kicker">{kicker}</p>
-                <h3 className="mt-3 font-display text-[clamp(1.9rem,6vw,2.6rem)] font-light leading-[1.02] tracking-[-0.01em] text-ink">
-                  {isVisit ? (
-                    <>Book your <span className="font-serif italic text-brass">site visit.</span></>
-                  ) : isBrochure ? (
-                    <>Download the <span className="font-serif italic text-brass">brochure.</span></>
-                  ) : auto ? (
-                    <>{t("enq.autoTitleA")} <span className="font-serif italic text-brass">{t("enq.autoTitleB")}</span></>
-                  ) : (
-                    <>{t("enq.titleA")} <span className="font-serif italic text-brass">{t("enq.titleB")}</span></>
-                  )}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-                  {isVisit
-                    ? "Tell us when suits you. Our team confirms the slot, arranges access and can send a car for the visit."
-                    : isBrochure
-                    ? "Floor plans, specifications, amenities and the price list — sent to you and downloaded instantly."
-                    : auto ? t("enq.autoBody") : `${PROJECT.configs} · ${PROJECT.location}. ${t("enq.body")}`}
-                </p>
+              <p className="mx-auto mt-6 max-w-xs text-sm leading-relaxed text-brass">
+                The brochure will be emailed to you shortly.
+              </p>
+            ))}
+            <button onClick={onClose} className="mt-8 mono text-[0.66rem] tracking-[0.2em] text-brass transition-colors hover:text-brass-soft">
+              {t("nav.close")}
+            </button>
+          </div>
+        ) : (
+          <div className="relative">
+            <p className="kicker">{kicker}</p>
+            <h3 className="mt-3 font-display text-[clamp(1.9rem,6vw,2.6rem)] font-light leading-[1.02] tracking-[-0.01em] text-ink">
+              {isVisit ? (
+                <>Book your <span className="font-serif italic text-brass">site visit.</span></>
+              ) : isBrochure ? (
+                <>Download the <span className="font-serif italic text-brass">brochure.</span></>
+              ) : auto ? (
+                <>{t("enq.autoTitleA")} <span className="font-serif italic text-brass">{t("enq.autoTitleB")}</span></>
+              ) : (
+                <>{t("enq.titleA")} <span className="font-serif italic text-brass">{t("enq.titleB")}</span></>
+              )}
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+              {isVisit
+                ? "Tell us when suits you. Our team confirms the slot, arranges access and can send a car for the visit."
+                : isBrochure
+                ? "Floor plans, specifications, amenities and the price list — sent to you and downloaded instantly."
+                : auto ? t("enq.autoBody") : `${PROJECT.configs} · ${PROJECT.location}. ${t("enq.body")}`}
+            </p>
 
-                <form onSubmit={submit} onFocus={touch} onInput={touch} className="mt-7 space-y-5">
-                  {/* Honeypot. Hidden from sight and from assistive tech, out of the
-                      tab order and out of autofill — but a plain, fillable input to a
-                      bot walking the DOM. Its value must be in state to reach spam.js. */}
-                  <input
-                    type="text"
-                    name="company"
-                    value={form.company}
-                    onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
-                    tabIndex={-1}
-                    autoComplete="off"
-                    aria-hidden="true"
-                    className="hidden"
-                  />
-                  <div>
-                    <input className={fieldCls("name")} placeholder={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
-                    {errors.name && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.name)}</p>}
-                  </div>
-                  <div>
-                    <input className={fieldCls("phone")} placeholder={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
-                    {errors.phone && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.phone)}</p>}
-                  </div>
-                  <div>
-                    <input className={fieldCls("email")} placeholder={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
-                    {errors.email && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.email)}</p>}
-                  </div>
-                  <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")}>
-                    <option value="">{t("form.config")}</option>
-                    {RESIDENCES.map((r) => (
-                      <option key={r.id} value={r.name}>{r.name}</option>
-                    ))}
-                  </select>
-
-                  {isVisit && (
-                    <div>
-                      <label className="mono block text-[0.58rem] tracking-[0.18em] text-ink-faint">
-                        Preferred date (optional)
-                      </label>
-                      <input
-                        className={FIELD}
-                        type="date"
-                        value={form.visitDate}
-                        min={new Date().toISOString().slice(0, 10)}
-                        onChange={(e) => setForm((f) => ({ ...f, visitDate: e.target.value }))}
-                      />
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={sending}
-                    data-cursor="OPEN"
-                    className="group/cta relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-brass py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-obsidian transition-colors disabled:opacity-70"
-                  >
-                    <span className="absolute inset-0 origin-left scale-x-0 bg-brass-soft transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
-                    <span className="relative z-10">
-                      {sending ? t("cta.sending") : isVisit ? "Book site visit" : isBrochure ? "Download brochure" : auto ? t("cta.sendMeDetails") : t("cta.registerInterest")}
-                    </span>
-                    {!sending && <ArrowRight size={15} className="relative z-10 transition-transform duration-500 group-hover/cta:translate-x-1" />}
-                  </button>
-                  {error && <p className="text-center text-[0.72rem] text-oxblood">{t(error)}</p>}
-
-                  {auto ? (
-                    <button type="button" onClick={onClose} className="mono block w-full text-center text-[0.58rem] tracking-[0.18em] text-ink-faint transition-colors hover:text-ink-soft">
-                      {t("cta.maybeLater")}
-                    </button>
-                  ) : (
-                    <p className="mono text-center text-[0.55rem] tracking-[0.18em] text-ink-faint">{t("cta.orCall")} {PROJECT.phone}</p>
-                  )}
-                </form>
+            <form onSubmit={submit} onFocus={touch} onInput={touch} className="mt-7 space-y-5">
+              {/* Honeypot. Hidden from sight and from assistive tech, out of the
+                  tab order and out of autofill — but a plain, fillable input to a
+                  bot walking the DOM. Its value must be in state to reach spam.js. */}
+              <input
+                type="text"
+                name="company"
+                value={form.company}
+                onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="hidden"
+              />
+              <div>
+                <input className={fieldCls("name")} placeholder={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
+                {errors.name && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.name)}</p>}
               </div>
-            )}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+              <div>
+                <input className={fieldCls("phone")} placeholder={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
+                {errors.phone && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.phone)}</p>}
+              </div>
+              <div>
+                <input className={fieldCls("email")} placeholder={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
+                {errors.email && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.email)}</p>}
+              </div>
+              <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")}>
+                <option value="">{t("form.config")}</option>
+                {RESIDENCES.map((r) => (
+                  <option key={r.id} value={r.name}>{r.name}</option>
+                ))}
+              </select>
+
+              {isVisit && (
+                <div>
+                  <label className="mono block text-[0.58rem] tracking-[0.18em] text-ink-faint">
+                    Preferred date (optional)
+                  </label>
+                  <input
+                    className={FIELD}
+                    type="date"
+                    value={form.visitDate}
+                    min={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => setForm((f) => ({ ...f, visitDate: e.target.value }))}
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={sending}
+                data-cursor="OPEN"
+                className="group/cta relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-brass py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-obsidian transition-colors disabled:opacity-70"
+              >
+                <span className="absolute inset-0 origin-left scale-x-0 bg-brass-soft transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
+                <span className="relative z-10">
+                  {sending ? t("cta.sending") : isVisit ? "Book site visit" : isBrochure ? "Download brochure" : auto ? t("cta.sendMeDetails") : t("cta.registerInterest")}
+                </span>
+                {!sending && <ArrowRight size={15} className="relative z-10 transition-transform duration-500 group-hover/cta:translate-x-1" />}
+              </button>
+              {error && <p className="text-center text-[0.72rem] text-oxblood">{t(error)}</p>}
+
+              {auto ? (
+                <button type="button" onClick={onClose} className="mono block w-full text-center text-[0.58rem] tracking-[0.18em] text-ink-faint transition-colors hover:text-ink-soft">
+                  {t("cta.maybeLater")}
+                </button>
+              ) : (
+                <p className="mono text-center text-[0.55rem] tracking-[0.18em] text-ink-faint">{t("cta.orCall")} {PROJECT.phone}</p>
+              )}
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

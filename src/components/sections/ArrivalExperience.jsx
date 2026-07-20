@@ -7,21 +7,45 @@ import { IMG, px } from "../../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/* The journey inward — six scenes, from the gate to the front door. */
+/* The journey inward. Three published renders exist and they happen to fall in
+   order — the towers on approach, the porte-cochère, the lobby — so the walk is
+   photographed exactly as far as M3M has photographed it and then stops. The
+   sequence used to run to six scenes by repeating the lobby under "The Lift",
+   "Private Corridor" and "Residence Door", which asserted three interiors that
+   have never been released. The fourth scene is now typographic and says so;
+   the descent moving out of image and into type as the building turns private
+   is the more truthful edit, and the better one. */
 const STAGES = [
-  { n: "Entrance", note: "The gates draw back.", id: IMG.facade },
-  { n: "Drop-off", note: "Arrival beneath the porte-cochère.", id: IMG.heroExterior },
-  { n: "The Lobby", note: "Into the double-height hall.", id: IMG.lobby },
-  { n: "The Lift", note: "A private ascent begins.", id: IMG.lobbyWarm },
-  { n: "Private Corridor", note: "The floor is yours alone.", id: IMG.livingRoom },
-  { n: "Residence Door", note: "You are home.", id: IMG.bedroom },
+  {
+    n: "The Approach",
+    note: "The towers stand over the landscaped grounds.",
+    id: IMG.tower,
+    alt: "The M3M Brabus towers above the landscaped grounds at Sector 58, Gurugram",
+  },
+  {
+    n: "The Arrival Court",
+    note: "Beneath the porte-cochère, the car is taken.",
+    id: IMG.arrival,
+    alt: "The porte-cochère arrival court at M3M Brabus, Sector 58, Gurugram",
+  },
+  {
+    n: "The Lobby",
+    note: "Into the double-height marble hall.",
+    id: IMG.lobby,
+    alt: "The double-height marble lobby and lounge at M3M Brabus",
+  },
+  {
+    n: "Beyond the Lobby",
+    note: "The private lift, the corridor that is yours alone, the door. M3M has published no render of this part of the walk — so none is shown.",
+    id: null,
+  },
 ];
 
 /* CHAPTER 05 — THE ARRIVAL EXPERIENCE
    A pinned sequence the user scrolls *through*. Each scroll step walks the
-   visitor one scene deeper — gate, forecourt, lobby, lift, corridor, door —
-   with cinematic depth: incoming layers push in from scale 1.15, blur
-   clearing as they settle. Dark and immersive. */
+   visitor one scene deeper — approach, forecourt, lobby, and the private
+   ascent beyond it — with cinematic depth: incoming layers push in from
+   scale 1.15, blur clearing as they settle. Dark and immersive. */
 export default function ArrivalExperience() {
   const root = useRef(null);
   const pin = useRef(null);
@@ -111,9 +135,31 @@ export default function ArrivalExperience() {
         {/* Stacked scene layers — cross-fade + push-in */}
         <div className="absolute inset-2.5 overflow-hidden rounded-[1.75rem] md:inset-4">
           {STAGES.map((s, i) => (
-            <div key={s.n} className="arr-stage absolute inset-0">
-              <Media src={px(s.id, 1800)} alt={`Arrival — ${s.n}`} priority={i === 0} sizes="100vw" />
-              <div className="absolute inset-0 [background:linear-gradient(180deg,rgba(10,9,8,0.55)_0%,rgba(10,9,8,0.2)_42%,rgba(10,9,8,0.9)_100%)]" />
+            <div key={s.n} className="arr-stage absolute inset-0 bg-obsidian">
+              {s.id ? (
+                <>
+                  <Media src={px(s.id, 1800)} alt={s.alt} priority={i === 0} sizes="100vw" />
+                  {/* scrim for caption legibility over a photograph — the
+                      drawn scene below is dark already and needs none */}
+                  <div className="absolute inset-0 [background:linear-gradient(180deg,rgba(10,9,8,0.55)_0%,rgba(10,9,8,0.2)_42%,rgba(10,9,8,0.9)_100%)]" />
+                </>
+              ) : (
+                /* An unphotographed scene, drawn rather than borrowed: a lit
+                   field and a hairline, depicting nothing and labelled as
+                   depicting nothing. */
+                <div className="absolute inset-0">
+                  <div className="absolute inset-0 [background:radial-gradient(115%_85%_at_50%_38%,rgba(201,168,106,0.14),transparent_62%)]" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-4 sm:gap-6">
+                      <span className="h-12 w-px bg-gradient-to-b from-transparent to-brass/60 sm:h-20" />
+                      <span className="mono text-[0.56rem] tracking-[0.26em] text-white/40">
+                        No render published
+                      </span>
+                      <span className="h-12 w-px bg-gradient-to-t from-transparent to-brass/60 sm:h-20" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

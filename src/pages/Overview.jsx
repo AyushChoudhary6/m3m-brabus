@@ -9,7 +9,7 @@ import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import ProjectHighlights from "../components/sections/ProjectHighlights.jsx";
 import Media from "../components/ui/Media.jsx";
-import { STATS, HIGHLIGHTS, PROJECT } from "../lib/site.js";
+import { HIGHLIGHTS, PROJECT } from "../lib/site.js";
 import { IMG, px } from "../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -22,23 +22,6 @@ export default function Overview() {
       gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
         const q = gsap.utils.selector(root);
 
-        gsap.from(q(".rise"), {
-          autoAlpha: 0, y: 24, duration: 0.9, ease: "power3.out", stagger: 0.07,
-          scrollTrigger: { trigger: q(".stats")[0], start: "top 85%" },
-        });
-
-        // count-up on the stat figures
-        q(".stat-n").forEach((el) => {
-          const to = Number(el.dataset.to) || 0;
-          const obj = { v: 0 };
-          gsap.to(obj, {
-            v: to, duration: 1.6, ease: "power3.out",
-            onUpdate: () => { el.textContent = Math.round(obj.v); },
-            scrollTrigger: { trigger: el, start: "top 90%" },
-          });
-        });
-
-        // the brief sits well below the stats, so it gets its own trigger
         gsap.from(q(".br-rise"), {
           autoAlpha: 0, y: 24, duration: 0.9, ease: "power3.out", stagger: 0.08,
           scrollTrigger: { trigger: q(".brief")[0], start: "top 82%" },
@@ -78,23 +61,13 @@ export default function Overview() {
         eyebrow="M3M Brabus Overview"
         title="A limited collection,"
         accent="engineered with BRABUS."
-        lede={`${PROJECT.configs} of ${PROJECT.sizes} at ${PROJECT.location}, on Golf Course Extension Road — an ultra-low-density address where every home opens on three sides.`}
+        lede={`${PROJECT.configs} of ${PROJECT.sizes} at ${PROJECT.location}, on Golf Course Extension Road. What follows is the case for the project — and the record of what ${PROJECT.developer} has published about it, and what it has not.`}
       />
 
-      {/* stats */}
-      <section className="stats container-lux pb-[clamp(3rem,9vh,6rem)]">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10 md:grid-cols-4">
-          {STATS.map((s) => (
-            <div key={s.label} className="rise">
-              <p className="font-display text-[clamp(2.6rem,6vw,4.2rem)] font-light leading-none tracking-[-0.03em] text-ink">
-                <span className="stat-n" data-to={s.value}>0</span>
-                <span className="text-brass">{s.suffix}</span>
-              </p>
-              <p className="mono mt-3 text-[0.6rem] tracking-[0.2em] text-ink-faint">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* The count-up stats band that stood here restated the sector, the largest
+          size and the three-side plan, all of which the header, 02 and the key-facts
+          grid now carry once and properly. Its one unshared claim — security and
+          concierge without office hours — moved into the brief below. */}
 
       {/* wide image */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
@@ -105,14 +78,16 @@ export default function Overview() {
           <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_55%,rgba(8,6,5,0.65))]" />
           <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
           <span className="mono absolute bottom-5 left-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">
-            The Tower · {PROJECT.location}
+            The Tower
           </span>
         </div>
       </section>
 
       {/* the argument — what the project is, and who it is written for.
-          Deliberately silent on configuration, size and the three-side plan:
-          the page header states those once, and 02 below carries the rest. */}
+          Deliberately silent on configuration, size and location: the header
+          states those once and the key-facts grid holds them on the record.
+          The three-side plan and the density belong to 02, which explains
+          them rather than merely asserting them again. */}
       <section className="brief container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="br-rise mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
@@ -133,9 +108,9 @@ export default function Overview() {
               It is written for a narrow readership — families who already own well and are buying a
               last address rather than a next one, and principals who want the home to read the way
               the car in the porch does. Consider it if you value provenance over frontage: an
-              {" "}{PROJECT.developer} address on Golf Course Extension Road, a global marque's
-              discipline carried into the interiors, and a floor plate large enough to live at villa
-              scale without leaving the skyline.
+              {" "}{PROJECT.developer} address, a global marque's discipline carried into the
+              interiors, a floor plate large enough to live at villa scale without leaving the
+              skyline, and security and concierge that keep no office hours.
             </p>
           </div>
         </div>

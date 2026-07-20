@@ -11,14 +11,6 @@
          them. Comments in this file ship on all 30 prerendered pages, so they
          are kept short. -->
 
-    <!-- Pexels is the only third-party origin touched during initial load:
-         /residences and /amenities fetch a stock shot eagerly above the fold.
-         No `crossorigin` — a plain <img> is a no-CORS fetch and would not reuse
-         a CORS-flagged socket. Deliberately not preconnected: googletagmanager
-         (analytics no-ops until VITE_GA_ID is set), script.google.com (lead
-         endpoint, submit only), basemaps.cartocdn.com (map tiles, below fold). -->
-    <link rel="preconnect" href="https://images.pexels.com" />
-
     <!-- Above-the-fold faces only: Fraunces sets the hero headline, Inter the
          eyebrow, fact ledger and buttons. Just the latin `wght` files —
          @fontsource also ships latin-ext/vietnamese/greek/cyrillic subsets

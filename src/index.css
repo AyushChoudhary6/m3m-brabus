@@ -1,8 +1,73 @@
 @import "tailwindcss";
 
-/* ---- Fonts ---- */
-@import "@fontsource-variable/fraunces";  /* display — high-contrast editorial serif */
-@import "@fontsource-variable/inter";     /* body */
+/* ---- Fonts ----
+   Declared face-by-face rather than `@import "@fontsource-variable/<pkg>"`.
+   The variable packages expose per-axis entry points (wght / opsz / standard /
+   full), not per-subset ones, and every one of them ships cyrillic, greek and
+   vietnamese next to latin. Their unicode-ranges never match a word on this
+   site, so a browser never fetches them — but they are still written into
+   dist/ and pushed to the CDN on every deploy. Naming the faces we actually
+   set keeps the deploy honest; it does not make the page load faster.
+   latin-ext is kept on purpose: it carries ₹, the dagger and the extended
+   currency block, and dropping it would surface as a stray system-font
+   glyph mid-sentence rather than as a build error.
+   Bare specifiers resolve through the packages' `./files/*` export, so these
+   land on the same hashed asset the <link rel=preload> in index.html points
+   at — a second copy would preload one file and paint with another. */
+@font-face {
+  font-family: "Fraunces Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Fraunces Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/fraunces/files/fraunces-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/inter/files/inter-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* Arabic. Neither Fraunces nor Inter has a single Arabic glyph, so before this
+   the RTL switch handed the whole page to whatever the OS happened to have.
+   Noto Sans Arabic (variable, wght 100–900 — the design leans on 300/400/500,
+   so a static face would have flattened it) is vendored from
+   @fontsource-variable/noto-sans-arabic@5.3.0 rather than installed, to keep
+   package.json out of this change; see src/assets/fonts/.
+   Two independent gates keep it off the English critical path: the family is
+   only ever named under [dir="rtl"] / :lang(ar) below, and the unicode-range
+   means that even there the file is fetched only once an Arabic glyph is
+   actually painted. The one Arabic character an English visitor sees — the ع
+   in the language switch — is pinned to system-ui inline in Navbar.jsx, so it
+   cannot pull this face in either. The range is Arabic only, so brand names
+   set in latin inside Arabic copy still come from Inter. */
+@font-face {
+  font-family: "Noto Sans Arabic Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("./assets/fonts/noto-sans-arabic-arabic-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC;
+}
 
 /* ============================================================
    M3M × BRABUS — "Obsidian & Gold"  (premium dark luxury)
@@ -175,22 +240,31 @@ h1, h2, h3, h4 {
 }
 @media (prefers-reduced-motion: reduce) { .grain { animation: none; } }
 
-/* ---- Arabic / RTL ---- */
+/* ---- Arabic / RTL ----
+   Every rule here is scoped to the RTL root, which is what keeps the Arabic
+   webfont off the English critical path — an English page never names the
+   family, so it can never request the file. The OS faces stay in the stack
+   behind it as the swap fallback. */
 :root[lang="ar"] body,
 [dir="rtl"] body {
-  font-family: "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", "Segoe UI", Tahoma, var(--font-sans);
+  font-family: "Noto Sans Arabic Variable", "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", "Segoe UI", Tahoma, var(--font-sans);
 }
 /* Arabic has no italics and the display serif has no Arabic glyphs —
    fall back to the Arabic stack and drop the slant. */
 [dir="rtl"] .font-display,
 [dir="rtl"] .font-serif,
 [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 {
-  font-family: "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", Tahoma, serif;
+  font-family: "Noto Sans Arabic Variable", "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", Tahoma, serif;
   font-style: normal;
   letter-spacing: 0;
 }
-/* Wide latin tracking looks broken on Arabic script */
+/* The eyebrow/index utilities are set in ui-monospace, which has no Arabic
+   either — without this they were the last thing still falling back to the OS.
+   Latin runs (EN, 01, BRABUS) keep the mono face: it sits ahead of the Arabic
+   font here, and the Arabic unicode-range does not claim latin. */
 [dir="rtl"] .mono, [dir="rtl"] .kicker, [dir="rtl"] .idx {
+  font-family: var(--font-mono), "Noto Sans Arabic Variable", "SF Arabic", "Geeza Pro", Tahoma, sans-serif;
+  /* Wide latin tracking looks broken on Arabic script */
   letter-spacing: 0.06em;
 }
 /* Mirror the arrow glyphs used in CTAs */

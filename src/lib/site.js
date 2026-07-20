@@ -6,6 +6,8 @@
 // possession, exact drive times) we say so rather than invent it.
 // ============================================================
 
+import { IMG } from "./images.js";
+
 export const PROJECT = {
   name: "M3M Brabus",
   tagline: "Branded Residences, Engineered for the Extraordinary",
@@ -112,6 +114,12 @@ export const HIGHLIGHTS = [
   },
 ];
 
+/* No render of either residence interior has been published, so the two cards
+   carry the official renders instead of stock photography of somebody else's
+   apartment: the lobby each home is entered through, and the arrival court.
+   `imageAlt` says what is actually in the frame — a card that captions the
+   arrival canopy as "the 5 BHK interior" is the same misrepresentation the
+   stock shots were, just cheaper. */
 export const RESIDENCES = [
   {
     id: "4bhk",
@@ -120,7 +128,8 @@ export const RESIDENCES = [
     facing: "3-side open · light & cross-ventilation",
     tag: "The Signature",
     subtitle: "A four-bedroom sanctuary in the sky",
-    image: 28729467,
+    image: IMG.lobby,
+    imageAlt: "M3M Brabus — the marble lobby the 4 BHK residences are entered through",
     features: [
       "Italian marble flooring",
       "Modular kitchen · branded fittings",
@@ -135,7 +144,8 @@ export const RESIDENCES = [
     facing: "3-side open · golf-green vistas",
     tag: "The Grand",
     subtitle: "Crafted like a private villa",
-    image: 31737843,
+    image: IMG.arrival,
+    imageAlt: "M3M Brabus — the porte-cochère arrival court at Sector 58",
     features: [
       "Villa-scale living spaces",
       "Smart-home integration",

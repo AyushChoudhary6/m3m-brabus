@@ -2,12 +2,10 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { Check, ArrowUpRight } from "lucide-react";
-import Media from "../ui/Media.jsx";
+import { Check } from "lucide-react";
 import Magnetic from "../ui/Magnetic.jsx";
 import { useEnquiry } from "../ui/Enquiry.jsx";
 import { RESIDENCES } from "../../lib/site.js";
-import { px } from "../../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -15,7 +13,26 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    Both configurations, presented as an interactive pair. Each plate tilts in
    3D toward the cursor under a travelling gold glare; hovering one lifts it
    and quiets its partner. Word-by-word names, a drawn gold rule, staged
-   specs, a magnetic CTA. */
+   specs, a magnetic CTA.
+
+   The plates carry no photograph, by decision. No interior render of either
+   home exists — the only published frames are the towers, the arrival court
+   and the lobby — and a 4:5 picture of a shared marble lobby sitting directly
+   above the words "5 BHK Residence" reads as that residence whatever the alt
+   text says. All three renders are already shown once each, accurately
+   captioned, in the Exhibition band further down this same page, so borrowing
+   one here would have been both untrue and the fourth appearance of the lobby
+   on the homepage. What a buyer is comparing at this point is size, aspect and
+   schedule; set as an engraved plaque, that is the more useful plate. The
+   frames themselves, with captions naming what is in them, live on
+   /residences. */
+
+/* Presentation only: "≈ 5,000 sq.ft" wants its unit set small beside the
+   figure. Fails open — an area written any other way prints whole. */
+function splitArea(area) {
+  const m = /^(.*?)\s*(sq\.?\s*ft\.?)$/i.exec(String(area || ""));
+  return m ? { figure: m[1], unit: m[2] } : { figure: area, unit: "" };
+}
 export default function Residences() {
   const root = useRef(null);
   const { openEnquiry } = useEnquiry();
@@ -33,9 +50,9 @@ export default function Residences() {
           if (!ctx.conditions.ok) return;
           const cards = q(".res-card");
 
-          // ---- entrance + scroll parallax (per card) ----
+          // ---- entrance (per card) ----
           cards.forEach((card) => {
-            const wrap = card.querySelector(".res-img-wrap");
+            const wrap = card.querySelector(".res-plate");
             gsap.set(wrap, { clipPath: "inset(100% 0 0 0)" });
             gsap.set(card.querySelectorAll(".res-word"), { yPercent: 112 });
             gsap.set(card.querySelector(".res-rule"), { scaleX: 0 });
@@ -47,11 +64,6 @@ export default function Residences() {
               .to(card.querySelectorAll(".res-word"), { yPercent: 0, duration: 1, ease: "power4.out", stagger: 0.08 }, 0.35)
               .to(card.querySelector(".res-rule"), { scaleX: 1, duration: 1.1, ease: "power3.inOut" }, 0.55)
               .to(card.querySelectorAll(".rise"), { autoAlpha: 1, y: 0, duration: 0.9, ease: "power3.out", stagger: 0.07 }, 0.6);
-
-            gsap.to(card.querySelector(".res-img-inner"), {
-              yPercent: 8, ease: "none",
-              scrollTrigger: { trigger: card, start: "top bottom", end: "bottom top", scrub: true },
-            });
           });
 
           // ---- 3D tilt + gold glare + focus/quiet (desktop, fine pointer) ----
@@ -112,88 +124,100 @@ export default function Residences() {
       </div>
 
       <div className="grid gap-x-14 gap-y-[clamp(3rem,7vh,5rem)] md:grid-cols-2">
-        {RESIDENCES.map((r, i) => (
-          <article key={r.id} className="res-card group [perspective:1400px]" data-cursor="VIEW">
-            {/* tilting plate */}
-            <div className="res-tilt relative [transform-style:preserve-3d]">
-              <div className="res-img-wrap relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-line transition-colors duration-500 group-hover:border-brass/50">
-                <div className="res-img-inner absolute inset-0 scale-[1.06] transition-transform duration-[1600ms] ease-lux group-hover:scale-[1.11]">
-                  <Media src={px(r.image, 1400)} alt={`${r.name} — interior`} priority={i === 0} sizes="(max-width:768px) 100vw, 42vw" />
-                </div>
-                {/* travelling gold glare */}
-                <div className="res-glare pointer-events-none absolute inset-[-35%] opacity-0 mix-blend-soft-light [background:radial-gradient(circle_at_center,rgba(235,214,160,0.55),transparent_42%)]" />
-                <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_46%,rgba(8,6,5,0.72))]" />
-                <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
+        {RESIDENCES.map((r, i) => {
+          const area = splitArea(r.area);
+          return (
+            <article key={r.id} className="res-card group [perspective:1400px]" data-cursor="VIEW">
+              {/* tilting plate — typographic, no photograph */}
+              <div className="res-tilt relative [transform-style:preserve-3d]">
+                <div className="res-plate relative flex aspect-[4/5] flex-col justify-between overflow-hidden rounded-[1.5rem] border border-line bg-paper p-6 transition-colors duration-500 group-hover:border-brass/50 sm:p-8">
+                  {/* decorative only — a lit corner and a travelling gold glare,
+                      depicting nothing and captioned as nothing */}
+                  <div className="pointer-events-none absolute inset-0 [background:radial-gradient(120%_90%_at_10%_0%,rgba(201,168,106,0.14),transparent_60%)]" />
+                  <div className="res-glare pointer-events-none absolute inset-[-35%] opacity-0 mix-blend-soft-light [background:radial-gradient(circle_at_center,rgba(235,214,160,0.5),transparent_42%)]" />
+                  <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
 
-                <span className="mono absolute left-4 top-4 text-[0.58rem] tracking-[0.2em] text-brass-soft">
-                  {String(i + 1).padStart(2, "0")} / {String(RESIDENCES.length).padStart(2, "0")}
-                </span>
+                  <div className="relative flex items-baseline justify-between gap-4">
+                    <span className="mono text-[0.58rem] tracking-[0.2em] text-brass-soft">
+                      {String(i + 1).padStart(2, "0")} / {String(RESIDENCES.length).padStart(2, "0")}
+                    </span>
+                    <span className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">{r.tag}</span>
+                  </div>
 
-                {/* hover reveal — over image */}
-                <div className="absolute inset-x-0 bottom-0 flex translate-y-3 items-center justify-between p-5 opacity-0 transition-[transform,opacity] duration-500 ease-lux group-hover:translate-y-0 group-hover:opacity-100">
-                  <span className="mono text-[0.6rem] tracking-[0.22em] text-brass-soft">{r.tag}</span>
-                  <span className="inline-flex items-center gap-2 font-sans text-[0.66rem] font-medium uppercase tracking-[0.16em] text-bone">
-                    View floor plan
-                    <ArrowUpRight size={13} className="text-brass" />
-                  </span>
+                  <div className="relative">
+                    {/* the figure that actually separates the two homes */}
+                    {/* Total area, as published. Carpet area is NOT published — ConfigTable
+                        on /residences gates it behind an enquiry, and this headline must agree. */}
+                    <p className="rise mono text-[0.56rem] tracking-[0.2em] text-ink-faint">Total area</p>
+                    <p className="rise mt-2 font-display font-light leading-[0.88] tracking-[-0.03em] text-ink">
+                      <span className="text-[clamp(2.8rem,6.4vw,4.4rem)]">{area.figure}</span>
+                      {area.unit && (
+                        <span className="ml-2 font-sans text-[0.7rem] uppercase tracking-[0.18em] text-ink-soft">
+                          {area.unit}
+                        </span>
+                      )}
+                    </p>
+
+                    <div className="rise mt-6 h-px w-full bg-gradient-to-r from-brass/50 via-line to-transparent" />
+
+                    <ul className="mt-5 space-y-2.5">
+                      {r.features.map((f) => (
+                        <li key={f} className="rise flex items-center gap-2.5 text-sm text-ink-soft">
+                          <Check size={13} strokeWidth={2} className="shrink-0 text-brass" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* details */}
-            <div className="mt-6 flex items-baseline justify-between">
-              <h3 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] font-light tracking-[-0.01em] text-ink">
-                {r.name.split(" ").map((w, wi) => (
-                  <span key={wi} className="mr-[0.25em] inline-block overflow-hidden align-bottom">
-                    <span className="res-word inline-block">{w}</span>
-                  </span>
-                ))}
-              </h3>
-              <span className="kicker whitespace-nowrap">{r.tag}</span>
-            </div>
-            <div className="res-rule mt-4 h-px w-full origin-left bg-gradient-to-r from-brass via-brass/40 to-transparent" />
-
-            <p className="rise mt-4 font-serif text-lg italic text-ink-soft">{r.subtitle}</p>
-
-            <dl className="rise mt-5 grid grid-cols-2 gap-x-8 gap-y-3">
-              <div>
-                <dt className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">Carpet Area</dt>
-                <dd className="mt-1 font-display text-base text-ink">{r.area}</dd>
+              {/* details */}
+              <div className="mt-6">
+                <h3 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] font-light tracking-[-0.01em] text-ink">
+                  {r.name.split(" ").map((w, wi) => (
+                    <span key={wi} className="mr-[0.25em] inline-block overflow-hidden align-bottom">
+                      <span className="res-word inline-block">{w}</span>
+                    </span>
+                  ))}
+                </h3>
               </div>
-              <div>
+              <div className="res-rule mt-4 h-px w-full origin-left bg-gradient-to-r from-brass via-brass/40 to-transparent" />
+
+              <p className="rise mt-4 font-serif text-lg italic text-ink-soft">{r.subtitle}</p>
+
+              <dl className="rise mt-5">
                 <dt className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">Orientation</dt>
                 <dd className="mt-1 text-sm leading-snug text-ink-soft">{r.facing}</dd>
+              </dl>
+
+              <div className="rise mt-7">
+                <Magnetic>
+                  <button
+                    type="button"
+                    onClick={() => openEnquiry(r.name)}
+                    data-cursor="REQUEST"
+                    className="group/cta relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-6 py-3.5"
+                  >
+                    <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
+                    <span className="relative z-10 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
+                      Request floor plan
+                    </span>
+                    <span className="relative z-10 text-brass transition-[transform,color] duration-500 group-hover/cta:translate-x-1 group-hover/cta:text-obsidian">→</span>
+                  </button>
+                </Magnetic>
               </div>
-            </dl>
-
-            <ul className="mt-5 grid grid-cols-1 gap-x-8 gap-y-2.5 sm:grid-cols-2">
-              {r.features.map((f) => (
-                <li key={f} className="rise flex items-center gap-2.5 text-sm text-ink-soft">
-                  <Check size={13} strokeWidth={2} className="shrink-0 text-brass" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-
-            <div className="rise mt-7">
-              <Magnetic>
-                <button
-                  type="button"
-                  onClick={() => openEnquiry(r.name)}
-                  data-cursor="REQUEST"
-                  className="group/cta relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-6 py-3.5"
-                >
-                  <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
-                  <span className="relative z-10 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-                    Request floor plan
-                  </span>
-                  <span className="relative z-10 text-brass transition-[transform,color] duration-500 group-hover/cta:translate-x-1 group-hover/cta:text-obsidian">→</span>
-                </button>
-              </Magnetic>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </div>
+
+      {/* Said plainly, so the absent picture reads as a decision rather than a
+          gap: what M3M has released is shown, once each, in the Exhibition. */}
+      <p className="mono mt-[clamp(2rem,5vh,3rem)] text-[0.58rem] leading-relaxed tracking-[0.2em] text-ink-faint">
+        No interior render of either residence has been published · The official
+        renders of the towers, the arrival court and the lobby are shown in full below
+      </p>
     </section>
   );
 }

@@ -2,13 +2,13 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpRight, ChevronLeft, ChevronRight, Expand, Maximize2,
   Minus, Plus, RotateCcw, Shrink, X,
 } from "lucide-react";
 import Magnetic from "../ui/Magnetic.jsx";
 import { useEnquiry } from "../ui/Enquiry.jsx";
+import usePresence from "../../lib/usePresence.js";
 import { CONFIGURATIONS } from "../../lib/facts.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -171,8 +171,11 @@ function OnRequest({ label, subject, note }) {
 /* ── enlarged view ──────────────────────────────────────────────────
    Dark backdrop · aria-modal · focus trapped · Escape closes · body scroll
    restored and every listener detached on unmount. `data-lenis-prevent`
-   keeps Lenis off the scrollable panel, as the enquiry modal does. */
-function PlanLightbox({ index, onIndex, onClose }) {
+   keeps Lenis off the scrollable panel, as the enquiry modal does.
+
+   `rootRef` comes from the section's usePresence: the parent owns the mount,
+   so it owns the node the leaving tween runs on. */
+function PlanLightbox({ rootRef, index, onIndex, onClose }) {
   const { openEnquiry } = useEnquiry();
   const dialogRef = useRef(null);
   const stageRef = useRef(null);
@@ -221,6 +224,23 @@ function PlanLightbox({ index, onIndex, onClose }) {
      time a room is hovered. So the moving parts go through refs. */
   const live = useRef({ go, onClose, zoom });
   live.current = { go, onClose, zoom };
+
+  /* Arrival: the backdrop washes in, the panel rises under it. Nothing is set
+     to a hidden start value under reduced motion, so the dialog is simply
+     there — no dependency on a tween ever running. */
+  useGSAP(
+    () => {
+      gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.fromTo(rootRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" });
+        gsap.fromTo(
+          dialogRef.current,
+          { opacity: 0, y: 22, scale: 0.985 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" },
+        );
+      });
+    },
+    { scope: rootRef },
+  );
 
   /* Escape, arrow keys and the tab cycle, all on one capturing listener. */
   useEffect(() => {
@@ -327,24 +347,17 @@ function PlanLightbox({ index, onIndex, onClose }) {
     "grid h-9 w-9 place-items-center rounded-full border border-line text-ink-soft transition-colors hover:border-brass hover:text-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass disabled:opacity-35 disabled:hover:border-line disabled:hover:text-ink-soft";
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: reduce ? 0 : 0.3 }}
+    <div
+      ref={rootRef}
       onClick={onClose}
       data-lenis-prevent
       className="fixed inset-0 z-[110] flex items-stretch justify-center overflow-y-auto bg-black/90 p-3 backdrop-blur-md sm:p-6"
     >
-      <motion.div
+      <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        initial={{ opacity: 0, y: 22, scale: 0.985 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 14, scale: 0.985 }}
-        transition={{ duration: reduce ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] }}
         onClick={(e) => e.stopPropagation()}
         data-lenis-prevent
         className="relative m-auto flex max-h-full w-full max-w-6xl flex-col overflow-y-auto rounded-[1.25rem] border border-brass/25 bg-paper shadow-[0_50px_120px_-30px_rgba(0,0,0,0.9)]"
@@ -486,8 +499,8 @@ function PlanLightbox({ index, onIndex, onClose }) {
         <p className="mono border-t border-line px-5 py-3 text-center text-[0.54rem] tracking-[0.18em] text-ink-faint md:px-8">
           Pinch or scroll to zoom · drag to pan · swipe or ← → to change home · Esc to close
         </p>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
@@ -496,6 +509,32 @@ export default function FloorPlan() {
   const [hover, setHover] = useState(null); // { id, i }
   const [openAt, setOpenAt] = useState(null); // index of the enlarged plan
   const { openEnquiry } = useEnquiry();
+
+  /* Leaving: the panel settles back down as the backdrop lifts. The lightbox
+     stays mounted for the duration, which is also what keeps its scroll lock,
+     focus restore and listener teardown running in the right order — they all
+     hang off its unmount, and its unmount now comes last. */
+  const exitLightbox = useCallback(
+    (node, done) =>
+      gsap
+        .timeline({ onComplete: done })
+        .to(node.querySelector('[role="dialog"]'), {
+          opacity: 0,
+          y: 14,
+          scale: 0.985,
+          duration: 0.3,
+          ease: "power2.in",
+        }, 0)
+        .to(node, { opacity: 0, duration: 0.3, ease: "power2.in" }, 0.05),
+    [],
+  );
+
+  const { mounted: lightboxMounted, ref: lightboxRef } = usePresence(openAt != null, exitLightbox);
+
+  /* Which plan to keep drawing while the lightbox animates away, after
+     `openAt` has already been cleared. */
+  const lastAt = useRef(0);
+  if (openAt != null) lastAt.current = openAt;
 
   useGSAP(
     () => {
@@ -639,11 +678,14 @@ export default function FloorPlan() {
         </Magnetic>
       </div>
 
-      <AnimatePresence>
-        {openAt != null && (
-          <PlanLightbox index={openAt} onIndex={setOpenAt} onClose={() => setOpenAt(null)} />
-        )}
-      </AnimatePresence>
+      {lightboxMounted && (
+        <PlanLightbox
+          rootRef={lightboxRef}
+          index={openAt ?? lastAt.current}
+          onIndex={setOpenAt}
+          onClose={() => setOpenAt(null)}
+        />
+      )}
     </section>
   );
 }

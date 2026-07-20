@@ -152,11 +152,8 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=0, must-revalidate"
-        },
-        {
-          "key": "Link",
-          "value": "</renders/tower.jpg>; rel=preload; as=image; fetchpriority=high"
         }
+        
       ]
     },
     {
