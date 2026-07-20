@@ -7,7 +7,7 @@ import clsx from "clsx";
 import { useEnquiry } from "./ui/Enquiry.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import usePresence from "../lib/usePresence.js";
-import { NAV_LINKS, PROJECT } from "../lib/site.js";
+import { NAV_LINKS, NAV_INLINE, PROJECT } from "../lib/site.js";
 
 gsap.registerPlugin(useGSAP);
 
@@ -129,8 +129,16 @@ export default function Navbar() {
             <span className="font-serif text-2xl italic text-brass">Brabus</span>
           </Link>
 
-          <ul className="hidden min-w-0 flex-1 items-center justify-center gap-4 xl:flex 2xl:gap-6">
-            {NAV_LINKS.map((l) => (
+          {/* The bar carries NAV_INLINE; the fullscreen menu carries all of
+              NAV_LINKS. See the note in site.js for why they differ.
+
+              The 1180px breakpoint is measured, not chosen: below it the six
+              links run into the CTA cluster (1120px overlapped by 5px, 1024px
+              by 46px). Between lg and 1180 the burger menu carries navigation
+              on its own, which it is designed to do. If a link is ever added
+              here, re-measure — do not assume it still fits. */}
+          <ul className="hidden min-w-0 flex-1 items-center justify-center gap-5 min-[1180px]:flex xl:gap-7 2xl:gap-9">
+            {NAV_INLINE.map((l) => (
               <li key={l.to} className="nav-item">
                 <Link
                   to={l.to}

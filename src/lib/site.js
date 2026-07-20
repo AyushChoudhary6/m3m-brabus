@@ -26,19 +26,33 @@ export const PROJECT = {
 };
 
 /* Ch. 21 — primary navigation. `tKey` is explicit rather than derived from
-   the path, so multi-word routes (/floor-plan) and "/" translate cleanly. */
+   the path, so multi-word routes (/floor-plan) and "/" translate cleanly.
+
+   `inline` marks the links shown in the top bar on wide screens. All ten
+   appear in the fullscreen menu; only these six sit in the bar.
+
+   Why not all ten inline: measured in headless Chrome, ten items overlap the
+   right-hand CTA cluster by 46px at 1280px and 11px at 1360px — both very
+   common laptop widths. The alternative fix, shrinking the type, runs against
+   an explicit request to make the nav text larger, so the bar carries the
+   high-intent links and the menu carries the full index.
+   Home is omitted because the wordmark already links home, and Brochure
+   because it is the gold CTA button beside the menu. */
 export const NAV_LINKS = [
   { label: "Home", to: "/", tKey: "nav.home" },
-  { label: "Project", to: "/overview", tKey: "nav.overview" },
-  { label: "Price", to: "/price", tKey: "nav.price" },
-  { label: "Floor Plans", to: "/floor-plan", tKey: "nav.floorPlans" },
+  { label: "Project", to: "/overview", tKey: "nav.overview", inline: true },
+  { label: "Price", to: "/price", tKey: "nav.price", inline: true },
+  { label: "Floor Plans", to: "/floor-plan", tKey: "nav.floorPlans", inline: true },
   { label: "Amenities", to: "/amenities", tKey: "nav.amenities" },
-  { label: "Location", to: "/location", tKey: "nav.location" },
-  { label: "Gallery", to: "/gallery", tKey: "nav.gallery" },
+  { label: "Location", to: "/location", tKey: "nav.location", inline: true },
+  { label: "Gallery", to: "/gallery", tKey: "nav.gallery", inline: true },
   { label: "Brochure", to: "/brochure", tKey: "nav.brochure" },
   { label: "Blogs", to: "/blogs", tKey: "nav.blogs" },
-  { label: "Contact", to: "/contact", tKey: "nav.contact" },
+  { label: "Contact", to: "/contact", tKey: "nav.contact", inline: true },
 ];
+
+/** The subset shown in the top bar. The menu always shows NAV_LINKS in full. */
+export const NAV_INLINE = NAV_LINKS.filter((l) => l.inline);
 
 /* Ch. 21 — footer navigation, four columns.
    Deviation from the spec, deliberate: "Configuration" points at the existing
