@@ -4,6 +4,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
+import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
+import RelatedPages from "../components/sections/RelatedPages.jsx";
 import LivingMap from "../components/sections/LivingMap.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import { PROJECT } from "../lib/site.js";
@@ -43,7 +45,9 @@ export default function LocationPage() {
         path="/location"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Location", path: "/location" }])}
       />
+      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Location", path: "/location" }]} />
       <PageHeader
+        compact
         eyebrow="05 · The Address"
         title="The centre of"
         accent="new Gurugram."
@@ -70,6 +74,7 @@ export default function LocationPage() {
         </div>
       </section>
 
+      <RelatedPages links={["/overview", "/amenities", "/contact"]} />
       <CtaBand title="Visit the" accent="address." subject="Location" />
     </div>
   );

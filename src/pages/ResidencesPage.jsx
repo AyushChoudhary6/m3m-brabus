@@ -5,6 +5,8 @@ import { useGSAP } from "@gsap/react";
 import { Check } from "lucide-react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
+import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
+import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { RESIDENCES, PROJECT } from "../lib/site.js";
@@ -80,7 +82,9 @@ export default function ResidencesPage() {
         path="/residences"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Residences", path: "/residences" }])}
       />
+      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Residences", path: "/residences" }]} />
       <PageHeader
+        compact
         eyebrow="02 · The Residences"
         title="Open on three sides."
         accent="A collection for the few."
@@ -176,6 +180,7 @@ export default function ResidencesPage() {
         </p>
       </section>
 
+      <RelatedPages links={["/floor-plan", "/price", "/brochure", "/amenities"]} />
       <CtaBand title="Request the" accent="floor plans." subject="Residences" />
     </div>
   );

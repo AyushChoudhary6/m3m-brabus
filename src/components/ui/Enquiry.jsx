@@ -4,12 +4,15 @@ import { X, ArrowRight } from "lucide-react";
 import { submitLead, markLeadCaptured } from "../../lib/leads.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../../lib/validate.js";
 import { useI18n } from "../../lib/i18n.jsx";
+import { trackLead, trackBrochure } from "../../lib/analytics.js";
 import { RESIDENCES, PROJECT } from "../../lib/site.js";
 
 const EnquiryCtx = createContext(null);
-export const useEnquiry = () => useContext(EnquiryCtx) || { openEnquiry: () => {} };
+export const useEnquiry = () =>
+  useContext(EnquiryCtx) || { openEnquiry: () => {}, openBrochure: () => {} };
 
 const AUTO_DELAY = 40000; // 40 seconds
+const BROCHURE_URL = "/brochure/m3m-brabus-brochure.pdf"; // drop the real PDF here
 const KEY_LEAD = "mb-lead"; // submitted a real enquiry — don't auto-invite on future visits
 
 const ls = {
@@ -24,6 +27,7 @@ export function EnquiryProvider({ children }) {
   const [open, setOpen] = useState(false);
   const [subject, setSubject] = useState("");
   const [auto, setAuto] = useState(false);
+  const [intent, setIntent] = useState("enquiry");
   const openRef = useRef(false);
   useEffect(() => { openRef.current = open; }, [open]);
 
@@ -36,6 +40,15 @@ export function EnquiryProvider({ children }) {
     }
     setSubject(subj);
     setAuto(isAuto);
+    setIntent("enquiry");
+    setOpen(true);
+  }, []);
+
+  /** Brochure gate: same modal, but the submit unlocks the PDF download. */
+  const openBrochure = useCallback((subj = "Brochure") => {
+    setSubject(subj);
+    setAuto(false);
+    setIntent("brochure");
     setOpen(true);
   }, []);
 
@@ -51,9 +64,9 @@ export function EnquiryProvider({ children }) {
   }, [openEnquiry]);
 
   return (
-    <EnquiryCtx.Provider value={{ openEnquiry }}>
+    <EnquiryCtx.Provider value={{ openEnquiry, openBrochure }}>
       {children}
-      <EnquiryModal open={open} subject={subject} auto={auto} onClose={close} />
+      <EnquiryModal open={open} subject={subject} auto={auto} intent={intent} onClose={close} />
     </EnquiryCtx.Provider>
   );
 }
@@ -61,7 +74,8 @@ export function EnquiryProvider({ children }) {
 const FIELD =
   "w-full border-b border-line bg-transparent py-3.5 text-ink placeholder:text-ink-faint outline-none transition-colors focus:border-brass";
 
-function EnquiryModal({ open, subject, auto, onClose }) {
+function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
+  const isBrochure = intent === "brochure";
   const { t } = useI18n();
   const [form, setForm] = useState({ name: "", phone: "", email: "", config: "" });
   const [sent, setSent] = useState(false);
@@ -101,9 +115,20 @@ function EnquiryModal({ open, subject, auto, onClose }) {
     setSending(true);
     setError("");
     try {
-      await submitLead({ ...form, source: auto ? "Timed invite" : subject ? `Modal · ${subject}` : "Modal" });
+      const source = isBrochure ? `Brochure · ${subject}` : auto ? "Timed invite" : subject ? `Modal · ${subject}` : "Modal";
+      await submitLead({ ...form, source });
       markLeadCaptured(); // never auto-invite again
+      trackLead(source, form.config);
       setSent(true);
+      if (isBrochure) {
+        trackBrochure(subject || "modal");
+        const a = document.createElement("a");
+        a.href = BROCHURE_URL;
+        a.download = "M3M-Brabus-Brochure.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
     } catch {
       setError("err.send");
     } finally {
@@ -111,7 +136,7 @@ function EnquiryModal({ open, subject, auto, onClose }) {
     }
   };
 
-  const kicker = sent ? t("enq.received") : auto ? t("enq.invitation") : subject ? `${t("enq.enquiry")} · ${subject}` : t("enq.private");
+  const kicker = sent ? t("enq.received") : isBrochure ? "Brochure" : auto ? t("enq.invitation") : subject ? `${t("enq.enquiry")} · ${subject}` : t("enq.private");
 
   return (
     <AnimatePresence>
@@ -156,6 +181,15 @@ function EnquiryModal({ open, subject, auto, onClose }) {
                 <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-ink-soft">
 {t("enq.thanksBody")}
                 </p>
+                {isBrochure && (
+                  <a
+                    href={BROCHURE_URL}
+                    download
+                    className="mt-6 inline-block mono text-[0.66rem] tracking-[0.2em] text-brass underline underline-offset-4 hover:text-brass-soft"
+                  >
+                    Download didn't start? Click here
+                  </a>
+                )}
                 <button onClick={onClose} className="mt-8 mono text-[0.66rem] tracking-[0.2em] text-brass transition-colors hover:text-brass-soft">
                   {t("nav.close")}
                 </button>
@@ -164,14 +198,18 @@ function EnquiryModal({ open, subject, auto, onClose }) {
               <div className="relative">
                 <p className="kicker">{kicker}</p>
                 <h3 className="mt-3 font-display text-[clamp(1.9rem,6vw,2.6rem)] font-light leading-[1.02] tracking-[-0.01em] text-ink">
-                  {auto ? (
+                  {isBrochure ? (
+                    <>Download the <span className="font-serif italic text-brass">brochure.</span></>
+                  ) : auto ? (
                     <>{t("enq.autoTitleA")} <span className="font-serif italic text-brass">{t("enq.autoTitleB")}</span></>
                   ) : (
                     <>{t("enq.titleA")} <span className="font-serif italic text-brass">{t("enq.titleB")}</span></>
                   )}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-                  {auto ? t("enq.autoBody") : `${PROJECT.configs} · ${PROJECT.location}. ${t("enq.body")}`}
+                  {isBrochure
+                    ? "Floor plans, specifications, amenities and the price list — sent to you and downloaded instantly."
+                    : auto ? t("enq.autoBody") : `${PROJECT.configs} · ${PROJECT.location}. ${t("enq.body")}`}
                 </p>
 
                 <form onSubmit={submit} className="mt-7 space-y-5">
@@ -183,10 +221,6 @@ function EnquiryModal({ open, subject, auto, onClose }) {
                   <div>
                     <input className={fieldCls("phone")} placeholder={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
                     {errors.phone && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.phone)}</p>}
-                  </div>
-                  <div>
-                    <input className={fieldCls("email")} placeholder={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
-                    {errors.email && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.email)}</p>}
                   </div>
                   <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")}>
                     <option value="">{t("form.config")}</option>
@@ -203,7 +237,7 @@ function EnquiryModal({ open, subject, auto, onClose }) {
                   >
                     <span className="absolute inset-0 origin-left scale-x-0 bg-brass-soft transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
                     <span className="relative z-10">
-                      {sending ? t("cta.sending") : auto ? t("cta.sendMeDetails") : t("cta.registerInterest")}
+                      {sending ? t("cta.sending") : isBrochure ? "Download brochure" : auto ? t("cta.sendMeDetails") : t("cta.registerInterest")}
                     </span>
                     {!sending && <ArrowRight size={15} className="relative z-10 transition-transform duration-500 group-hover/cta:translate-x-1" />}
                   </button>

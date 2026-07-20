@@ -4,6 +4,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
+import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
+import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { IMG, px } from "../lib/images.js";
@@ -67,7 +69,9 @@ export default function Brabus() {
         path="/brabus"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "BRABUS", path: "/brabus" }])}
       />
+      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "BRABUS", path: "/brabus" }]} />
       <PageHeader
+        compact
         eyebrow="03 · The Partnership"
         title="Not badged."
         accent="Engineered."
@@ -133,6 +137,7 @@ export default function Brabus() {
         </div>
       </section>
 
+      <RelatedPages links={["/residences", "/amenities", "/gallery"]} />
       <CtaBand title="Own a piece of" accent="the marque." subject="BRABUS" />
     </div>
   );

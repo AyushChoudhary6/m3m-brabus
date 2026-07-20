@@ -13,11 +13,20 @@ import Amenities from "./pages/Amenities.jsx";
 import LocationPage from "./pages/LocationPage.jsx";
 import Gallery from "./pages/Gallery.jsx";
 import Contact from "./pages/Contact.jsx";
+import PricePage from "./pages/PricePage.jsx";
+import FloorPlanPage from "./pages/FloorPlanPage.jsx";
+import PaymentPlanPage from "./pages/PaymentPlanPage.jsx";
+import BrochurePage from "./pages/BrochurePage.jsx";
+import ReviewsPage from "./pages/ReviewsPage.jsx";
+import PossessionPage from "./pages/PossessionPage.jsx";
+import ReraPage from "./pages/ReraPage.jsx";
 import Placeholder from "./pages/Placeholder.jsx";
 import CustomCursor from "./components/ui/CustomCursor.jsx";
 import ScrollProgress from "./components/ui/ScrollProgress.jsx";
 import { EnquiryProvider } from "./components/ui/Enquiry.jsx";
 import SideEnquiry from "./components/ui/SideEnquiry.jsx";
+import WhatsAppFloat from "./components/ui/WhatsAppFloat.jsx";
+import { initAnalytics, trackPageView } from "./lib/analytics.js";
 import { LanguageProvider } from "./lib/i18n.jsx";
 
 /* Reset scroll on navigation, then let ScrollTrigger re-measure the new page. */
@@ -25,13 +34,18 @@ function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
-    const t = setTimeout(() => ScrollTrigger.refresh(), 220);
+    const t = setTimeout(() => {
+      ScrollTrigger.refresh();
+      trackPageView(pathname);
+    }, 220);
     return () => clearTimeout(t);
   }, [pathname]);
   return null;
 }
 
 export default function App() {
+  useEffect(() => { initAnalytics(); }, []);
+
   return (
     <SmoothScroll>
       <LanguageProvider>
@@ -50,12 +64,20 @@ export default function App() {
             <Route path="/location" element={<LocationPage />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/price" element={<PricePage />} />
+            <Route path="/floor-plan" element={<FloorPlanPage />} />
+            <Route path="/payment-plan" element={<PaymentPlanPage />} />
+            <Route path="/brochure" element={<BrochurePage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/possession" element={<PossessionPage />} />
+            <Route path="/rera" element={<ReraPage />} />
             <Route path="*" element={<Placeholder title="Page" />} />
           </Routes>
         </main>
         <Footer />
         <MobileCTA />
         <SideEnquiry />
+        <WhatsAppFloat />
       </EnquiryProvider>
       </LanguageProvider>
     </SmoothScroll>

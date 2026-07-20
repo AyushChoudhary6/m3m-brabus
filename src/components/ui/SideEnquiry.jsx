@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { submitLead, markLeadCaptured } from "../../lib/leads.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../../lib/validate.js";
 import { useI18n } from "../../lib/i18n.jsx";
+import { trackLead } from "../../lib/analytics.js";
 import { RESIDENCES, PROJECT } from "../../lib/site.js";
 
 /* Right-docked enquiry panel. Open on landing so a visitor can fill it right
@@ -59,6 +60,7 @@ export default function SideEnquiry() {
     try {
       await submitLead({ ...form, source: "Side panel" });
       markLeadCaptured();
+      trackLead("Side panel", form.config);
       setSent(true);
     } catch {
       setError("err.send");
@@ -122,10 +124,6 @@ export default function SideEnquiry() {
                 <div>
                   <input className={fieldCls("phone")} placeholder={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
                   {errors.phone && <p className="mt-1 text-[0.68rem] text-oxblood">{t(errors.phone)}</p>}
-                </div>
-                <div>
-                  <input className={fieldCls("email")} placeholder={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
-                  {errors.email && <p className="mt-1 text-[0.68rem] text-oxblood">{t(errors.email)}</p>}
                 </div>
                 <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")}>
                   <option value="">{t("form.config")}</option>

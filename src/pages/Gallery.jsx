@@ -4,6 +4,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
+import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
+import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { IMG, px } from "../lib/images.js";
@@ -55,7 +57,9 @@ export default function Gallery() {
         path="/gallery"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Gallery", path: "/gallery" }])}
       />
+      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Gallery", path: "/gallery" }]} />
       <PageHeader
+        compact
         eyebrow="06 · Gallery"
         title="A first look,"
         accent="framed."
@@ -109,6 +113,7 @@ export default function Gallery() {
         </p>
       </section>
 
+      <RelatedPages links={["/residences", "/amenities", "/brochure"]} />
       <CtaBand title="See the" accent="real thing." subject="Gallery" />
     </div>
   );

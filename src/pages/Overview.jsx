@@ -4,6 +4,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
+import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
+import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { STATS, HIGHLIGHTS, PROJECT } from "../lib/site.js";
@@ -74,7 +76,9 @@ export default function Overview() {
         path="/overview"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Overview", path: "/overview" }])}
       />
+      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Overview", path: "/overview" }]} />
       <PageHeader
+        compact
         eyebrow="01 · Overview"
         title="A limited collection,"
         accent="engineered with BRABUS."
@@ -145,6 +149,7 @@ export default function Overview() {
         </dl>
       </section>
 
+      <RelatedPages links={["/residences", "/price", "/amenities", "/location"]} />
       <CtaBand title="See it" accent="in person." subject="Overview" />
     </div>
   );

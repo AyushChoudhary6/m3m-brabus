@@ -5,6 +5,8 @@ import { useGSAP } from "@gsap/react";
 import { Phone, Mail, MapPin, MessageCircle, ArrowRight } from "lucide-react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
+import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
+import RelatedPages from "../components/sections/RelatedPages.jsx";
 import { submitLead, markLeadCaptured } from "../lib/leads.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../lib/validate.js";
 import { useI18n } from "../lib/i18n.jsx";
@@ -87,7 +89,9 @@ export default function Contact() {
         path="/contact"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }])}
       />
+      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }]} />
       <PageHeader
+        compact
         eyebrow="07 · Contact"
         title="A private"
         accent="consultation."
@@ -206,6 +210,7 @@ export default function Contact() {
           ))}
         </div>
       </section>
+      <RelatedPages links={["/brochure", "/residences", "/price"]} />
     </div>
   );
 }

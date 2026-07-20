@@ -4,6 +4,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
+import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
+import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { IMG, px } from "../lib/images.js";
@@ -95,7 +97,9 @@ export default function Amenities() {
         path="/amenities"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Amenities", path: "/amenities" }])}
       />
+      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Amenities", path: "/amenities" }]} />
       <PageHeader
+        compact
         eyebrow="04 · Amenities"
         title="A private world"
         accent="within the walls."
@@ -139,6 +143,7 @@ export default function Amenities() {
         </p>
       </section>
 
+      <RelatedPages links={["/residences", "/gallery", "/location"]} />
       <CtaBand title="Tour the" accent="amenities." subject="Amenities" />
     </div>
   );

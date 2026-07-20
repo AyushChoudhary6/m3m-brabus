@@ -6,7 +6,7 @@ gsap.registerPlugin(useGSAP);
 
 /** Editorial page masthead — kicker, monumental serif title with a gold
  *  accent, lede, and a drawn gold rule. Used by every inner page. */
-export default function PageHeader({ eyebrow, title, accent, lede }) {
+export default function PageHeader({ eyebrow, title, accent, lede, compact = false }) {
   const root = useRef(null);
 
   useGSAP(
@@ -29,7 +29,11 @@ export default function PageHeader({ eyebrow, title, accent, lede }) {
   return (
     <header ref={root} className="relative overflow-hidden">
       <div className="gold-glow pointer-events-none absolute -left-40 top-0 h-[34rem] w-[34rem] rounded-full bg-brass/[0.07] blur-[130px]" />
-      <div className="container-lux relative pb-[clamp(2.5rem,7vh,4.5rem)] pt-[clamp(9rem,20vh,13rem)]">
+      <div
+        className={`container-lux relative pb-[clamp(2.5rem,7vh,4.5rem)] ${
+          compact ? "pt-[clamp(1.5rem,4vh,3rem)]" : "pt-[clamp(9rem,20vh,13rem)]"
+        }`}
+      >
         <p className="ph-fade kicker">{eyebrow}</p>
         <h1 className="mt-6 max-w-[15ch] font-display text-[clamp(2.6rem,7vw,6rem)] font-light leading-[0.98] tracking-[-0.03em] text-ink">
           <span className="ph-line block overflow-hidden"><span className="block">{title}</span></span>
