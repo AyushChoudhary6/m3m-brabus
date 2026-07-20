@@ -125,6 +125,10 @@ export default function SideEnquiry() {
                   <input className={fieldCls("phone")} placeholder={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
                   {errors.phone && <p className="mt-1 text-[0.68rem] text-oxblood">{t(errors.phone)}</p>}
                 </div>
+                <div>
+                  <input className={fieldCls("email")} placeholder={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
+                  {errors.email && <p className="mt-1 text-[0.68rem] text-oxblood">{t(errors.email)}</p>}
+                </div>
                 <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")}>
                   <option value="">{t("form.config")}</option>
                   {RESIDENCES.map((r) => (
