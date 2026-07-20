@@ -14,6 +14,7 @@ export const TRANSLATIONS = {
     "nav.gallery": "Gallery",
     "nav.contact": "Contact",
     "nav.enquire": "Enquire",
+    "nav.brochure": "Brochure",
     "nav.menu": "Menu",
     "nav.close": "Close",
     "nav.salesEnquiries": "Sales Enquiries",
@@ -25,6 +26,7 @@ export const TRANSLATIONS = {
 
     // actions
     "cta.registerInterest": "Register interest",
+    "cta.downloadBrochure": "Download brochure",
     "cta.requestFloorPlan": "Request floor plan",
     "cta.requestFloorPlans": "Request detailed floor plans",
     "cta.sendEnquiry": "Send enquiry",
@@ -90,6 +92,7 @@ export const TRANSLATIONS = {
     "nav.gallery": "المعرض",
     "nav.contact": "اتصل بنا",
     "nav.enquire": "استفسر",
+    "nav.brochure": "الكتيّب",
     "nav.menu": "القائمة",
     "nav.close": "إغلاق",
     "nav.salesEnquiries": "استفسارات المبيعات",
@@ -101,6 +104,7 @@ export const TRANSLATIONS = {
 
     // actions
     "cta.registerInterest": "سجّل اهتمامك",
+    "cta.downloadBrochure": "تحميل الكتيّب",
     "cta.requestFloorPlan": "اطلب المخطط",
     "cta.requestFloorPlans": "اطلب المخططات التفصيلية",
     "cta.sendEnquiry": "إرسال الطلب",

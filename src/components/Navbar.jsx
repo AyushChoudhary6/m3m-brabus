@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Download } from "lucide-react";
 import clsx from "clsx";
 import { useEnquiry } from "./ui/Enquiry.jsx";
 import { useI18n } from "../lib/i18n.jsx";
@@ -21,7 +21,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const navRef = useRef(null);
-  const { openEnquiry } = useEnquiry();
+  const { openEnquiry, openBrochure } = useEnquiry();
   const { t, lang, toggle } = useI18n();
 
   const reduce =
@@ -129,6 +129,17 @@ export default function Navbar() {
               className="mono hidden text-[0.8rem] tracking-[0.16em] text-ink-soft transition-colors hover:text-ink md:inline"
             >
               {t("nav.enquire")}
+            </button>
+
+            {/* gated: opens the form, download starts on submit */}
+            <button
+              type="button"
+              onClick={() => openBrochure("Navbar")}
+              data-cursor="DOWNLOAD"
+              className="group hidden items-center gap-2 rounded-full bg-brass px-4 py-2 font-sans text-[0.72rem] font-medium uppercase tracking-[0.12em] text-obsidian transition-colors hover:bg-brass-soft sm:inline-flex"
+            >
+              <Download size={13} className="transition-transform duration-500 group-hover:translate-y-0.5" />
+              {t("nav.brochure")}
             </button>
             <button
               aria-label="Open menu"

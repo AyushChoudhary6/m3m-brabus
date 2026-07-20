@@ -2,7 +2,9 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { Download } from "lucide-react";
 import { useEnquiry } from "../ui/Enquiry.jsx";
+import { useI18n } from "../../lib/i18n.jsx";
 import { PROJECT } from "../../lib/site.js";
 import { IMG, px } from "../../lib/images.js";
 
@@ -21,7 +23,8 @@ export default function Hero() {
   const pad = useRef(null);
   const card = useRef(null);
   const videoWrap = useRef(null);
-  const { openEnquiry } = useEnquiry();
+  const { openEnquiry, openBrochure } = useEnquiry();
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -140,7 +143,7 @@ export default function Hero() {
 
                 <div className="hero-fade mt-8 h-px w-full max-w-xs bg-gradient-to-r from-brass/70 via-line to-transparent" />
 
-                <div className="hero-fade mt-8">
+                <div className="hero-fade mt-8 flex flex-wrap items-center gap-4">
                   <button
                     type="button"
                     onClick={() => openEnquiry()}
@@ -149,9 +152,20 @@ export default function Hero() {
                   >
                     <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover:scale-x-100" />
                     <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover:text-obsidian">
-                      Register interest
+                      {t("cta.registerInterest")}
                     </span>
                     <span className="relative z-10 text-brass transition-[transform,color] duration-500 group-hover:translate-x-1 group-hover:text-obsidian">→</span>
+                  </button>
+
+                  {/* gated: opens the form, download starts on submit */}
+                  <button
+                    type="button"
+                    onClick={() => openBrochure("Hero")}
+                    data-cursor="DOWNLOAD"
+                    className="group inline-flex items-center gap-2.5 rounded-full bg-brass px-7 py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-obsidian transition-colors duration-500 hover:bg-brass-soft"
+                  >
+                    <Download size={14} className="transition-transform duration-500 group-hover:translate-y-0.5" />
+                    {t("cta.downloadBrochure")}
                   </button>
                 </div>
               </div>
