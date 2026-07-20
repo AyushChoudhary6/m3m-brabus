@@ -72,7 +72,7 @@ export default function Overview() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Overview | 4 & 5 BHK Branded Residences, Sector 58 Gurgaon"
-        description="Everything about M3M Brabus, Sector 58 Gurgaon — 4 & 5 BHK branded residences of approx. 5,000–7,000 sq.ft on Golf Course Extension Road, developed by M3M India and inspired by BRABUS."
+        description="M3M Brabus overview, Sector 58 Gurgaon — 4 & 5 BHK branded residences of approx. 5,000–7,000 sq.ft on Golf Course Extension Road by M3M India."
         path="/overview"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Overview", path: "/overview" }])}
       />

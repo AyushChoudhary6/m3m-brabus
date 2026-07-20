@@ -94,7 +94,7 @@ export default function BrochurePage() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Brochure | Download Floor Plans, Specifications & Price List"
-        description="Download the official M3M Brabus brochure — 4 & 5 BHK branded residences of approx. 5,000–7,000 sq.ft at Sector 58, Golf Course Extension Road, Gurugram. Floor plans, specifications, amenities and location, shared directly on request."
+        description="Download the M3M Brabus brochure — 4 & 5 BHK residences of approx. 5,000–7,000 sq.ft at Sector 58, Gurugram. Floor plans, specifications and amenities."
         path="/brochure"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Brochure", path: "/brochure" }])}
       />

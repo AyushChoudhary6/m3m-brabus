@@ -153,7 +153,7 @@ export default function ReraPage() {
     <div ref={root}>
       <Seo
         title="M3M Brabus RERA | Registration Status & How to Verify on HARERA"
-        description="M3M Brabus RERA status — the official listing does not publish a registration number; it is shared on request. Here is what HARERA is, how to verify a Gurugram project on haryanarera.gov.in, and the documents to ask for."
+        description="M3M Brabus RERA status — no registration number is published on the official listing. What HARERA is, how to verify a Gurugram project, and what to ask for."
         path="/rera"
         jsonLd={[
           breadcrumbLd([{ name: "Home", path: "/" }, { name: "RERA", path: "/rera" }]),

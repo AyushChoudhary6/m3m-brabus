@@ -139,7 +139,7 @@ export default function FloorPlanPage() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Floor Plan | Interactive 4 & 5 BHK Layouts, Sector 58 Gurgaon"
-        description="Explore the M3M Brabus floor plan — interactive 4 BHK (approx. 5,000 sq.ft) and 5 BHK (approx. 7,000 sq.ft) layouts, how to read them, and what open-core, three-side-open architecture means for light and ventilation. Dimensioned drawings on request."
+        description="M3M Brabus floor plans — interactive 4 BHK (~5,000 sq.ft) and 5 BHK (~7,000 sq.ft) layouts, how to read them, and dimensioned drawings on request."
         path="/floor-plan"
         jsonLd={[
           breadcrumbLd([{ name: "Home", path: "/" }, { name: "Floor Plan", path: "/floor-plan" }]),

@@ -9,9 +9,6 @@ import { useEnquiry } from "./ui/Enquiry.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { NAV_LINKS, PROJECT } from "../lib/site.js";
 
-/** Maps a nav route to its translation key. */
-const navKey = (to) => `nav.${to.replace("/", "")}`;
-
 gsap.registerPlugin(useGSAP);
 
 /* Minimal editorial bar — wordmark, centred index, quiet menu.
@@ -97,14 +94,14 @@ export default function Navbar() {
             <span className="font-serif text-2xl italic text-brass">Brabus</span>
           </Link>
 
-          <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 lg:flex">
+          <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 lg:flex xl:gap-7">
             {NAV_LINKS.map((l) => (
               <li key={l.to} className="nav-item">
                 <Link
                   to={l.to}
-                  className="group relative mono text-[0.8rem] tracking-[0.16em] text-ink-soft transition-colors hover:text-ink"
+                  className="group relative mono whitespace-nowrap text-[0.68rem] tracking-[0.12em] text-ink-soft transition-colors hover:text-ink xl:text-[0.74rem]"
                 >
-                  {t(navKey(l.to))}
+                  {t(l.tKey)}
                   <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-brass transition-all duration-500 ease-lux group-hover:w-full" />
                 </Link>
               </li>
@@ -210,7 +207,7 @@ export default function Navbar() {
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <span className="text-[clamp(2rem,7vw,5rem)] transition-all duration-500 ease-lux group-hover:translate-x-3 group-hover:italic">
-                          {t(navKey(l.to))}
+                          {t(l.tKey)}
                         </span>
                       </Link>
                     </motion.div>

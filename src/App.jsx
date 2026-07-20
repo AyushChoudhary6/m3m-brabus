@@ -20,6 +20,16 @@ import BrochurePage from "./pages/BrochurePage.jsx";
 import ReviewsPage from "./pages/ReviewsPage.jsx";
 import PossessionPage from "./pages/PossessionPage.jsx";
 import ReraPage from "./pages/ReraPage.jsx";
+import MasterPlanPage from "./pages/MasterPlanPage.jsx";
+import SpecificationsPage from "./pages/SpecificationsPage.jsx";
+import ConstructionStatusPage from "./pages/ConstructionStatusPage.jsx";
+import FaqsPage from "./pages/FaqsPage.jsx";
+import GuidesPage from "./pages/GuidesPage.jsx";
+import AboutPage from "./pages/AboutPage.jsx";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.jsx";
+import DisclaimerPage from "./pages/DisclaimerPage.jsx";
+import BlogIndex from "./pages/BlogIndex.jsx";
+import BlogPost from "./pages/BlogPost.jsx";
 import Placeholder from "./pages/Placeholder.jsx";
 import CustomCursor from "./components/ui/CustomCursor.jsx";
 import ScrollProgress from "./components/ui/ScrollProgress.jsx";
@@ -71,6 +81,18 @@ export default function App() {
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/possession" element={<PossessionPage />} />
             <Route path="/rera" element={<ReraPage />} />
+
+            {/* Volume 2 · Part 1 — IA build-out */}
+            <Route path="/master-plan" element={<MasterPlanPage />} />
+            <Route path="/specifications" element={<SpecificationsPage />} />
+            <Route path="/construction-status" element={<ConstructionStatusPage />} />
+            <Route path="/faqs" element={<FaqsPage />} />
+            <Route path="/guides" element={<GuidesPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/disclaimer" element={<DisclaimerPage />} />
+            <Route path="/blogs" element={<BlogIndex />} />
+            <Route path="/blogs/:slug" element={<BlogPost />} />
             <Route path="*" element={<Placeholder title="Page" />} />
           </Routes>
         </main>

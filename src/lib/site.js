@@ -23,14 +23,67 @@ export const PROJECT = {
   email: "sales@m3m-brabus.com",
 };
 
+/* Ch. 21 — primary navigation. `tKey` is explicit rather than derived from
+   the path, so multi-word routes (/floor-plan) and "/" translate cleanly. */
 export const NAV_LINKS = [
-  { label: "Overview", to: "/overview" },
-  { label: "Residences", to: "/residences" },
-  { label: "BRABUS", to: "/brabus" },
-  { label: "Amenities", to: "/amenities" },
-  { label: "Location", to: "/location" },
-  { label: "Gallery", to: "/gallery" },
-  { label: "Contact", to: "/contact" },
+  { label: "Home", to: "/", tKey: "nav.home" },
+  { label: "Project", to: "/overview", tKey: "nav.overview" },
+  { label: "Price", to: "/price", tKey: "nav.price" },
+  { label: "Floor Plans", to: "/floor-plan", tKey: "nav.floorPlans" },
+  { label: "Amenities", to: "/amenities", tKey: "nav.amenities" },
+  { label: "Location", to: "/location", tKey: "nav.location" },
+  { label: "Gallery", to: "/gallery", tKey: "nav.gallery" },
+  { label: "Brochure", to: "/brochure", tKey: "nav.brochure" },
+  { label: "Blogs", to: "/blogs", tKey: "nav.blogs" },
+  { label: "Contact", to: "/contact", tKey: "nav.contact" },
+];
+
+/* Ch. 21 — footer navigation, four columns.
+   Deviation from the spec, deliberate: "Configuration" points at the existing
+   /residences page rather than a new /configuration URL. Two pages covering
+   the same unit mix would compete with each other in search and split the
+   internal links. The label follows the spec; the destination stays canonical.
+   /brabus, /reviews and /possession are also listed here so no indexed page
+   is left orphaned by the new IA. */
+export const FOOTER_NAV = [
+  {
+    heading: "Project",
+    links: [
+      { label: "Overview", to: "/overview" },
+      { label: "Configuration", to: "/residences" },
+      { label: "Specifications", to: "/specifications" },
+      { label: "Master Plan", to: "/master-plan" },
+      { label: "The BRABUS Partnership", to: "/brabus" },
+    ],
+  },
+  {
+    heading: "Buyer Information",
+    links: [
+      { label: "Price", to: "/price" },
+      { label: "Payment Plan", to: "/payment-plan" },
+      { label: "Construction Status", to: "/construction-status" },
+      { label: "RERA Information", to: "/rera" },
+      { label: "Possession", to: "/possession" },
+    ],
+  },
+  {
+    heading: "Resources",
+    links: [
+      { label: "Blogs", to: "/blogs" },
+      { label: "FAQs", to: "/faqs" },
+      { label: "Guides", to: "/guides" },
+      { label: "Reviews", to: "/reviews" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { label: "About", to: "/about" },
+      { label: "Contact", to: "/contact" },
+      { label: "Privacy Policy", to: "/privacy-policy" },
+      { label: "Disclaimer", to: "/disclaimer" },
+    ],
+  },
 ];
 
 export const STATS = [

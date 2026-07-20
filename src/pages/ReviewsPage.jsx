@@ -149,7 +149,7 @@ export default function ReviewsPage() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Review | An Honest Assessment, Sector 58 Gurgaon"
-        description="An editorial review of M3M Brabus, Sector 58 Gurgaon — the BRABUS branded-residence proposition, three-side-open architecture, ultra-low density and 5,000–7,000 sq.ft sizes, plus what to verify before you buy. Price, RERA and possession are not yet published."
+        description="An editorial review of M3M Brabus, Sector 58 Gurgaon — the BRABUS proposition, the architecture and the sizes, plus what to verify before you buy."
         path="/reviews"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Reviews", path: "/reviews" }])}
       />

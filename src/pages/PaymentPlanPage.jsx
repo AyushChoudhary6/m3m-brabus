@@ -133,7 +133,7 @@ export default function PaymentPlanPage() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Payment Plan | Official Schedule On Request, Sector 58 Gurgaon"
-        description="M3M Brabus payment plan status — no schedule has been published yet. Understand how construction-linked, possession-linked and down-payment structures work, and request the official plan for Sector 58, Gurugram."
+        description="M3M Brabus payment plan — no schedule is published yet. How construction-linked, possession-linked and down-payment structures work, and how to request it."
         path="/payment-plan"
         jsonLd={[
           breadcrumbLd([{ name: "Home", path: "/" }, { name: "Payment Plan", path: "/payment-plan" }]),

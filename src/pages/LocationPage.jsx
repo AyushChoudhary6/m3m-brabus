@@ -41,7 +41,7 @@ export default function LocationPage() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Location | Sector 58, Golf Course Extension Road, Gurgaon"
-        description="M3M Brabus is on Golf Course Extension Road, Sector 58, Gurugram — with easy access to Golf Course Road, Cyber City, NH-8, Sohna Road, IGI Airport and nearby metro connectivity."
+        description="M3M Brabus is on Golf Course Extension Road, Sector 58 Gurugram — access to Golf Course Road, Cyber City, NH-8, Sohna Road, IGI Airport and the metro."
         path="/location"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Location", path: "/location" }])}
       />

@@ -93,7 +93,7 @@ export default function Amenities() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Amenities | Clubhouse, Pool, Spa & Gym, Sector 58 Gurgaon"
-        description="M3M Brabus amenities — grand clubhouse, temperature-controlled swimming pool, spa with sauna and steam, fully-equipped gym, event hall, landscaped gardens and 24/7 security."
+        description="M3M Brabus amenities — grand clubhouse, temperature-controlled pool, spa with sauna and steam, gym, event hall, landscaped gardens and 24/7 security."
         path="/amenities"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Amenities", path: "/amenities" }])}
       />

@@ -20,6 +20,15 @@ const ALL = {
   "/possession": { t: "Possession", d: "Timeline status and what to ask before you buy." },
   "/rera": { t: "RERA", d: "Registration status and how to verify on the HARERA portal." },
   "/contact": { t: "Contact", d: "Speak to the private client team or book a site visit." },
+  "/master-plan": { t: "Master Plan", d: "How the site is planned — orientation, spacing and phasing." },
+  "/specifications": { t: "Specifications", d: "Finishes and systems, confirmed and on request." },
+  "/construction-status": { t: "Construction Status", d: "Verified progress, and how to check it yourself." },
+  "/faqs": { t: "FAQs", d: "Straight answers on price, RERA, possession and layouts." },
+  "/guides": { t: "Buyer Guides", d: "A staged path from research to handover." },
+  "/blogs": { t: "Blogs", d: "Guides on branded residences, the corridor and buying well." },
+  "/about": { t: "About", d: "Who runs this site, and how we handle information." },
+  "/privacy-policy": { t: "Privacy Policy", d: "What we collect, where it goes, and your rights." },
+  "/disclaimer": { t: "Disclaimer", d: "What this website is, and what it is not." },
 };
 
 export default function RelatedPages({ links = [], title = "Continue exploring" }) {

@@ -144,7 +144,7 @@ export default function PossessionPage() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Possession Date & Status | Sector 58 Gurgaon"
-        description="M3M Brabus possession date is not published on the official listing yet. Here is the current status, what governs a handover timeline, and exactly what to ask before you commit."
+        description="M3M Brabus possession date is not published yet. The current status, what governs a handover timeline, and exactly what to ask before you commit."
         path="/possession"
         jsonLd={[
           breadcrumbLd([{ name: "Home", path: "/" }, { name: "Possession", path: "/possession" }]),

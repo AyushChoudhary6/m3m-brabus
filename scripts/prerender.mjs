@@ -47,16 +47,31 @@ const MIME = {
   ".xml": "application/xml; charset=utf-8",
 };
 
-function serveDist() {
+/**
+ * Serve dist/, but always fall back to the PRISTINE Vite shell.
+ *
+ * Subtle and important: this script writes the rendered "/" back to
+ * dist/index.html. If the fallback re-read that file from disk, every route
+ * rendered afterwards would boot from the already-prerendered homepage — and
+ * inherit its <title>, <link rel="canonical"> and JSON-LD. React then appends
+ * the correct tags, leaving two canonicals per page and pointing half the site
+ * at the homepage. Holding the original shell in memory keeps every route
+ * booting from the same clean slate.
+ *
+ * @param {Buffer} shell the untouched dist/index.html read before any writes
+ */
+function serveDist(shell) {
   return new Promise((ok) => {
     const server = createServer(async (req, res) => {
       try {
         const url = decodeURIComponent((req.url || "/").split("?")[0]);
-        let file = join(DIST, url);
-        if (!extname(file) || !existsSync(file)) file = join(DIST, "index.html"); // SPA fallback
-        const body = await readFile(file);
+        const file = join(DIST, url);
+        const isAsset = extname(file) && existsSync(file);
+        const body = isAsset ? await readFile(file) : shell; // SPA fallback
         res.writeHead(200, {
-          "Content-Type": MIME[extname(file)] || "application/octet-stream",
+          "Content-Type": isAsset
+            ? MIME[extname(file)] || "application/octet-stream"
+            : MIME[".html"],
           "Cache-Control": "no-store",
         });
         res.end(body);
@@ -97,7 +112,9 @@ async function main() {
     process.exit(1);
   }
 
-  const server = await serveDist();
+  // Snapshot the clean shell BEFORE the loop overwrites dist/index.html.
+  const shell = await readFile(join(DIST, "index.html"));
+  const server = await serveDist(shell);
   console.log(`prerendering ${ROUTES.length} routes…`);
   let failures = 0;
 
@@ -107,6 +124,11 @@ async function main() {
       // sanity: the shell alone is ~2kB; a rendered page is far larger
       if (html.length < 6000) {
         console.warn(`  ! ${route.padEnd(12)} looks unrendered (${html.length}b)`);
+        failures++;
+      }
+      const canonicals = (html.match(/<link rel="canonical"/g) || []).length;
+      if (canonicals !== 1) {
+        console.warn(`  ! ${route.padEnd(12)} has ${canonicals} canonical tags (expected 1)`);
         failures++;
       }
       const out =

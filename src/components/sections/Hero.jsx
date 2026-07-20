@@ -2,17 +2,36 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { Download } from "lucide-react";
+import { ArrowUpRight, Download } from "lucide-react";
 import { useEnquiry } from "../ui/Enquiry.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 import { PROJECT } from "../../lib/site.js";
+import { PRICE, PROJECT_FACT, hasValue } from "../../lib/facts.js";
 import { IMG, px } from "../../lib/images.js";
+import { track } from "../../lib/analytics.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const HERO_VIDEO = "/hero-brabus.mp4";
 const prefersReduced =
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* Ch. 23 — the four things a visitor arrives wanting to know, on one line.
+   Two are published, two are not: M3M quotes neither a price nor a RERA
+   number, so those read as "on request" and open the form instead. They are
+   driven off the facts layer rather than hard-coded copy, so the day either
+   figure is officially released the strip states it without a code change. */
+const LEDGER = [
+  { key: "configs", text: PROJECT.configs },
+  { key: "location", text: PROJECT.location },
+  { key: PRICE.key, fact: PRICE, idle: "Price on request", aria: "Request the price of M3M Brabus — pricing is not yet published" },
+  {
+    key: PROJECT_FACT.rera.key,
+    fact: PROJECT_FACT.rera,
+    idle: "RERA status on request",
+    aria: "Ask for the RERA status of M3M Brabus — no registration number is published yet",
+  },
+];
 
 /* CHAPTER 01 — ARRIVAL · Obsidian & Gold
    A cinematic film held in a rounded card. A tall section + a CSS-sticky
@@ -141,18 +160,52 @@ export default function Hero() {
                   </span>
                 </h1>
 
-                <div className="hero-fade mt-8 h-px w-full max-w-xs bg-gradient-to-r from-brass/70 via-line to-transparent" />
+                {/* name + value proposition, kept to one breath */}
+                <p className="hero-fade mt-4 max-w-[40ch] text-sm leading-relaxed sm:mt-5 sm:text-[0.95rem]">
+                  <span className="text-bone">{PROJECT.name}</span>
+                  <span className="text-bone/55"> — {PROJECT.tagline}.</span>
+                </p>
 
-                <div className="hero-fade mt-8 flex flex-wrap items-center gap-4">
+                <div className="hero-fade mt-6 h-px w-full max-w-xs bg-gradient-to-r from-brass/70 via-line to-transparent md:mt-8" />
+
+                {/* fact ledger — an unknown is a conversation, not a blank */}
+                <ul className="hero-fade mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[0.58rem] sm:gap-x-5 sm:text-[0.62rem] md:mt-6">
+                  {LEDGER.map((item) => (
+                    <li
+                      key={item.key}
+                      className="mono flex items-center gap-4 tracking-[0.18em] before:h-3 before:w-px before:shrink-0 before:bg-brass/30 before:content-[''] first:before:hidden sm:gap-5"
+                    >
+                      {item.fact && !hasValue(item.fact) ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            track("hero_fact_request", { fact: item.fact.key });
+                            openEnquiry(item.fact.label);
+                          }}
+                          aria-label={item.aria}
+                          data-cursor="ASK"
+                          className="inline-flex items-center gap-1.5 rounded-sm text-brass underline decoration-brass/35 decoration-dotted underline-offset-4 transition-colors duration-300 hover:text-brass-soft hover:decoration-brass-soft focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-brass"
+                        >
+                          {item.idle}
+                          <ArrowUpRight size={11} strokeWidth={1.6} aria-hidden="true" />
+                        </button>
+                      ) : (
+                        <span className="text-bone/75">{item.fact ? item.fact.value : item.text}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="hero-fade mt-6 flex flex-wrap items-center gap-4 md:mt-8">
                   <button
                     type="button"
-                    onClick={() => openEnquiry()}
+                    onClick={() => openEnquiry(PRICE.label)}
                     data-cursor="ENTER"
-                    className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-7 py-4"
+                    className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-7 py-4 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-brass"
                   >
                     <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover:scale-x-100" />
                     <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover:text-obsidian">
-                      {t("cta.registerInterest")}
+                      {t("cta.requestPrice")}
                     </span>
                     <span className="relative z-10 text-brass transition-[transform,color] duration-500 group-hover:translate-x-1 group-hover:text-obsidian">→</span>
                   </button>
@@ -162,7 +215,7 @@ export default function Hero() {
                     type="button"
                     onClick={() => openBrochure("Hero")}
                     data-cursor="DOWNLOAD"
-                    className="group inline-flex items-center gap-2.5 rounded-full bg-brass px-7 py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-obsidian transition-colors duration-500 hover:bg-brass-soft"
+                    className="group inline-flex items-center gap-2.5 rounded-full bg-brass px-7 py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-obsidian transition-colors duration-500 hover:bg-brass-soft focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-brass"
                   >
                     <Download size={14} className="transition-transform duration-500 group-hover:translate-y-0.5" />
                     {t("cta.downloadBrochure")}

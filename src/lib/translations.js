@@ -6,7 +6,11 @@
 export const TRANSLATIONS = {
   en: {
     // nav
-    "nav.overview": "Overview",
+    "nav.home": "Home",
+    "nav.overview": "Project",
+    "nav.price": "Price",
+    "nav.floorPlans": "Floor Plans",
+    "nav.blogs": "Blogs",
     "nav.residences": "Residences",
     "nav.brabus": "BRABUS",
     "nav.amenities": "Amenities",
@@ -26,6 +30,12 @@ export const TRANSLATIONS = {
 
     // actions
     "cta.registerInterest": "Register interest",
+    "cta.requestPrice": "Request price",
+    "cta.scheduleVisit": "Schedule site visit",
+    "cta.callNow": "Call now",
+    "cta.getAvailability": "Get latest availability",
+    "cta.readMore": "Read more",
+    "cta.readLess": "Read less",
     "cta.downloadBrochure": "Download brochure",
     "cta.requestFloorPlan": "Request floor plan",
     "cta.requestFloorPlans": "Request detailed floor plans",
@@ -84,7 +94,11 @@ export const TRANSLATIONS = {
 
   ar: {
     // nav
-    "nav.overview": "نظرة عامة",
+    "nav.home": "الرئيسية",
+    "nav.overview": "المشروع",
+    "nav.price": "الأسعار",
+    "nav.floorPlans": "المخططات",
+    "nav.blogs": "المدونة",
     "nav.residences": "المساكن",
     "nav.brabus": "برابوس",
     "nav.amenities": "المرافق",
@@ -104,6 +118,12 @@ export const TRANSLATIONS = {
 
     // actions
     "cta.registerInterest": "سجّل اهتمامك",
+    "cta.requestPrice": "اطلب السعر",
+    "cta.scheduleVisit": "حدد موعد زيارة",
+    "cta.callNow": "اتصل الآن",
+    "cta.getAvailability": "اعرف التوفر الحالي",
+    "cta.readMore": "اقرأ المزيد",
+    "cta.readLess": "عرض أقل",
     "cta.downloadBrochure": "تحميل الكتيّب",
     "cta.requestFloorPlan": "اطلب المخطط",
     "cta.requestFloorPlans": "اطلب المخططات التفصيلية",

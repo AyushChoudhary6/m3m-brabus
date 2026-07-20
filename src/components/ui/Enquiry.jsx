@@ -9,7 +9,7 @@ import { RESIDENCES, PROJECT } from "../../lib/site.js";
 
 const EnquiryCtx = createContext(null);
 export const useEnquiry = () =>
-  useContext(EnquiryCtx) || { openEnquiry: () => {}, openBrochure: () => {} };
+  useContext(EnquiryCtx) || { openEnquiry: () => {}, openBrochure: () => {}, openVisit: () => {} };
 
 const AUTO_DELAY = 40000; // 40 seconds
 // NOTE: public/ is served case-sensitively — this must match the filename exactly.
@@ -82,6 +82,14 @@ export function EnquiryProvider({ children }) {
     setOpen(true);
   }, []);
 
+  /** Ch. 21 utility action: book a site visit. Same modal, visit-specific copy. */
+  const openVisit = useCallback((subj = "Site visit") => {
+    setSubject(subj);
+    setAuto(false);
+    setIntent("visit");
+    setOpen(true);
+  }, []);
+
   const close = useCallback(() => setOpen(false), []);
 
   // timed invitation — fires once, ~40s after load
@@ -94,7 +102,7 @@ export function EnquiryProvider({ children }) {
   }, [openEnquiry]);
 
   return (
-    <EnquiryCtx.Provider value={{ openEnquiry, openBrochure }}>
+    <EnquiryCtx.Provider value={{ openEnquiry, openBrochure, openVisit }}>
       {children}
       <EnquiryModal open={open} subject={subject} auto={auto} intent={intent} onClose={close} />
     </EnquiryCtx.Provider>
@@ -106,8 +114,9 @@ const FIELD =
 
 function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
   const isBrochure = intent === "brochure";
+  const isVisit = intent === "visit";
   const { t } = useI18n();
-  const [form, setForm] = useState({ name: "", phone: "", email: "", config: "" });
+  const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", visitDate: "" });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -147,8 +156,8 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
     setSending(true);
     setError("");
     try {
-      const source = isBrochure ? `Brochure · ${subject}` : auto ? "Timed invite" : subject ? `Modal · ${subject}` : "Modal";
-      await submitLead({ ...form, source });
+      const source = isVisit ? `Site visit · ${subject}` : isBrochure ? `Brochure · ${subject}` : auto ? "Timed invite" : subject ? `Modal · ${subject}` : "Modal";
+      await submitLead({ ...form, source, message: form.visitDate ? `Preferred visit date: ${form.visitDate}` : "" });
       markLeadCaptured(); // never auto-invite again
       trackLead(source, form.config);
       setSent(true);
@@ -163,7 +172,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
     }
   };
 
-  const kicker = sent ? t("enq.received") : isBrochure ? "Brochure" : auto ? t("enq.invitation") : subject ? `${t("enq.enquiry")} · ${subject}` : t("enq.private");
+  const kicker = sent ? t("enq.received") : isVisit ? "Site visit" : isBrochure ? "Brochure" : auto ? t("enq.invitation") : subject ? `${t("enq.enquiry")} · ${subject}` : t("enq.private");
 
   return (
     <AnimatePresence>
@@ -229,7 +238,9 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
               <div className="relative">
                 <p className="kicker">{kicker}</p>
                 <h3 className="mt-3 font-display text-[clamp(1.9rem,6vw,2.6rem)] font-light leading-[1.02] tracking-[-0.01em] text-ink">
-                  {isBrochure ? (
+                  {isVisit ? (
+                    <>Book your <span className="font-serif italic text-brass">site visit.</span></>
+                  ) : isBrochure ? (
                     <>Download the <span className="font-serif italic text-brass">brochure.</span></>
                   ) : auto ? (
                     <>{t("enq.autoTitleA")} <span className="font-serif italic text-brass">{t("enq.autoTitleB")}</span></>
@@ -238,7 +249,9 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
                   )}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-                  {isBrochure
+                  {isVisit
+                    ? "Tell us when suits you. Our team confirms the slot, arranges access and can send a car for the visit."
+                    : isBrochure
                     ? "Floor plans, specifications, amenities and the price list — sent to you and downloaded instantly."
                     : auto ? t("enq.autoBody") : `${PROJECT.configs} · ${PROJECT.location}. ${t("enq.body")}`}
                 </p>
@@ -264,6 +277,21 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
                     ))}
                   </select>
 
+                  {isVisit && (
+                    <div>
+                      <label className="mono block text-[0.58rem] tracking-[0.18em] text-ink-faint">
+                        Preferred date (optional)
+                      </label>
+                      <input
+                        className={FIELD}
+                        type="date"
+                        value={form.visitDate}
+                        min={new Date().toISOString().slice(0, 10)}
+                        onChange={(e) => setForm((f) => ({ ...f, visitDate: e.target.value }))}
+                      />
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={sending}
@@ -272,7 +300,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
                   >
                     <span className="absolute inset-0 origin-left scale-x-0 bg-brass-soft transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
                     <span className="relative z-10">
-                      {sending ? t("cta.sending") : isBrochure ? "Download brochure" : auto ? t("cta.sendMeDetails") : t("cta.registerInterest")}
+                      {sending ? t("cta.sending") : isVisit ? "Book site visit" : isBrochure ? "Download brochure" : auto ? t("cta.sendMeDetails") : t("cta.registerInterest")}
                     </span>
                     {!sending && <ArrowRight size={15} className="relative z-10 transition-transform duration-500 group-hover/cta:translate-x-1" />}
                   </button>

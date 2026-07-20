@@ -78,7 +78,7 @@ export default function ResidencesPage() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Floor Plans & Residences | 4 & 5 BHK, 5,000–7,000 sq.ft"
-        description="M3M Brabus 4 BHK (approx. 5,000 sq.ft) and 5 BHK (approx. 7,000 sq.ft) branded residences — layouts, orientation, Italian marble, VRV climate control and the full specification schedule."
+        description="M3M Brabus 4 BHK (~5,000 sq.ft) and 5 BHK (~7,000 sq.ft) branded residences — layouts, Italian marble, VRV climate control and the specification schedule."
         path="/residences"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Residences", path: "/residences" }])}
       />
