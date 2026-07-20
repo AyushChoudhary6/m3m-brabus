@@ -170,7 +170,7 @@ export default function ReraPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "RERA", path: "/rera" }]} />
       <PageHeader
-        eyebrow="08 · RERA"
+        eyebrow="M3M Brabus RERA"
         title="The record,"
         accent="stated plainly."
         lede={`${PROJECT.rera}. The official M3M listing does not publish a registration number for ${PROJECT.name} at this stage — so neither do we. Here is what that means, and how to verify the project yourself on the HARERA register.`}

@@ -152,7 +152,7 @@ export default function PaymentPlanPage() {
         trail={[{ name: "Home", path: "/" }, { name: "Payment Plan", path: "/payment-plan" }]}
       />
       <PageHeader
-        eyebrow="06 · Payment Plan"
+        eyebrow="M3M Brabus Payment Plan"
         title="The plan is not"
         accent="published yet."
         lede={`${PROJECT.name} has not released a payment schedule, and pricing is still marked ${PROJECT.price.toLowerCase()}. Rather than guess, here is how such plans are usually structured — and how to receive the official one the day it is issued.`}

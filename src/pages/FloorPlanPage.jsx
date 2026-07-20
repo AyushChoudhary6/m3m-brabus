@@ -156,7 +156,7 @@ export default function FloorPlanPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Floor Plan", path: "/floor-plan" }]} />
       <PageHeader
-        eyebrow="Floor Plan"
+        eyebrow="M3M Brabus Floor Plans"
         title="The plan, before"
         accent="the persuasion."
         lede={`${PROJECT.configs} of ${PROJECT.sizes} at ${PROJECT.location}. Move through both layouts room by room below — then read what the drawing is actually telling you.`}

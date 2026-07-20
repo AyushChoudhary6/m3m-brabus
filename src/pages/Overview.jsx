@@ -79,7 +79,7 @@ export default function Overview() {
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Overview", path: "/overview" }]} />
       <PageHeader
         compact
-        eyebrow="01 · Overview"
+        eyebrow="M3M Brabus Overview"
         title="A limited collection,"
         accent="engineered with BRABUS."
         lede={`${PROJECT.configs} of ${PROJECT.sizes} at ${PROJECT.location}, on Golf Course Extension Road — an ultra-low-density address where every home opens on three sides.`}

@@ -34,8 +34,10 @@ export default function PageHeader({ eyebrow, title, accent, lede, compact = fal
           compact ? "pt-[clamp(1.5rem,4vh,3rem)]" : "pt-[clamp(9rem,20vh,13rem)]"
         }`}
       >
-        <p className="ph-fade kicker">{eyebrow}</p>
-        <h1 className="mt-6 max-w-[15ch] font-display text-[clamp(2.6rem,7vw,6rem)] font-light leading-[0.98] tracking-[-0.03em] text-ink">
+        {/* The eyebrow lives INSIDE the h1 so the heading carries the target
+            keyword (SEO) while the display line stays the visual hero. */}
+        <h1 className="max-w-[15ch] font-display text-[clamp(2.6rem,7vw,6rem)] font-light leading-[0.98] tracking-[-0.03em] text-ink">
+          <span className="ph-fade kicker mb-6 block">{eyebrow}</span>
           <span className="ph-line block overflow-hidden"><span className="block">{title}</span></span>
           {accent && (
             <span className="ph-line block overflow-hidden">

@@ -155,7 +155,7 @@ export default function ReviewsPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Reviews", path: "/reviews" }]} />
       <PageHeader
-        eyebrow="Review · An honest assessment"
+        eyebrow="M3M Brabus Review"
         title="What M3M Brabus"
         accent="actually offers."
         lede="An editorial assessment written on verifiable attributes only — architecture, density, scale, address and specification. We publish no star ratings and no customer testimonials, because none have been verified. Where a figure is unpublished, we say so."

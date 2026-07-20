@@ -92,7 +92,7 @@ export default function Contact() {
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }]} />
       <PageHeader
         compact
-        eyebrow="07 · Contact"
+        eyebrow="Contact M3M Brabus"
         title="A private"
         accent="consultation."
         lede="Speak with the private client team for the brochure, price list, floor plans and a viewing at your convenience."

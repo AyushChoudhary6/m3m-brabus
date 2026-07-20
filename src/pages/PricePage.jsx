@@ -158,7 +158,7 @@ export default function PricePage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Price", path: "/price" }]} />
       <PageHeader
-        eyebrow="Price"
+        eyebrow="M3M Brabus Price"
         title="The price is"
         accent="not out yet."
         lede={`M3M has not released pricing for Brabus — the official listing reads "${PROJECT.price}", and so does this page. Here is what will set the number, what the sheet will carry, and how to be among the first to see it.`}

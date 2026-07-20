@@ -72,7 +72,7 @@ export default function Brabus() {
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "BRABUS", path: "/brabus" }]} />
       <PageHeader
         compact
-        eyebrow="03 · The Partnership"
+        eyebrow="M3M Brabus · The BRABUS Partnership"
         title="Not badged."
         accent="Engineered."
         lede={`${PROJECT.developer} presents a branded residence inspired by ${PROJECT.partner} — the German marque whose ethos of luxury, performance and exclusivity shapes every interior.`}

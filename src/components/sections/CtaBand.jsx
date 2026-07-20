@@ -13,7 +13,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 /** Closing enquiry band — used at the foot of every inner page. */
 export default function CtaBand({ title = "Your residence", accent = "awaits.", subject = "" }) {
   const root = useRef(null);
-  const { openEnquiry } = useEnquiry();
+  const { openEnquiry, openBrochure } = useEnquiry();
   const { t } = useI18n();
 
   useGSAP(
@@ -55,6 +55,16 @@ export default function CtaBand({ title = "Your residence", accent = "awaits.", 
               <ArrowUpRight size={15} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
             </button>
           </Magnetic>
+          {/* gated: opens the form, download starts on submit */}
+          <button
+            type="button"
+            onClick={() => openBrochure(subject || "CTA band")}
+            data-cursor="DOWNLOAD"
+            className="group inline-flex items-center gap-2.5 border-b border-brass/50 pb-1 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors hover:border-brass"
+          >
+            Download brochure
+            <ArrowUpRight size={14} className="transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </button>
           <a
             href={`tel:${PROJECT.phone}`}
             className="mono text-[0.68rem] tracking-[0.18em] text-ink-soft transition-colors hover:text-ink"

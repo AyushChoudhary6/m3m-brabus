@@ -92,7 +92,7 @@ export default function Lifestyle() {
               >
                 <div className="relative aspect-[3/4] overflow-hidden rounded-[1.25rem] border border-line transition-colors duration-500 group-hover:border-brass/40">
                   <div className="absolute inset-0 scale-[1.04] transition-transform duration-[1600ms] ease-lux group-hover:scale-[1.1]">
-                    <Media src={px(a.id, 1200)} alt={a.n} sizes="(max-width:768px) 78vw, 28vw" />
+                    <Media src={px(a.id, 1200)} alt={`${a.n} — M3M Brabus amenities, Sector 58 Gurgaon`} sizes="(max-width:768px) 78vw, 28vw" />
                   </div>
                   <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_48%,rgba(8,6,5,0.72))]" />
                   <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />

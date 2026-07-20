@@ -67,7 +67,7 @@ export default function Exhibition() {
           >
             <div className="pc-img relative aspect-[4/3] overflow-hidden rounded-[1.5rem] border border-line">
               <div className="pc-img-inner ed-breath absolute inset-0 scale-[1.05]">
-                <Media src={px(p.id, 1600)} alt={p.label} sizes="(max-width:1024px) 100vw, 48vw" />
+                <Media src={px(p.id, 1600)} alt={`${p.label} — M3M Brabus, Sector 58 Gurgaon`} sizes="(max-width:1024px) 100vw, 48vw" />
               </div>
               <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_60%,rgba(8,6,5,0.45))]" />
               <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />

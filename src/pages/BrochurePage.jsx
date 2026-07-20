@@ -100,7 +100,7 @@ export default function BrochurePage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Brochure", path: "/brochure" }]} />
       <PageHeader
-        eyebrow="08 · Brochure"
+        eyebrow="M3M Brabus Brochure"
         title="The full book,"
         accent="sent to you directly."
         lede={`Floor plans, specifications, amenities and the location dossier for ${PROJECT.name} — ${PROJECT.configs.toLowerCase()} of ${PROJECT.sizes} at ${PROJECT.location}. Leave your details and the brochure arrives from the private client team.`}
@@ -144,8 +144,8 @@ export default function BrochurePage() {
               <span className="font-serif italic text-brass">brochure.</span>
             </h2>
             <p className="dl-rise mt-5 max-w-[46ch] leading-relaxed text-ink-soft">
-              A short form unlocks the download — name, phone and email, so the team knows where to send
-              the plans and can answer anything the book leaves open.
+              A short form unlocks the download — just your name and phone, so the team can answer
+              anything the book leaves open. The file starts downloading the moment you submit.
             </p>
 
             <div className="dl-rise mt-9">

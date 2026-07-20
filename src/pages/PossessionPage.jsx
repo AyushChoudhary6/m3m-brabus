@@ -161,7 +161,7 @@ export default function PossessionPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Possession", path: "/possession" }]} />
       <PageHeader
-        eyebrow="Possession"
+        eyebrow="M3M Brabus Possession"
         title="The date is not"
         accent="published yet."
         lede={`The official ${PROJECT.name} listing does not state a possession timeline — it reads "${PROJECT.possession}". Rather than quote a quarter we cannot source, here is what possession means, what governs it, and what to ask for.`}

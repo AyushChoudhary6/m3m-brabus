@@ -48,7 +48,7 @@ export default function LocationPage() {
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Location", path: "/location" }]} />
       <PageHeader
         compact
-        eyebrow="05 · The Address"
+        eyebrow="M3M Brabus Location · Sector 58"
         title="The centre of"
         accent="new Gurugram."
         lede={`${PROJECT.address} — a position that puts the metro, the business district and the airport within easy reach, while keeping the noise out.`}

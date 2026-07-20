@@ -100,7 +100,7 @@ export default function Amenities() {
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Amenities", path: "/amenities" }]} />
       <PageHeader
         compact
-        eyebrow="04 · Amenities"
+        eyebrow="M3M Brabus Amenities"
         title="A private world"
         accent="within the walls."
         lede="A grand clubhouse, water, wellness and green — staffed around the clock and reserved for residents alone."
@@ -114,7 +114,7 @@ export default function Amenities() {
           >
             <figure className="grp-img relative aspect-[4/3] overflow-hidden rounded-[1.5rem] border border-line">
               <div className="grp-img-inner ed-breath absolute inset-0 scale-[1.06]">
-                <Media src={px(g.img, 1400)} alt={g.title} priority={i === 0} sizes="(max-width:1024px) 100vw, 46vw" />
+                <Media src={px(g.img, 1400)} alt={`${g.title} — M3M Brabus amenities, Sector 58 Gurgaon`} priority={i === 0} sizes="(max-width:1024px) 100vw, 46vw" />
               </div>
               <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_55%,rgba(8,6,5,0.65))]" />
               <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />

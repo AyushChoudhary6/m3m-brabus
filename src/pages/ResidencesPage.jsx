@@ -85,7 +85,7 @@ export default function ResidencesPage() {
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Residences", path: "/residences" }]} />
       <PageHeader
         compact
-        eyebrow="02 · The Residences"
+        eyebrow="M3M Brabus Residences · 4 & 5 BHK"
         title="Open on three sides."
         accent="A collection for the few."
         lede={`${PROJECT.configs} of ${PROJECT.sizes}, each opening on three sides with a private lift lobby — composed so light, air and silence arrive before you do.`}

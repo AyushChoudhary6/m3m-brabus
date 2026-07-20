@@ -60,7 +60,7 @@ export default function Gallery() {
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Gallery", path: "/gallery" }]} />
       <PageHeader
         compact
-        eyebrow="06 · Gallery"
+        eyebrow="M3M Brabus Gallery"
         title="A first look,"
         accent="framed."
         lede="The architecture, the interiors and the private world within — the full collection, in one place."
@@ -92,7 +92,7 @@ export default function Gallery() {
             <figure key={p.n} className="gp mb-8 break-inside-avoid" data-cursor="VIEW">
               <div className={`group relative ${p.ratio} overflow-hidden rounded-[1.25rem] border border-line transition-colors duration-500 hover:border-brass/40`}>
                 <div className="absolute inset-0 scale-[1.04] transition-transform duration-[1600ms] ease-lux group-hover:scale-[1.09]">
-                  <Media src={px(p.id, 1200)} alt={p.n} sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 32vw" />
+                  <Media src={px(p.id, 1200)} alt={`${p.n} — M3M Brabus, Golf Course Extension Road, Gurgaon`} sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 32vw" />
                 </div>
                 <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_50%,rgba(8,6,5,0.7))]" />
                 <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
