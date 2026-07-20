@@ -14,7 +14,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    with a pulsing gold marker, alongside a ledger of distances. */
 const COORDS = [28.4236, 77.0916]; // Sector 58, Gurugram · GCE Road (indicative — set to the exact plot)
 
-export default function LivingMap() {
+export default function LivingMap({ bare = false }) {
   const root = useRef(null);
   const mapEl = useRef(null);
   const mapRef = useRef(null);
@@ -76,16 +76,22 @@ export default function LivingMap() {
   const mapsHref = `https://www.google.com/maps/search/?api=1&query=${COORDS[0]},${COORDS[1]}`;
 
   return (
-    <section id="location" ref={root} className="container-lux py-[clamp(5rem,13vh,9rem)]">
-      <div className="mb-[clamp(2.5rem,6vh,4.5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
-        <div className="flex items-baseline gap-5">
-          <span className="idx">06</span>
-          <span className="kicker">The Address</span>
+    <section
+      id="location"
+      ref={root}
+      className={bare ? "container-lux pb-[clamp(3rem,9vh,6rem)]" : "container-lux py-[clamp(5rem,13vh,9rem)]"}
+    >
+      {!bare && (
+        <div className="mb-[clamp(2.5rem,6vh,4.5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
+          <div className="flex items-baseline gap-5">
+            <span className="idx">06</span>
+            <span className="kicker">The Address</span>
+          </div>
+          <h2 className="max-w-[18ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
+            The centre of <span className="font-serif italic text-brass">new Gurugram.</span>
+          </h2>
         </div>
-        <h2 className="max-w-[18ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-          The centre of <span className="font-serif italic text-brass">new Gurugram.</span>
-        </h2>
-      </div>
+      )}
 
       <div className="grid items-stretch gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
         {/* distance ledger */}

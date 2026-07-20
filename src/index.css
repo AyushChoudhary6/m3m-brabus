@@ -175,6 +175,27 @@ h1, h2, h3, h4 {
 }
 @media (prefers-reduced-motion: reduce) { .grain { animation: none; } }
 
+/* ---- Arabic / RTL ---- */
+:root[lang="ar"] body,
+[dir="rtl"] body {
+  font-family: "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", "Segoe UI", Tahoma, var(--font-sans);
+}
+/* Arabic has no italics and the display serif has no Arabic glyphs —
+   fall back to the Arabic stack and drop the slant. */
+[dir="rtl"] .font-display,
+[dir="rtl"] .font-serif,
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 {
+  font-family: "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", Tahoma, serif;
+  font-style: normal;
+  letter-spacing: 0;
+}
+/* Wide latin tracking looks broken on Arabic script */
+[dir="rtl"] .mono, [dir="rtl"] .kicker, [dir="rtl"] .idx {
+  letter-spacing: 0.06em;
+}
+/* Mirror the arrow glyphs used in CTAs */
+[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
+
 /* ---- Leaflet dark map (real GPS) ---- */
 .leaflet-container { background: #0e0b08; font-family: var(--font-mono); }
 .leaflet-control-attribution {

@@ -6,7 +6,11 @@ import { useGSAP } from "@gsap/react";
 import { Menu, X } from "lucide-react";
 import clsx from "clsx";
 import { useEnquiry } from "./ui/Enquiry.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 import { NAV_LINKS, PROJECT } from "../lib/site.js";
+
+/** Maps a nav route to its translation key. */
+const navKey = (to) => `nav.${to.replace("/", "")}`;
 
 gsap.registerPlugin(useGSAP);
 
@@ -18,6 +22,7 @@ export default function Navbar() {
   const { pathname } = useLocation();
   const navRef = useRef(null);
   const { openEnquiry } = useEnquiry();
+  const { t, lang, toggle } = useI18n();
 
   const reduce =
     typeof window !== "undefined" &&
@@ -99,20 +104,31 @@ export default function Navbar() {
                   to={l.to}
                   className="group relative mono text-[0.8rem] tracking-[0.16em] text-ink-soft transition-colors hover:text-ink"
                 >
-                  {l.label}
+                  {t(navKey(l.to))}
                   <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-brass transition-all duration-500 ease-lux group-hover:w-full" />
                 </Link>
               </li>
             ))}
           </ul>
 
-          <div className="nav-cta flex items-center gap-6">
+          <div className="nav-cta flex items-center gap-5">
+            {/* language switch */}
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label={lang === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+              className="mono flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[0.68rem] tracking-[0.14em] text-ink-soft transition-colors hover:border-brass hover:text-brass"
+            >
+              <span className={lang === "en" ? "text-brass" : ""}>EN</span>
+              <span className="text-ink-faint">/</span>
+              <span className={lang === "ar" ? "text-brass" : ""} style={{ fontFamily: "system-ui" }}>ع</span>
+            </button>
             <button
               type="button"
               onClick={() => openEnquiry()}
               className="mono hidden text-[0.8rem] tracking-[0.16em] text-ink-soft transition-colors hover:text-ink md:inline"
             >
-              Enquire
+              {t("nav.enquire")}
             </button>
             <button
               aria-label="Open menu"
@@ -121,7 +137,7 @@ export default function Navbar() {
               data-cursor="OPEN"
               className="mono flex items-center gap-2 text-[0.8rem] tracking-[0.16em] text-ink transition-colors hover:text-brass"
             >
-              <span className="hidden sm:inline">Menu</span>
+              <span className="hidden sm:inline">{t("nav.menu")}</span>
               <Menu size={18} />
             </button>
           </div>
@@ -183,7 +199,7 @@ export default function Navbar() {
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <span className="text-[clamp(2rem,7vw,5rem)] transition-all duration-500 ease-lux group-hover:translate-x-3 group-hover:italic">
-                          {l.label}
+                          {t(navKey(l.to))}
                         </span>
                       </Link>
                     </motion.div>
@@ -204,7 +220,7 @@ export default function Navbar() {
 
                 <div className="flex flex-col gap-6">
                   <div>
-                    <p className="kicker">Sales Enquiries</p>
+                    <p className="kicker">{t("nav.salesEnquiries")}</p>
                     <a
                       href={`tel:${PROJECT.phone}`}
                       className="mt-2 block font-display text-2xl text-ink transition-colors hover:text-brass"

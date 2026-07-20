@@ -12,9 +12,9 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    that alternate side to side, each with a clip reveal and a caption
    ledger. Distinct from the amenity gallery — this is the building itself. */
 const PIECES = [
-  { no: "I", label: "The Tower", id: IMG.tower, note: "The silhouette on the Golf Course Extension skyline." },
-  { no: "II", label: "The Arrival", id: IMG.lobbyWarm, note: "A porte-cochère and lobby scaled for occasion." },
-  { no: "III", label: "The Residence", id: IMG.duplexLiving, note: "Interiors composed in stone, timber and considered light." },
+  { no: "I", label: "The Towers", id: IMG.tower, note: "The silhouette on the Golf Course Extension skyline." },
+  { no: "II", label: "The Arrival", id: IMG.arrival, note: "A porte-cochère scaled for occasion, lit for the evening." },
+  { no: "III", label: "The Lobby", id: IMG.lobby, note: "Marble, brass light and the marque, stated once at the door." },
 ];
 
 export default function Exhibition() {

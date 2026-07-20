@@ -1,7 +1,9 @@
 // ============================================================
 // M3M Brabus — Single source of truth for site content.
-// Verify all figures against the official RERA listing / brochure
-// before going live. Placeholders are marked "on request".
+// Facts sourced from the official M3M listing:
+// https://www.m3mproperties.com/residential/gurugram/m3m-brabus/
+// Where the official page does not publish a figure (price, RERA,
+// possession, exact drive times) we say so rather than invent it.
 // ============================================================
 
 export const PROJECT = {
@@ -12,9 +14,10 @@ export const PROJECT = {
   location: "Sector 58, Gurgaon",
   address: "Golf Course Extension Road, Sector 58, Gurugram, Haryana",
   configs: "4 & 5 BHK Residences",
+  sizes: "≈ 5,000 – 7,000 sq.ft",
   rera: "RERA registration — on request",
-  possession: "On request",
-  price: "On request",
+  possession: "Announced on request",
+  price: "Coming soon",
   phone: "+91 00000 00000",
   whatsapp: "910000000000",
   email: "sales@m3m-brabus.com",
@@ -31,28 +34,28 @@ export const NAV_LINKS = [
 ];
 
 export const STATS = [
-  { value: 58, label: "Sector · GCE Road", suffix: "" },
-  { value: 2, label: "Homes Per Core", suffix: "" },
-  { value: 100, label: "Natural Light", suffix: "%" },
-  { value: 5, label: "Star Concierge", suffix: "★" },
+  { value: 58, label: "Sector · Golf Course Ext.", suffix: "" },
+  { value: 7000, label: "Sq.ft · Largest residence", suffix: "" },
+  { value: 3, label: "Sides Open · Every home", suffix: "" },
+  { value: 24, label: "Security & Concierge", suffix: "/7" },
 ];
 
 export const HIGHLIGHTS = [
   {
     title: "Open-Core Architecture",
-    body: "Only two residences per core and a three-side-open form — every home breathes with cross-ventilation and uninterrupted light.",
+    body: "Every residence opens on three sides — natural light and cross-ventilation reach each room, giving a high-rise home the feel of a villa.",
   },
   {
     title: "Ultra-Low Density",
-    body: "A limited collection of residences across a sprawling address, engineered for privacy, silence and space.",
+    body: "A limited collection across a generous address, planned so privacy, silence and space are the default rather than the upgrade.",
   },
   {
-    title: "Private Arrival",
-    body: "Dedicated lift lobbies and porte-cochère arrival — a sequence choreographed like a marque unveiling.",
+    title: "BRABUS-Inspired Design",
+    body: "Bespoke interiors and premium finishes shaped by the marque's ethos of luxury, performance and exclusivity.",
   },
   {
-    title: "Intelligent Living",
-    body: "IoT and AI-assisted home automation, climate, lighting and security — performance you command with a touch.",
+    title: "Smart & Sustainable",
+    body: "Smart-home integration and VRV climate control, with rainwater harvesting and energy-efficient systems built in.",
   },
 ];
 
@@ -60,64 +63,90 @@ export const RESIDENCES = [
   {
     id: "4bhk",
     name: "4 BHK Residence",
-    area: "On request",
-    facing: "3-side open · green & city vistas",
+    area: "≈ 5,000 sq.ft",
+    facing: "3-side open · light & cross-ventilation",
     tag: "The Signature",
     subtitle: "A four-bedroom sanctuary in the sky",
     image: 28729467,
-    features: ["Private lift lobby", "Double-height living", "Chef & family kitchens", "Wellness suite"],
+    features: [
+      "Italian marble flooring",
+      "Modular kitchen · branded fittings",
+      "VRV air conditioning",
+      "Private lift lobby",
+    ],
   },
   {
     id: "5bhk",
     name: "5 BHK Residence",
-    area: "On request",
+    area: "≈ 7,000 sq.ft",
     facing: "3-side open · golf-green vistas",
     tag: "The Grand",
     subtitle: "Crafted like a private villa",
     image: 31737843,
-    features: ["Private foyer", "Sky lounge", "Staff quarters", "Panoramic terrace"],
+    features: [
+      "Villa-scale living spaces",
+      "Smart-home integration",
+      "Premium branded finishes",
+      "Private foyer & lift lobby",
+    ],
   },
 ];
 
 export const AMENITIES = [
-  { name: "The BRABUS Club", note: "Multi-level clubhouse & lounge" },
-  { name: "Olympic Pool", note: "Temperature-controlled" },
-  { name: "Signature Spa", note: "Hammam · sauna · treatment suites" },
-  { name: "Performance Gym", note: "Precision fitness & recovery" },
-  { name: "Sky Lounges", note: "Elevated social decks" },
-  { name: "Concierge", note: "24/7 five-star service" },
-  { name: "Private Theatre", note: "Screening & amphitheatre" },
-  { name: "Racquet Courts", note: "Tennis · badminton · squash" },
+  { name: "Grand Clubhouse", note: "Multi-level club & lounge" },
+  { name: "Temperature-Controlled Pool", note: "Swimming through every season" },
+  { name: "Spa & Wellness Centre", note: "Sauna · steam · treatment rooms" },
+  { name: "Fully-Equipped Gym", note: "Strength, cardio & recovery" },
+  { name: "Multipurpose Event Hall", note: "Private celebrations & gatherings" },
+  { name: "Landscaped Gardens", note: "Jogging tracks & green courts" },
+  { name: "Children's Play Area", note: "Safe, supervised play" },
+  { name: "Indoor & Outdoor Games", note: "Courts and a games room" },
+  { name: "Restaurant", note: "Dining within the address" },
+  { name: "24/7 Security", note: "CCTV surveillance & manned gates" },
+  { name: "Dedicated Parking", note: "Covered resident parking" },
+  { name: "Rainwater Harvesting", note: "Energy-efficient & eco-conscious" },
 ];
 
+// The official page describes connectivity qualitatively; exact drive times
+// are not published, so we describe access rather than quote minutes.
 export const LOCATION = [
-  { place: "Rapid Metro Station", time: "< 2 min" },
   { place: "Golf Course Extension Road", time: "On doorstep" },
-  { place: "Cyber Hub / Cyber City", time: "~ 25 min" },
-  { place: "IGI Airport", time: "~ 30 min" },
-  { place: "Leading Hospitals & Schools", time: "5–10 min" },
-  { place: "Diplomatic Enclave", time: "~ 15 min" },
+  { place: "Golf Course Road", time: "Direct link" },
+  { place: "Cyber City & business hubs", time: "Easy access" },
+  { place: "NH-8", time: "Quick access" },
+  { place: "Sohna Road", time: "Quick access" },
+  { place: "IGI Airport", time: "Easy access" },
+  { place: "Metro connectivity", time: "Nearby" },
+  { place: "Schools, hospitals & retail", time: "Close by" },
 ];
 
 export const FAQS = [
   {
     q: "Where is M3M Brabus located?",
-    a: "M3M Brabus is at Sector 58, on Golf Course Extension Road, Gurugram — one of the city's most established ultra-luxury corridors, with the Rapid Metro moments away.",
+    a: "M3M Brabus is at Sector 58, on Golf Course Extension Road, Gurugram — with easy access to Golf Course Road, Cyber City, NH-8, Sohna Road and IGI Airport, and metro connectivity nearby.",
   },
   {
-    q: "What configurations does M3M Brabus offer?",
-    a: "M3M Brabus presents 4 BHK and 5 BHK branded residences, designed for ultra-low-density living with only two homes per core.",
+    q: "What configurations and sizes does M3M Brabus offer?",
+    a: "The project presents 4 BHK and 5 BHK branded residences, with homes ranging approximately 5,000 to 7,000 sq.ft. Exact carpet and saleable areas are shared on request.",
   },
   {
     q: "Who is the developer and the brand partner?",
-    a: "The project is developed by M3M India in partnership with BRABUS, the German automotive luxury marque, whose design language shapes the residences.",
+    a: "The project is developed by M3M India as a branded residence inspired by BRABUS, the German luxury automotive marque, whose ethos of luxury, performance and exclusivity shapes the bespoke interiors and premium finishes.",
   },
   {
     q: "What is the price of M3M Brabus?",
-    a: "Pricing is available on request as the collection is limited. Register your interest to receive the detailed price sheet and payment plan.",
+    a: "Pricing has not been publicly released yet — it is marked as coming soon. Register your interest to receive the price sheet and payment plan as soon as it is announced.",
   },
   {
     q: "What is the possession timeline and RERA status?",
-    a: "Possession and RERA registration details are shared on request. We provide only verified, official information — please enquire for the current status.",
+    a: "Possession and RERA registration details are not published on the official listing at this stage. We share only verified, official information — please enquire for the current status.",
+  },
+  {
+    q: "What amenities are planned?",
+    a: "A grand clubhouse with a fully equipped gym, a temperature-controlled swimming pool, a spa and wellness centre with sauna and steam rooms, a multipurpose event hall, landscaped gardens with jogging tracks, a children's play area, indoor and outdoor games, a restaurant, dedicated parking and 24/7 security with CCTV surveillance.",
+  },
+  {
+    q: "What makes the homes different?",
+    a: "Open-core architecture opens each residence on three sides for natural light and ventilation, in an ultra-low-density plan. Homes feature Italian marble flooring, modular kitchens with branded fittings, VRV air conditioning and smart-home integration — a villa-like feel in a high-rise format.",
   },
 ];

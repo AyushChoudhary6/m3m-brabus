@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
+import { submitLead, markLeadCaptured } from "../../lib/leads.js";
+import { sanitizeField, validateField, validateLead, isClean } from "../../lib/validate.js";
+import { useI18n } from "../../lib/i18n.jsx";
 import { RESIDENCES, PROJECT } from "../../lib/site.js";
 
 const EnquiryCtx = createContext(null);
@@ -59,13 +62,26 @@ const FIELD =
   "w-full border-b border-line bg-transparent py-3.5 text-ink placeholder:text-ink-faint outline-none transition-colors focus:border-brass";
 
 function EnquiryModal({ open, subject, auto, onClose }) {
+  const { t } = useI18n();
   const [form, setForm] = useState({ name: "", phone: "", email: "", config: "" });
   const [sent, setSent] = useState(false);
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const set = (k) => (e) => {
+    const v = sanitizeField(k, e.target.value);
+    setForm((f) => ({ ...f, [k]: v }));
+    if (errors[k]) setErrors((x) => ({ ...x, [k]: validateField(k, v) }));
+  };
+  const blur = (k) => () => setErrors((x) => ({ ...x, [k]: validateField(k, form[k]) }));
+  const fieldCls = (k) => `${FIELD} ${errors[k] ? "border-oxblood" : ""}`;
 
   useEffect(() => {
     if (!open) return;
     setSent(false);
+    setSending(false);
+    setError("");
+    setErrors({});
     setForm((f) => ({ ...f, config: subject && subject.includes("BHK") ? subject : f.config }));
     const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -77,14 +93,25 @@ function EnquiryModal({ open, subject, auto, onClose }) {
     };
   }, [open, subject, onClose]);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.phone) return;
-    ls.set("localStorage", KEY_LEAD, "1"); // never auto-invite again
-    setSent(true); // TODO: wire to CRM / WhatsApp / email
+    if (sending) return;
+    const errs = validateLead(form);
+    if (!isClean(errs)) { setErrors(errs); return; }
+    setSending(true);
+    setError("");
+    try {
+      await submitLead({ ...form, source: auto ? "Timed invite" : subject ? `Modal · ${subject}` : "Modal" });
+      markLeadCaptured(); // never auto-invite again
+      setSent(true);
+    } catch {
+      setError("err.send");
+    } finally {
+      setSending(false);
+    }
   };
 
-  const kicker = sent ? "Received" : auto ? "A private invitation" : subject ? `Enquiry · ${subject}` : "Private enquiry";
+  const kicker = sent ? t("enq.received") : auto ? t("enq.invitation") : subject ? `${t("enq.enquiry")} · ${subject}` : t("enq.private");
 
   return (
     <AnimatePresence>
@@ -124,14 +151,13 @@ function EnquiryModal({ open, subject, auto, onClose }) {
               <div className="relative py-6 text-center">
                 <p className="kicker">{kicker}</p>
                 <h3 className="mt-4 font-display text-[clamp(2rem,7vw,3rem)] font-light leading-[0.95] text-ink">
-                  Thank you, <span className="font-serif italic text-brass">{form.name.split(" ")[0] || "friend"}.</span>
+                  {t("enq.thankYou")} <span className="font-serif italic text-brass">{form.name.split(" ")[0] || "friend"}.</span>
                 </h3>
                 <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-ink-soft">
-                  Our private client team will reach you shortly with the brochure,
-                  pricing and a viewing invitation.
+{t("enq.thanksBody")}
                 </p>
                 <button onClick={onClose} className="mt-8 mono text-[0.66rem] tracking-[0.2em] text-brass transition-colors hover:text-brass-soft">
-                  Close
+                  {t("nav.close")}
                 </button>
               </div>
             ) : (
@@ -139,24 +165,31 @@ function EnquiryModal({ open, subject, auto, onClose }) {
                 <p className="kicker">{kicker}</p>
                 <h3 className="mt-3 font-display text-[clamp(1.9rem,6vw,2.6rem)] font-light leading-[1.02] tracking-[-0.01em] text-ink">
                   {auto ? (
-                    <>The details, <span className="font-serif italic text-brass">privately.</span></>
+                    <>{t("enq.autoTitleA")} <span className="font-serif italic text-brass">{t("enq.autoTitleB")}</span></>
                   ) : (
-                    <>Register your <span className="font-serif italic text-brass">interest.</span></>
+                    <>{t("enq.titleA")} <span className="font-serif italic text-brass">{t("enq.titleB")}</span></>
                   )}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-                  {auto
-                    ? "Receive the brochure, price list and a private viewing invitation — sent directly to you."
-                    : `${PROJECT.configs} at ${PROJECT.location}. Leave your details for a private consultation.`}
+                  {auto ? t("enq.autoBody") : `${PROJECT.configs} · ${PROJECT.location}. ${t("enq.body")}`}
                 </p>
 
                 <form onSubmit={submit} className="mt-7 space-y-5">
                   <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hidden" />
-                  <input className={FIELD} placeholder="Full name" value={form.name} onChange={set("name")} required />
-                  <input className={FIELD} placeholder="Phone number" type="tel" value={form.phone} onChange={set("phone")} required />
-                  <input className={FIELD} placeholder="Email address" type="email" value={form.email} onChange={set("email")} />
+                  <div>
+                    <input className={fieldCls("name")} placeholder={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
+                    {errors.name && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.name)}</p>}
+                  </div>
+                  <div>
+                    <input className={fieldCls("phone")} placeholder={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
+                    {errors.phone && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.phone)}</p>}
+                  </div>
+                  <div>
+                    <input className={fieldCls("email")} placeholder={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
+                    {errors.email && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.email)}</p>}
+                  </div>
                   <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")}>
-                    <option value="">Configuration of interest</option>
+                    <option value="">{t("form.config")}</option>
                     {RESIDENCES.map((r) => (
                       <option key={r.id} value={r.name}>{r.name}</option>
                     ))}
@@ -164,20 +197,24 @@ function EnquiryModal({ open, subject, auto, onClose }) {
 
                   <button
                     type="submit"
+                    disabled={sending}
                     data-cursor="OPEN"
-                    className="group/cta relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-brass py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-obsidian transition-colors"
+                    className="group/cta relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-brass py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-obsidian transition-colors disabled:opacity-70"
                   >
                     <span className="absolute inset-0 origin-left scale-x-0 bg-brass-soft transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
-                    <span className="relative z-10">{auto ? "Send me the details" : "Register interest"}</span>
-                    <ArrowRight size={15} className="relative z-10 transition-transform duration-500 group-hover/cta:translate-x-1" />
+                    <span className="relative z-10">
+                      {sending ? t("cta.sending") : auto ? t("cta.sendMeDetails") : t("cta.registerInterest")}
+                    </span>
+                    {!sending && <ArrowRight size={15} className="relative z-10 transition-transform duration-500 group-hover/cta:translate-x-1" />}
                   </button>
+                  {error && <p className="text-center text-[0.72rem] text-oxblood">{t(error)}</p>}
 
                   {auto ? (
                     <button type="button" onClick={onClose} className="mono block w-full text-center text-[0.58rem] tracking-[0.18em] text-ink-faint transition-colors hover:text-ink-soft">
-                      Maybe later
+                      {t("cta.maybeLater")}
                     </button>
                   ) : (
-                    <p className="mono text-center text-[0.55rem] tracking-[0.18em] text-ink-faint">Or call {PROJECT.phone}</p>
+                    <p className="mono text-center text-[0.55rem] tracking-[0.18em] text-ink-faint">{t("cta.orCall")} {PROJECT.phone}</p>
                   )}
                 </form>
               </div>

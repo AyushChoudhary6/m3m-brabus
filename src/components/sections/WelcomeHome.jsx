@@ -1,6 +1,9 @@
 import { useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { submitLead, markLeadCaptured } from "../../lib/leads.js";
+import { sanitizeField, validateField, validateLead, isClean } from "../../lib/validate.js";
+import { useI18n } from "../../lib/i18n.jsx";
 import { RESIDENCES } from "../../lib/site.js";
 
 const FIELD =
@@ -11,14 +14,36 @@ const FIELD =
    Light ivory, hairline fields, restrained. */
 export default function WelcomeHome() {
   const root = useRef(null);
+  const { t } = useI18n();
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", phone: "", email: "", config: "" });
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const [errors, setErrors] = useState({});
+  const set = (k) => (e) => {
+    const v = sanitizeField(k, e.target.value);
+    setForm((f) => ({ ...f, [k]: v }));
+    if (errors[k]) setErrors((x) => ({ ...x, [k]: validateField(k, v) }));
+  };
+  const blur = (k) => () => setErrors((x) => ({ ...x, [k]: validateField(k, form[k]) }));
+  const fieldCls = (k) => `${FIELD} ${errors[k] ? "border-oxblood" : ""}`;
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.phone) return;
-    setSent(true); // TODO: wire to CRM / WhatsApp / email
+    if (sending) return;
+    const errs = validateLead(form);
+    if (!isClean(errs)) { setErrors(errs); return; }
+    setSending(true);
+    setError("");
+    try {
+      await submitLead({ ...form, source: "Welcome Home section" });
+      markLeadCaptured();
+      setSent(true);
+    } catch {
+      setError("err.send");
+    } finally {
+      setSending(false);
+    }
   };
 
   useGSAP(
@@ -67,22 +92,33 @@ export default function WelcomeHome() {
 
             <form onSubmit={submit} className="space-y-6">
               <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hidden" />
-              <input className={FIELD} placeholder="Full name" value={form.name} onChange={set("name")} required />
-              <input className={FIELD} placeholder="Phone number" type="tel" value={form.phone} onChange={set("phone")} required />
-              <input className={FIELD} placeholder="Email address" type="email" value={form.email} onChange={set("email")} />
+              <div>
+                <input className={fieldCls("name")} placeholder={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
+                {errors.name && <p className="mt-1.5 text-[0.72rem] text-oxblood">{t(errors.name)}</p>}
+              </div>
+              <div>
+                <input className={fieldCls("phone")} placeholder={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
+                {errors.phone && <p className="mt-1.5 text-[0.72rem] text-oxblood">{t(errors.phone)}</p>}
+              </div>
+              <div>
+                <input className={fieldCls("email")} placeholder={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
+                {errors.email && <p className="mt-1.5 text-[0.72rem] text-oxblood">{t(errors.email)}</p>}
+              </div>
               <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")}>
-                <option value="">Configuration of interest</option>
+                <option value="">{t("form.config")}</option>
                 {RESIDENCES.map((r) => (
                   <option key={r.id} value={r.id}>{r.name}</option>
                 ))}
               </select>
               <button
                 type="submit"
+                disabled={sending}
                 data-cursor="OPEN"
-                className="group mt-4 inline-flex w-full items-center justify-center gap-2 bg-ink py-4 font-sans text-sm font-medium uppercase tracking-[0.14em] text-canvas transition-colors hover:bg-brass"
+                className="group mt-4 inline-flex w-full items-center justify-center gap-2 bg-ink py-4 font-sans text-sm font-medium uppercase tracking-[0.14em] text-canvas transition-colors hover:bg-brass disabled:opacity-70"
               >
-                Register Interest
+                {sending ? t("cta.sending") : t("cta.registerInterest")}
               </button>
+              {error && <p className="text-center text-[0.74rem] text-oxblood">{t(error)}</p>}
             </form>
           </div>
         )}

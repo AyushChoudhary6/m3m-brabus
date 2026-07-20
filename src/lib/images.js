@@ -1,19 +1,32 @@
 // ============================================================
-// Curated stock photography (Pexels — free commercial use, no
-// attribution required). All IDs verified live. Swap these for
-// official M3M Brabus renders when available.
+// Imagery.
+//
+// The architectural shots are the OFFICIAL M3M Brabus renders, served
+// locally from /public/renders. The interior + amenity shots are still
+// indicative stock (Pexels, free commercial use) until official renders
+// for those spaces are supplied — swap the ids below when they arrive.
 // ============================================================
 
-/** Build a responsive Pexels CDN URL at a given width. */
+/**
+ * Resolve an image source.
+ * - a string starting with "/" is a local asset and is returned as-is
+ * - a number is a Pexels photo id, built into a responsive CDN URL
+ */
 export const px = (id, w = 1200) =>
-  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}&dpr=2`;
+  typeof id === "string"
+    ? id
+    : `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}&dpr=2`;
 
 export const IMG = {
-  heroExterior: 944007,     // low-angle high-rise
-  facade: 22604447,         // apartment facade with balconies
-  tower: 1662159,           // clean high-rise
-  lobby: 6758532,           // luxury hotel lobby
-  lobbyWarm: 31080809,      // elegant warm lobby
+  // ---- Official M3M Brabus renders ----
+  heroExterior: "/renders/tower.jpg",   // twin towers at dusk
+  tower: "/renders/tower.jpg",
+  arrival: "/renders/arrival.jpg",      // porte-cochère / entrance
+  facade: "/renders/arrival.jpg",
+  lobby: "/renders/lobby.jpg",          // BRABUS marble lobby
+  lobbyWarm: "/renders/lobby.jpg",
+
+  // ---- Indicative stock (awaiting official interior renders) ----
   livingRoom: 6588599,      // modern apartment living room
   duplexLiving: 28729467,   // luxurious duplex living room
   bedroom: 31737843,        // modern luxury bedroom

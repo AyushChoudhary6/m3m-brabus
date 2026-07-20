@@ -81,6 +81,7 @@ export default function Lifestyle() {
         <div className="mt-8 flex-1 md:mt-10 md:flex md:items-center">
           <div
             ref={track}
+            dir="ltr"
             className="flex gap-5 overflow-x-auto px-[var(--spacing-gutter)] pb-6 [-ms-overflow-style:none] [scrollbar-width:none] md:gap-8 md:overflow-visible md:pb-0 md:pr-[6vw] [&::-webkit-scrollbar]:hidden"
           >
             {AMENITIES.map((a, i) => (

@@ -12,7 +12,7 @@ import { px } from "../../lib/images.js";
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /* CHAPTER 03 — THE RESIDENCES
-   Two homes per core, presented as an interactive pair. Each plate tilts in
+   Both configurations, presented as an interactive pair. Each plate tilts in
    3D toward the cursor under a travelling gold glare; hovering one lifts it
    and quiets its partner. Word-by-word names, a drawn gold rule, staged
    specs, a magnetic CTA. */
@@ -107,7 +107,7 @@ export default function Residences() {
           <span className="kicker">The Residences</span>
         </div>
         <h2 className="max-w-[22ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-          Two homes per core. <span className="font-serif italic text-brass">A collection for the few.</span>
+          Open on three sides. <span className="font-serif italic text-brass">A collection for the few.</span>
         </h2>
       </div>
 
