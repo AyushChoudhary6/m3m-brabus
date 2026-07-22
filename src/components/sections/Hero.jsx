@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { ArrowUpRight, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { useEnquiry } from "../ui/Enquiry.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 import { PROJECT } from "../../lib/site.js";
-import { PRICE, PROJECT_FACT, hasValue } from "../../lib/facts.js";
+import { PRICE } from "../../lib/facts.js";
 import { IMG } from "../../lib/images.js";
 import { RENDERS } from "../../lib/renders.generated.js";
 import { track } from "../../lib/analytics.js";
@@ -34,18 +34,6 @@ const srcSetOf = (variants) => variants.map(([w, url]) => `${url} ${w}w`).join("
    number, so those read as "on request" and open the form instead. They are
    driven off the facts layer rather than hard-coded copy, so the day either
    figure is officially released the strip states it without a code change. */
-const LEDGER = [
-  { key: "configs", text: PROJECT.configs },
-  { key: "location", text: PROJECT.location },
-  { key: PRICE.key, fact: PRICE, idle: "shero.priceOnRequest", aria: "shero.priceOnRequestAria" },
-  {
-    key: PROJECT_FACT.rera.key,
-    fact: PROJECT_FACT.rera,
-    idle: "shero.reraOnRequest",
-    aria: "shero.reraOnRequestAria",
-  },
-];
-
 /* CHAPTER 01 — ARRIVAL · Obsidian & Gold
    A cinematic film held in a rounded card. A tall section + a CSS-sticky
    frame let the card grow to full-bleed as you scroll (margins → 0, corners
@@ -282,34 +270,6 @@ export default function Hero() {
                 </p>
 
                 <div className="hero-fade mt-6 h-px w-full max-w-xs bg-gradient-to-r from-brass/70 via-line to-transparent md:mt-8" />
-
-                {/* fact ledger — an unknown is a conversation, not a blank */}
-                <ul className="hero-fade mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[0.58rem] sm:gap-x-5 sm:text-[0.62rem] md:mt-6">
-                  {LEDGER.map((item) => (
-                    <li
-                      key={item.key}
-                      className="mono flex items-center gap-4 tracking-[0.18em] before:h-3 before:w-px before:shrink-0 before:bg-brass/30 before:content-[''] first:before:hidden sm:gap-5"
-                    >
-                      {item.fact && !hasValue(item.fact) ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            track("hero_fact_request", { fact: item.fact.key });
-                            openEnquiry(item.fact.label);
-                          }}
-                          aria-label={t(item.aria)}
-                          data-cursor="ASK"
-                          className="inline-flex items-center gap-1.5 rounded-sm text-brass underline decoration-brass/35 decoration-dotted underline-offset-4 transition-colors duration-300 hover:text-brass-soft hover:decoration-brass-soft focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-brass"
-                        >
-                          {t(item.idle)}
-                          <ArrowUpRight size={11} strokeWidth={1.6} aria-hidden="true" />
-                        </button>
-                      ) : (
-                        <span className="text-bone/75">{item.fact ? item.fact.value : item.text}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
 
                 <div className="hero-fade mt-6 flex flex-wrap items-center gap-4 md:mt-8">
                   <button
