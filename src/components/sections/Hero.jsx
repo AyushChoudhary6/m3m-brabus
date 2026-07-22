@@ -139,10 +139,10 @@ export default function Hero() {
 
           // ---- entrance ----
           gsap.set(videoWrap.current, { autoAlpha: 0, scale: 1.12, filter: "blur(16px)" });
-          // 140% (not just >100%) so the slide-up start stays fully below the
+          // 150% (not just >100%) so the slide-up start stays fully below the
           // mask even with the descender padding on .ed-line (else a sliver of
           // the letter-tops would peek at the bottom before the reveal).
-          gsap.set(q(".ed-line > span"), { yPercent: 140 });
+          gsap.set(q(".ed-line > span"), { yPercent: 150 });
           gsap.set(q(".hero-fade"), { autoAlpha: 0, y: 20 });
 
           gsap
@@ -240,21 +240,22 @@ export default function Hero() {
             </div>
 
             {/* grades + glow + grain */}
-            <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,rgba(8,6,5,0.62)_0%,rgba(8,6,5,0.04)_30%,rgba(8,6,5,0.30)_58%,rgba(8,6,5,0.92)_100%)]" />
+            {/* Scrim: the film now plays on mobile too and some frames are bright
+                (a daylit terrace), which washed out the light headline/subtitle/
+                stats. Darken the lower half — where all the text sits — so it stays
+                legible on any frame, while keeping a lighter middle for the imagery. */}
+            <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,rgba(8,6,5,0.66)_0%,rgba(8,6,5,0.10)_26%,rgba(8,6,5,0.55)_60%,rgba(8,6,5,0.96)_100%)]" />
             <div className="gold-glow pointer-events-none absolute -inset-1/4 [background:radial-gradient(38%_38%_at_26%_22%,rgba(201,168,106,0.16),transparent_66%)]" />
             <div className="grain pointer-events-none absolute inset-0" />
 
-            {/* content — extra top padding on mobile so the ledger clears the
-                fixed navbar logo (they overlapped at phone widths). */}
-            <div className="relative z-10 flex h-full flex-col justify-between p-6 pt-20 md:p-10 lg:p-14">
-              {/* top ledger */}
-              <div className="hero-fade flex items-center justify-between">
-                <span className="kicker text-champagne">{PROJECT.developer} · {t("shero.with")} {PROJECT.partner}</span>
-                <span className="mono hidden text-[0.6rem] tracking-[0.24em] text-ink-faint sm:block">{t("shero.sectorGurgaon")}</span>
-              </div>
-
+            {/* content — anchored to the bottom. On mobile/tablet the fixed
+                Call/WhatsApp/Visit/Brochure bar (lg:hidden) sits over the bottom
+                ~5rem, so the CTA row is lifted above it with bottom padding (plus
+                the home-indicator safe area) — otherwise Download Brochure was
+                half-hidden behind the bar on first load. */}
+            <div className="relative z-10 flex h-full flex-col justify-end px-6 pt-24 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:px-10 lg:p-14">
               {/* bottom block */}
-              <div className="max-w-3xl">
+              <div className="max-w-3xl [text-shadow:0_2px_18px_rgba(0,0,0,0.55)]">
                 <h1 className="font-display text-[clamp(2.3rem,6vw,6rem)] font-light leading-[0.94] tracking-[-0.03em] text-bone">
                   <span className="ed-line"><span>{t("shero.headlineLead")}</span></span>
                   <span className="ed-line">
