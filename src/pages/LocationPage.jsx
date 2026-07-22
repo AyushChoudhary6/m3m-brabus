@@ -11,6 +11,7 @@ import LivingMap from "../components/sections/LivingMap.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import { PROJECT } from "../lib/site.js";
 import { OFFICIAL_SOURCE } from "../lib/facts.js";
+import { useI18n } from "../lib/i18n.jsx";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -92,6 +93,7 @@ const EVERYDAY = [
 
 export default function LocationPage() {
   const root = useRef(null);
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -132,13 +134,13 @@ export default function LocationPage() {
         path="/location"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Location", path: "/location" }])}
       />
-      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Location", path: "/location" }]} />
+      <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: t("location.crumb"), path: "/location" }]} />
       <PageHeader
         compact
-        eyebrow="M3M Brabus Location · Sector 58"
-        title="The centre of"
-        accent="new Gurugram."
-        lede={`${PROJECT.address} — a position that puts the metro, the business district and the airport within easy reach, while keeping the noise out.`}
+        eyebrow={t("location.eyebrow")}
+        title={t("location.title")}
+        accent={t("location.accent")}
+        lede={`${PROJECT.address} — ${t("location.ledeBody")}`}
       />
 
       {/* real map + the published connectivity ledger (page supplies its own heading) */}
@@ -148,20 +150,15 @@ export default function LocationPage() {
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="rise mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">Why here</span>
+          <span className="kicker">{t("location.whyHere")}</span>
         </div>
 
         <div className="grid gap-x-16 gap-y-6 lg:grid-cols-[1fr_0.92fr] lg:items-end">
           <h2 className="rise max-w-[17ch] font-display text-[clamp(2rem,5vw,3.4rem)] font-light leading-[1.03] tracking-[-0.025em] text-ink">
-            An address argued in <span className="font-serif italic text-brass">weeks, not minutes.</span>
+            {t("location.whyTitle1")} <span className="font-serif italic text-brass">{t("location.whyTitle2")}</span>
           </h2>
           <p className="rise max-w-[48ch] leading-relaxed text-ink-soft">
-            {PROJECT.developer} publishes no drive times and no distances for this address, so you
-            will find none here — and a minute figure measured on a quiet Sunday is not the number
-            anyone drives on a Monday morning anyway. What follows is the part that does not move
-            with the traffic: what each of these places is for, and what having it on this side of
-            Gurugram does to an ordinary week. Where the distance genuinely decides the answer, we
-            say what to check on a map yourself.
+            {PROJECT.developer} {t("location.whyBody")}
           </p>
         </div>
 
@@ -180,22 +177,22 @@ export default function LocationPage() {
                       </span>
                     </div>
                     <h3 className="mt-3 max-w-[16ch] font-display text-xl leading-snug text-ink transition-colors duration-500 group-hover:text-brass-soft md:text-2xl">
-                      {p.title}
+                      {t(`location.pillar.${p.key}.title`)}
                     </h3>
                     <p className="mono mt-4 max-w-[26ch] text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-                      {p.places}
+                      {t(`location.pillar.${p.key}.places`)}
                     </p>
                   </div>
 
                   <div>
-                    {p.body.map((para) => (
-                      <p key={para.slice(0, 32)} className="mb-4 max-w-[62ch] leading-relaxed text-ink-soft last:mb-0">
-                        {para}
+                    {p.body.map((para, bi) => (
+                      <p key={bi} className="mb-4 max-w-[62ch] leading-relaxed text-ink-soft last:mb-0">
+                        {t(`location.pillar.${p.key}.body.${bi}`)}
                       </p>
                     ))}
                     <p className="mt-6 max-w-[62ch] border-l border-brass/40 pl-5 text-sm leading-relaxed text-ink-faint">
-                      <span className="mono mr-2 text-[0.58rem] tracking-[0.18em] text-brass">Check for yourself</span>
-                      {p.check}
+                      <span className="mono mr-2 text-[0.58rem] tracking-[0.18em] text-brass">{t("location.checkForYourself")}</span>
+                      {t(`location.pillar.${p.key}.check`)}
                     </p>
                   </div>
                 </div>
@@ -205,7 +202,7 @@ export default function LocationPage() {
         </ol>
 
         <div className="everyday mt-[clamp(2.5rem,7vh,4.5rem)] border-t border-line pt-8">
-          <h3 className="rise font-display text-xl text-ink md:text-2xl">And the week in between</h3>
+          <h3 className="rise font-display text-xl text-ink md:text-2xl">{t("location.weekInBetween")}</h3>
 
           <div className="mt-8 grid grid-cols-1 gap-x-14 gap-y-0 md:grid-cols-3">
             {EVERYDAY.map((e) => {
@@ -216,11 +213,11 @@ export default function LocationPage() {
                     <Icon size={18} strokeWidth={1.4} />
                   </span>
                   <h3 className="mt-3 font-display text-lg text-ink transition-colors duration-500 group-hover:text-brass-soft">
-                    {e.title}
+                    {t(`location.everyday.${e.key}.title`)}
                   </h3>
-                  <p className="mt-3 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{e.body}</p>
+                  <p className="mt-3 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{t(`location.everyday.${e.key}.body`)}</p>
                   <p className="mt-4 max-w-[46ch] border-l border-brass/40 pl-4 text-sm leading-relaxed text-ink-faint">
-                    {e.check}
+                    {t(`location.everyday.${e.key}.check`)}
                   </p>
                 </article>
               );
@@ -229,20 +226,20 @@ export default function LocationPage() {
         </div>
 
         <p className="rise mono mt-[clamp(2rem,6vh,3.5rem)] border-t border-line pt-8 text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-          No drive times or distances are published for {PROJECT.name} ·{" "}
+          {t("location.noDrivePrefix")} {PROJECT.name} ·{" "}
           <a
             href={OFFICIAL_SOURCE}
             target="_blank"
             rel="noopener noreferrer"
             className="transition-colors hover:text-ink-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
           >
-            Facts as published by {PROJECT.developer}
+            {t("location.factsBy")} {PROJECT.developer}
           </a>
         </p>
       </section>
 
       <RelatedPages links={["/overview", "/amenities", "/contact"]} />
-      <CtaBand title="Visit the" accent="address." subject="Location" />
+      <CtaBand title={t("location.ctaTitle")} accent={t("location.ctaAccent")} subject="Location" />
     </div>
   );
 }

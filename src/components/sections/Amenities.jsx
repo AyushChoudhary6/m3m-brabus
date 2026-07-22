@@ -6,6 +6,7 @@ import { icon } from "../../lib/icons.js";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import Media from "../ui/Media.jsx";
 import { useEnquiry } from "../ui/Enquiry.jsx";
+import { useI18n } from "../../lib/i18n.jsx";
 import { track } from "../../lib/analytics.js";
 import { AMENITY_CATEGORIES, AMENITY_INDEX, AMENITY_COUNT } from "../../lib/amenities.js";
 import { px } from "../../lib/images.js";
@@ -33,6 +34,7 @@ export default function Amenities() {
   const list = useRef(null);
   const [openId, setOpenId] = useState(AMENITY_CATEGORIES[0].id);
   const { openEnquiry, openVisit } = useEnquiry();
+  const { t } = useI18n();
 
   const { contextSafe } = useGSAP(
     () => {
@@ -101,15 +103,13 @@ export default function Amenities() {
       <div className="container-lux">
         <div className="am-rise mb-[clamp(2.5rem,6vh,4rem)] flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-xl">
-            <p className="kicker mb-5">The Lifestyle</p>
+            <p className="kicker mb-5">{t("samenities.kicker")}</p>
             <h2 className="font-display text-[clamp(2rem,5vw,3.4rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
-              A private world of <span className="font-serif italic text-brass">amenities.</span>
+              {t("samenities.headingLead")} <span className="font-serif italic text-brass">{t("samenities.headingAccent")}</span>
             </h2>
           </div>
           <p className="max-w-sm text-ink-soft">
-            {AMENITY_COUNT} facilities named across the official listing and project
-            material, arranged the way a household actually uses them. Open a category
-            to see what sits inside it — and what has not been announced.
+            {AMENITY_COUNT} {t("samenities.intro")}
           </p>
         </div>
 
@@ -145,7 +145,7 @@ export default function Amenities() {
                       {c.label}
                     </span>
                     <span className="mono ml-auto hidden shrink-0 text-[0.58rem] tracking-[0.18em] text-ink-faint sm:block">
-                      {c.items.length} {c.items.length === 1 ? "facility" : "facilities"}
+                      {c.items.length} {c.items.length === 1 ? t("samenities.facility") : t("samenities.facilities")}
                     </span>
                     <ChevronDown
                       size={17}
@@ -172,7 +172,7 @@ export default function Amenities() {
                         <div className="ed-breath absolute inset-0 scale-[1.04]">
                           <Media
                             src={px(c.image, 1200)}
-                            alt={c.imageAlt || `${c.label} — M3M Brabus, Sector 58 Gurgaon`}
+                            alt={c.imageAlt || `${c.label} — M3M Brabus, ${t("samenities.location")}`}
                             sizes="(max-width:1024px) 100vw, 38vw"
                           />
                         </div>
@@ -205,7 +205,7 @@ export default function Amenities() {
                       {c.gated && (
                         <div className="am-in mt-6 rounded-[1rem] border border-brass/25 bg-paper p-5 sm:p-6">
                           <p className="mono text-[0.56rem] tracking-[0.2em] text-ink-faint">
-                            Not published
+                            {t("samenities.notPublished")}
                           </p>
                           <p className="mt-2 max-w-[52ch] text-sm leading-relaxed text-ink-soft">
                             {c.gated.note}
@@ -239,7 +239,7 @@ export default function Amenities() {
             record of what exists should not be. */}
         <div className="am-index mt-[clamp(2.5rem,6vh,4rem)]">
           <p className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">
-            All {AMENITY_COUNT} named facilities
+            {t("samenities.allPre")} {AMENITY_COUNT} {t("samenities.namedFacilities")}
           </p>
           <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
             {AMENITY_INDEX.map((name) => (
@@ -262,7 +262,7 @@ export default function Amenities() {
           >
             <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/visit:scale-x-100" />
             <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/visit:text-obsidian">
-              Book a tour of the club
+              {t("samenities.bookTour")}
             </span>
             <ArrowUpRight
               size={15}
@@ -271,8 +271,7 @@ export default function Amenities() {
             />
           </button>
           <p className="mono max-w-[42ch] text-[0.56rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-            Amenities as published by the developer · Indicative and subject to the
-            final approved plan
+            {t("samenities.disclaimer")}
           </p>
         </div>
       </div>

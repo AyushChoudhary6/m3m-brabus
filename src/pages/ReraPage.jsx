@@ -11,109 +11,79 @@ import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { PROJECT } from "../lib/site.js";
 import { IMG, px } from "../lib/images.js";
+import { useI18n } from "../lib/i18n.jsx";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /* Regulatory status. Nothing here is inferred — where the official listing
    does not publish a figure, the row says so. */
 const STATUS = [
-  { k: "RERA registration", v: PROJECT.rera },
-  { k: "Regulator", v: "HARERA — Haryana Real Estate Regulatory Authority, Gurugram bench" },
-  { k: "Portal", v: "haryanarera.gov.in" },
-  { k: "Project", v: `${PROJECT.name} · ${PROJECT.configs}` },
-  { k: "Developer", v: PROJECT.developer },
-  { k: "Address", v: PROJECT.address },
-  { k: "Possession", v: PROJECT.possession },
-  { k: "Price", v: PROJECT.price },
+  { kKey: "rera.status.reraLabel", v: PROJECT.rera },
+  { kKey: "rera.status.regulatorLabel", vKey: "rera.status.regulatorValue" },
+  { kKey: "rera.status.portalLabel", v: "haryanarera.gov.in" },
+  { kKey: "rera.status.projectLabel", v: `${PROJECT.name} · ${PROJECT.configs}` },
+  { kKey: "rera.status.developerLabel", v: PROJECT.developer },
+  { kKey: "rera.status.addressLabel", v: PROJECT.address },
+  { kKey: "rera.status.possessionLabel", v: PROJECT.possession },
+  { kKey: "rera.status.priceLabel", v: PROJECT.price },
 ];
 
 const PROTECTIONS = [
-  {
-    t: "Carpet area is defined",
-    d: "Under RERA, a home must be sold on carpet area — a single statutory definition — so the area you pay for is the area you can measure inside the walls.",
-  },
-  {
-    t: "Funds are ring-fenced",
-    d: "A registered project must hold a prescribed share of buyer collections in a separate account, to be drawn only against construction of that project.",
-  },
-  {
-    t: "Committed timelines",
-    d: "The declared completion date sits on the public record. Where a promoter misses it, the Act provides for interest or withdrawal at the allottee's option.",
-  },
-  {
-    t: "Advertising is accountable",
-    d: "Plans, layouts, approvals and sanctioned specifications filed with the Authority are the ones that bind — marketing material cannot quietly depart from them.",
-  },
-  {
-    t: "A defect-liability window",
-    d: "Structural and workmanship defects notified within the statutory period after handover are the promoter's to rectify.",
-  },
-  {
-    t: "A forum for disputes",
-    d: "Complaints go to the Authority and, on appeal, to the Appellate Tribunal — a specialist route rather than a general civil suit.",
-  },
+  { tKey: "rera.prot.carpet", dKey: "rera.prot.carpetD" },
+  { tKey: "rera.prot.funds", dKey: "rera.prot.fundsD" },
+  { tKey: "rera.prot.timelines", dKey: "rera.prot.timelinesD" },
+  { tKey: "rera.prot.advertising", dKey: "rera.prot.advertisingD" },
+  { tKey: "rera.prot.defect", dKey: "rera.prot.defectD" },
+  { tKey: "rera.prot.forum", dKey: "rera.prot.forumD" },
 ];
 
 const VERIFY = [
-  {
-    n: "01",
-    t: "Open the HARERA Gurugram portal",
-    d: "Go to haryanarera.gov.in and choose the Gurugram authority. Sector 58 falls under the Gurugram bench, not Panchkula.",
-  },
-  {
-    n: "02",
-    t: "Search the registered-projects register",
-    d: "Use the public project search. You can look by promoter name, by project name or by district and sector — search on the developer as well as the project, since the filed name can differ from the marketing name.",
-  },
-  {
-    n: "03",
-    t: "Read the project record end to end",
-    d: "A registered project's page carries the registration number, its validity, the promoter details, the sanctioned plans and the declared completion date. Note the number exactly as written.",
-  },
-  {
-    n: "04",
-    t: "Check the quarterly progress filings",
-    d: "Registered promoters file periodic updates on construction and on booking status. Reading two or three consecutive filings tells you more than any brochure.",
-  },
-  {
-    n: "05",
-    t: "Cross-check what you were shown",
-    d: "Match the tower, block and unit in your proposal against the sanctioned layout on record. Anything that does not appear on the portal should be treated as not yet approved.",
-  },
+  { n: "01", tKey: "rera.verify.open", dKey: "rera.verify.openD" },
+  { n: "02", tKey: "rera.verify.search", dKey: "rera.verify.searchD" },
+  { n: "03", tKey: "rera.verify.read", dKey: "rera.verify.readD" },
+  { n: "04", tKey: "rera.verify.progress", dKey: "rera.verify.progressD" },
+  { n: "05", tKey: "rera.verify.cross", dKey: "rera.verify.crossD" },
 ];
 
 const DOCUMENTS = [
-  "RERA registration certificate and the registration number, with its validity period",
-  "Licence and building-plan approvals for the land parcel",
-  "Approved layout and sanctioned floor plan for the specific unit",
-  "Title report or land ownership documents for the project land",
-  "Carpet-area statement for the residence, stated separately from built-up area",
-  "The full cost sheet — base price, statutory charges, taxes and any other head",
-  "Draft allotment letter and draft builder-buyer agreement, before any payment",
-  "Payment plan with the construction-linked milestones written out",
-  "Declared completion or possession date as filed with the Authority",
-  "Specification schedule for the residence and the common areas",
-  "Details of the escrow or designated project account for payments",
-  "Receipts issued in the name of the registered project entity",
+  "rera.docs.certificate",
+  "rera.docs.licence",
+  "rera.docs.layout",
+  "rera.docs.title",
+  "rera.docs.carpet",
+  "rera.docs.cost",
+  "rera.docs.draft",
+  "rera.docs.payment",
+  "rera.docs.completion",
+  "rera.docs.spec",
+  "rera.docs.escrow",
+  "rera.docs.receipts",
 ];
 
 const FAQ_ITEMS = [
   {
     q: "What is the RERA number of M3M Brabus?",
     a: "The official M3M listing does not publish a RERA registration number for M3M Brabus at this stage — it is marked as on request. We do not publish a number we cannot source. Please enquire and we will share the registration status in writing as it stands, and you can confirm it independently on the HARERA portal.",
+    qKey: "rera.faq.q1",
+    aKey: "rera.faq.a1",
   },
   {
     q: "How do I verify M3M Brabus on the HARERA portal myself?",
     a: "Visit haryanarera.gov.in, select the Gurugram authority, and use the public search of registered projects. Search by the promoter name as well as the project name, since a project can be filed under a name that differs from its marketing name. Any registered project displays its registration number, validity, sanctioned plans and declared completion date.",
+    qKey: "rera.faq.q2",
+    aKey: "rera.faq.a2",
   },
   {
     q: "Should I pay a booking amount before a registration number is confirmed?",
     a: "Take no step on our word alone. Ask for the registration certificate, the licence and approvals, the draft agreement and the full cost sheet in writing, verify the record on the HARERA portal yourself, and take independent legal advice before committing any money.",
+    qKey: "rera.faq.q3",
+    aKey: "rera.faq.a3",
   },
 ];
 
 export default function ReraPage() {
   const root = useRef(null);
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -170,33 +140,31 @@ export default function ReraPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "RERA", path: "/rera" }]} />
       <PageHeader
-        eyebrow="M3M Brabus RERA"
-        title="The record,"
-        accent="stated plainly."
-        lede={`${PROJECT.rera}. The official M3M listing does not publish a registration number for ${PROJECT.name} at this stage — so neither do we. Here is what that means, and how to verify the project yourself on the HARERA register.`}
+        eyebrow={t("rera.eyebrow")}
+        title={t("rera.title")}
+        accent={t("rera.accent")}
+        lede={`${PROJECT.rera}. ${t("rera.ledeA")} ${PROJECT.name} ${t("rera.ledeB")}`}
       />
 
       {/* status */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">Registration status</span>
+          <span className="kicker">{t("rera.k01")}</span>
         </div>
         <dl className="border-t border-line">
           {STATUS.map((s) => (
             <div
-              key={s.k}
+              key={s.kKey}
               className="rise grid grid-cols-1 gap-1 border-b border-line py-5 sm:grid-cols-[minmax(0,14rem)_1fr] sm:gap-8"
             >
-              <dt className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{s.k}</dt>
-              <dd className="text-ink">{s.v}</dd>
+              <dt className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{t(s.kKey)}</dt>
+              <dd className="text-ink">{s.vKey ? t(s.vKey) : s.v}</dd>
             </div>
           ))}
         </dl>
         <p className="rise mt-6 max-w-[60ch] text-sm leading-relaxed text-ink-soft">
-          We publish only what the official listing carries. Where a figure has not been released — the
-          registration number, the price, the possession date — this page says so rather than fill the
-          gap. Ask us, and we will put the current position to you in writing.
+          {t("rera.statusNote")}
         </p>
       </section>
 
@@ -204,30 +172,22 @@ export default function ReraPage() {
       <section className="sec container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">What HARERA is</span>
+          <span className="kicker">{t("rera.k02")}</span>
         </div>
         <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div>
             <h2 className="sec-rise max-w-[18ch] font-display text-[clamp(1.9rem,4vw,3rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-              A regulator, and{" "}
-              <span className="font-serif italic text-brass">a public register.</span>
+              {t("rera.headlineA")}{" "}
+              <span className="font-serif italic text-brass">{t("rera.headlineB")}</span>
             </h2>
             <p className="sec-rise mt-6 max-w-[54ch] leading-relaxed text-ink-soft">
-              The Real Estate (Regulation and Development) Act, 2016 — RERA — required every state to
-              constitute an authority for the sector. Haryana's is HARERA, and it operates through two
-              benches: Gurugram and Panchkula. A project in Sector 58, Gurugram falls to the Gurugram
-              bench.
+              {t("rera.whatP1")}
             </p>
             <p className="sec-rise mt-4 max-w-[54ch] leading-relaxed text-ink-soft">
-              The Act's mechanism is disclosure. A promoter covered by it registers the project before
-              advertising or selling, and files the licence, approvals, sanctioned plans, land title,
-              declared completion date and periodic progress updates onto a register the public can
-              read. The registration number is simply the key to that record — which is why it matters
-              far more than the number itself does.
+              {t("rera.whatP2")}
             </p>
             <p className="sec-rise mt-4 max-w-[54ch] leading-relaxed text-ink-soft">
-              This page is general guidance on the framework, not legal advice. Verify the record
-              yourself and take independent counsel before you commit.
+              {t("rera.whatP3")}
             </p>
           </div>
 
@@ -235,7 +195,7 @@ export default function ReraPage() {
             <div className="rera-img-inner ed-breath absolute inset-0 scale-[1.06]">
               <Media
                 src={px(IMG.arrival, 1400)}
-                alt={`${PROJECT.name} — arrival court, ${PROJECT.location}`}
+                alt={`${PROJECT.name} ${t("rera.arrivalAlt")} ${PROJECT.location}`}
                 sizes="(max-width:1024px) 100vw, 46vw"
               />
             </div>
@@ -252,20 +212,20 @@ export default function ReraPage() {
       <section className="sec container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">03</span>
-          <span className="kicker">Why it matters to a buyer</span>
+          <span className="kicker">{t("rera.k03")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {PROTECTIONS.map((p) => (
-            <div key={p.t} className="sec-rise group border-b border-line py-6">
+            <div key={p.tKey} className="sec-rise group border-b border-line py-6">
               <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
-                {p.t}
+                {t(p.tKey)}
               </h3>
-              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{p.d}</p>
+              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{t(p.dKey)}</p>
             </div>
           ))}
         </div>
         <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          Indicative summary of the statutory framework — refer to the Act and HARERA rules for the operative text
+          {t("rera.protNote")}
         </p>
       </section>
 
@@ -273,7 +233,7 @@ export default function ReraPage() {
       <section className="sec container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">04</span>
-          <span className="kicker">Verifying a project on HARERA</span>
+          <span className="kicker">{t("rera.k04")}</span>
         </div>
         <ol className="border-t border-line">
           {VERIFY.map((v) => (
@@ -284,17 +244,15 @@ export default function ReraPage() {
               <span className="idx">{v.n}</span>
               <div>
                 <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
-                  {v.t}
+                  {t(v.tKey)}
                 </h3>
-                <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-ink-soft">{v.d}</p>
+                <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-ink-soft">{t(v.dKey)}</p>
               </div>
             </li>
           ))}
         </ol>
         <p className="sec-rise mt-6 max-w-[60ch] text-sm leading-relaxed text-ink-soft">
-          We deliberately do not link to a project page or reproduce a registration number here — there is
-          none published to reproduce. Search the register yourself; a result you found is worth more than
-          a number we typed.
+          {t("rera.verifyNote")}
         </p>
       </section>
 
@@ -302,7 +260,7 @@ export default function ReraPage() {
       <section className="sec container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">05</span>
-          <span className="kicker">Documents to ask for</span>
+          <span className="kicker">{t("rera.k05")}</span>
         </div>
         <ul className="border-t border-line">
           {DOCUMENTS.map((d) => (
@@ -311,13 +269,12 @@ export default function ReraPage() {
               className="sec-rise flex items-start gap-4 border-b border-line py-4 text-ink-soft"
             >
               <Check size={13} strokeWidth={2} className="mt-1.5 shrink-0 text-brass" />
-              <span className="max-w-[70ch] leading-relaxed">{d}</span>
+              <span className="max-w-[70ch] leading-relaxed">{t(d)}</span>
             </li>
           ))}
         </ul>
         <p className="sec-rise mt-6 max-w-[60ch] text-sm leading-relaxed text-ink-soft">
-          Ask for every one of these in writing, and read the draft agreement before any payment. If a
-          document cannot be produced, that is itself an answer worth having early.
+          {t("rera.docsNote")}
         </p>
       </section>
 
@@ -325,13 +282,13 @@ export default function ReraPage() {
       <section className="sec container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">06</span>
-          <span className="kicker">RERA questions</span>
+          <span className="kicker">{t("rera.k06")}</span>
         </div>
         <dl className="border-t border-line">
           {FAQ_ITEMS.map((f) => (
             <div key={f.q} className="sec-rise border-b border-line py-6">
-              <dt className="font-display text-xl text-ink md:text-2xl">{f.q}</dt>
-              <dd className="mt-3 max-w-[68ch] leading-relaxed text-ink-soft">{f.a}</dd>
+              <dt className="font-display text-xl text-ink md:text-2xl">{t(f.qKey)}</dt>
+              <dd className="mt-3 max-w-[68ch] leading-relaxed text-ink-soft">{t(f.aKey)}</dd>
             </div>
           ))}
         </dl>
@@ -339,7 +296,7 @@ export default function ReraPage() {
 
       <RelatedPages links={["/overview", "/possession", "/reviews", "/contact"]} />
 
-      <CtaBand title="Ask for the" accent="paperwork." subject="RERA" />
+      <CtaBand title={t("rera.ctaTitle")} accent={t("rera.ctaAccent")} subject="RERA" />
     </div>
   );
 }

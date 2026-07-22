@@ -12,6 +12,7 @@ import ConfigTable from "../components/sections/ConfigTable.jsx";
 import Media from "../components/ui/Media.jsx";
 import { RESIDENCES, PROJECT } from "../lib/site.js";
 import { px } from "../lib/images.js";
+import { useI18n } from "../lib/i18n.jsx";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -27,14 +28,14 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    hold in common is stated once, in 03. */
 
 const SPEC_SCHEDULE = [
-  { t: "Flooring", d: "Italian marble to the living and dining areas, with premium finishes carried through the home." },
-  { t: "Kitchen", d: "Modular kitchen fitted with branded appliances and hardware." },
-  { t: "Climate", d: "VRV air conditioning throughout, zoned for quiet, even comfort." },
-  { t: "Automation", d: "Smart-home integration for lighting, climate and security." },
-  { t: "Structure", d: "Open-core architecture — each residence opens on three sides for daylight and cross-ventilation." },
-  { t: "Arrival", d: "Private lift lobby serving the residence, with dedicated covered parking." },
-  { t: "Safety", d: "24/7 manned security with CCTV surveillance across the address." },
-  { t: "Sustainability", d: "Rainwater harvesting and energy-efficient building systems." },
+  { key: "flooring" },
+  { key: "kitchen" },
+  { key: "climate" },
+  { key: "automation" },
+  { key: "structure" },
+  { key: "arrival" },
+  { key: "safety" },
+  { key: "sustainability" },
 ];
 
 /* Both homes are built to the schedule above, so a bullet repeating one of its
@@ -76,6 +77,7 @@ const frameCaption = (alt) => {
 
 export default function ResidencesPage() {
   const root = useRef(null);
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -114,13 +116,13 @@ export default function ResidencesPage() {
         path="/residences"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Residences", path: "/residences" }])}
       />
-      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Residences", path: "/residences" }]} />
+      <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: t("residences.crumb"), path: "/residences" }]} />
       <PageHeader
         compact
-        eyebrow="M3M Brabus Residences · 4 & 5 BHK"
-        title="Open on three sides."
-        accent="A collection for the few."
-        lede={`${PROJECT.configs} of ${PROJECT.sizes} — composed so that light, air and silence arrive before you do.`}
+        eyebrow={t("residences.eyebrow")}
+        title={t("residences.title")}
+        accent={t("residences.accent")}
+        lede={`${PROJECT.configs} ${t("residences.ledeMid")} ${PROJECT.sizes}${t("residences.ledeTail")}`}
       />
 
       {/* alternating residence rows */}
@@ -159,11 +161,11 @@ export default function ResidencesPage() {
 
               <dl className="rr-rise mt-7 grid grid-cols-2 gap-x-8 gap-y-4 border-t border-line pt-6">
                 <div>
-                  <dt className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">Size</dt>
+                  <dt className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">{t("residences.size")}</dt>
                   <dd className="mt-1 font-display text-lg text-ink">{r.area}</dd>
                 </div>
                 <div>
-                  <dt className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">Orientation</dt>
+                  <dt className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">{t("residences.orientation")}</dt>
                   <dd className="mt-1 text-sm leading-snug text-ink-soft">{r.facing}</dd>
                 </div>
               </dl>
@@ -173,7 +175,7 @@ export default function ResidencesPage() {
               {DISTINCT[r.id].length > 0 && (
                 <div className="rr-rise mt-7">
                   <p className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">
-                    Only in this residence
+                    {t("residences.onlyInThis")}
                   </p>
                   <ul className="mt-3 grid gap-y-2.5 sm:grid-cols-2 sm:gap-x-8">
                     {DISTINCT[r.id].map((f) => (
@@ -192,38 +194,37 @@ export default function ResidencesPage() {
         {/* Says out loud what the short lists imply, so a reader cannot infer
             that the 4 BHK goes without the marble or the lift lobby. */}
         <p className="mono mt-8 text-[0.58rem] leading-relaxed tracking-[0.2em] text-ink-faint">
-          Both residences are built to the same specification schedule, set out in 03
+          {t("residences.builtToSchedule")}
           <span className="mt-2 block">
-            No interior render of either residence has been published · Layouts are
-            issued on request
+            {t("residences.noRender")}
           </span>
         </p>
       </section>
 
       {/* comparison — semantic table, with the two unpublished figures gated */}
-      <ConfigTable index="02" kicker="Side by side" />
+      <ConfigTable index="02" kicker={t("residences.configKicker")} />
 
       {/* specification schedule */}
       <section className="spec-grid container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">03</span>
-          <span className="kicker">Specification schedule</span>
+          <span className="kicker">{t("residences.specKicker")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {SPEC_SCHEDULE.map((s) => (
-            <div key={s.t} className="spec group border-b border-line py-6">
-              <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">{s.t}</h3>
-              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{s.d}</p>
+            <div key={s.key} className="spec group border-b border-line py-6">
+              <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">{t(`residences.spec.${s.key}.t`)}</h3>
+              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{t(`residences.spec.${s.key}.d`)}</p>
             </div>
           ))}
         </div>
         <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          Specifications are indicative and subject to the final approved plan
+          {t("residences.specNote")}
         </p>
       </section>
 
       <RelatedPages links={["/floor-plan", "/price", "/brochure", "/amenities"]} />
-      <CtaBand title="Request the" accent="floor plans." subject="Residences" />
+      <CtaBand title={t("residences.ctaTitle")} accent={t("residences.ctaAccent")} subject="Residences" />
     </div>
   );
 }

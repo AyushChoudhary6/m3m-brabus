@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import Media from "../ui/Media.jsx";
+import { useI18n } from "../../lib/i18n.jsx";
 import { IMG, px } from "../../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -12,14 +13,15 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    three principles. Motion: the statement brightens word by word; the plate
    clip-reveals; the text rises. */
 const PRINCIPLES = [
-  { k: "i", t: "Obsessive detail", d: "Every junction, material and line considered like a bespoke commission." },
-  { k: "ii", t: "Performance living", d: "Systems, air and light tuned to perform — quietly, precisely, always." },
-  { k: "iii", t: "Bespoke by nature", d: "No two residences alike; crafted for those who refuse the ordinary." },
+  { k: "i", t: "smanifesto.p1Title", d: "smanifesto.p1Desc" },
+  { k: "ii", t: "smanifesto.p2Title", d: "smanifesto.p2Desc" },
+  { k: "iii", t: "smanifesto.p3Title", d: "smanifesto.p3Desc" },
 ];
 
 export default function Manifesto() {
   const root = useRef(null);
   const imgWrap = useRef(null);
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -61,13 +63,13 @@ export default function Manifesto() {
       <div className="stmt grid gap-8 lg:grid-cols-[auto_1fr] lg:gap-16">
         <div className="flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">The Philosophy</span>
+          <span className="kicker">{t("smanifesto.thePhilosophy")}</span>
         </div>
         <h2 className="flex max-w-[24ch] flex-wrap font-display text-[clamp(1.9rem,4.6vw,3.9rem)] font-light leading-[1.14] tracking-[-0.02em] text-ink">
-          {"We did not set out to build homes. We set out to compose a".split(" ").map((w, i) => (
+          {t("smanifesto.statementLead").split(" ").map((w, i) => (
             <span key={i} className="stmt-word mr-[0.28em]">{w}</span>
           ))}
-          {"way of living.".split(" ").map((w, i) => (
+          {t("smanifesto.statementAccent").split(" ").map((w, i) => (
             <span key={`a${i}`} className="stmt-word mr-[0.28em] font-serif italic text-brass">{w}</span>
           ))}
         </h2>
@@ -79,13 +81,13 @@ export default function Manifesto() {
         <figure className="rise">
           <div ref={imgWrap} className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-line md:aspect-[5/6]">
             <div className="mf-img-inner ed-breath absolute inset-0 scale-[1.06]">
-              <Media src={px(IMG.lobby, 1600)} alt="M3M Brabus — the double-height marble lobby at Sector 58, Gurugram" sizes="(max-width:1024px) 100vw, 46vw" />
+              <Media src={px(IMG.lobby, 1600)} alt={t("smanifesto.lobbyAlt")} sizes="(max-width:1024px) 100vw, 46vw" />
             </div>
             <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_50%,rgba(8,6,5,0.6))]" />
             <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
             {/* Caption the frame, not the argument. This is the lobby render; no
                 image of the engineering itself has been published. */}
-            <span className="mono absolute left-5 bottom-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">The Lobby</span>
+            <span className="mono absolute left-5 bottom-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">{t("smanifesto.theLobby")}</span>
           </div>
         </figure>
 
@@ -93,10 +95,10 @@ export default function Manifesto() {
         <div>
           <div className="rise flex items-baseline gap-5">
             <span className="idx">02</span>
-            <span className="kicker">The Engineering</span>
+            <span className="kicker">{t("smanifesto.theEngineering")}</span>
           </div>
           <h3 className="rise mt-6 max-w-[18ch] font-display text-[clamp(1.8rem,3.8vw,3.1rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
-            Hand-built precision, <span className="font-serif italic text-brass">translated into architecture.</span>
+            {t("smanifesto.engLead")} <span className="font-serif italic text-brass">{t("smanifesto.engAccent")}</span>
           </h3>
 
           <ul className="mt-9 border-t border-line">
@@ -104,8 +106,8 @@ export default function Manifesto() {
               <li key={c.k} className="rise group flex gap-6 border-b border-line py-6 transition-colors duration-500 hover:bg-brass/[0.035]">
                 <span className="idx pt-1.5 text-brass">{c.k}</span>
                 <div>
-                  <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">{c.t}</h3>
-                  <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{c.d}</p>
+                  <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">{t(c.t)}</h3>
+                  <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{t(c.d)}</p>
                 </div>
               </li>
             ))}

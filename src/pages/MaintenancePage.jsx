@@ -1,5 +1,6 @@
 import { Phone, MessageCircle, RotateCw } from "lucide-react";
 import Seo from "../components/ui/Seo.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT } from "../lib/site.js";
 import { trackCall, trackWhatsApp } from "../lib/analytics.js";
 
@@ -33,11 +34,11 @@ import { trackCall, trackWhatsApp } from "../lib/analytics.js";
  *    WhatsApp routes below are the fallback, and they always work.
  */
 
-const WA_TEXT = encodeURIComponent(
-  `Hello — the ${PROJECT.name} website is under maintenance. Could you send me the details?`,
-);
-
 export default function MaintenancePage() {
+  const { t } = useI18n();
+  const WA_TEXT = encodeURIComponent(
+    `${t("maintenance.waTextPre")}${PROJECT.name}${t("maintenance.waTextPost")}`,
+  );
   return (
     <section className="relative flex min-h-[86vh] items-center overflow-hidden">
       <Seo
@@ -53,18 +54,15 @@ export default function MaintenancePage() {
         <p className="kicker">{PROJECT.name}</p>
 
         <h1 className="mt-6 max-w-[14ch] font-display text-[clamp(2.6rem,7vw,5.5rem)] font-light leading-[0.98] tracking-[-0.03em] text-ink">
-          Back very <span className="font-serif italic text-brass">shortly.</span>
+          {t("maintenance.titleLead")} <span className="font-serif italic text-brass">{t("maintenance.titleAccent")}</span>
         </h1>
 
         <p className="mt-7 max-w-[52ch] text-lg leading-relaxed text-ink-soft">
-          The site is closed for a short spell of scheduled maintenance. Nothing is wrong and
-          nothing has been lost — we are simply updating it. Please try again in a few minutes.
+          {t("maintenance.body1")}
         </p>
 
         <p className="mt-4 max-w-[52ch] leading-relaxed text-ink-soft">
-          If you would rather not wait, the private client team is reachable throughout. They can
-          send the brochure, the plans and the current position on price, RERA and possession
-          directly.
+          {t("maintenance.body2")}
         </p>
 
         <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -77,7 +75,7 @@ export default function MaintenancePage() {
             <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
             <RotateCw size={14} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
             <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-              Try again
+              {t("maintenance.tryAgain")}
             </span>
           </button>
 
@@ -89,7 +87,7 @@ export default function MaintenancePage() {
             className="mono inline-flex items-center gap-2 rounded-full border border-line px-6 py-4 text-[0.66rem] tracking-[0.18em] text-ink-soft transition-colors hover:border-brass/50 hover:text-brass"
           >
             <MessageCircle size={14} className="text-brass" />
-            WhatsApp the team
+            {t("maintenance.whatsappTeam")}
           </a>
         </div>
 

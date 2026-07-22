@@ -25,9 +25,9 @@ const FIELD =
 const FORM_KEY = "Contact page";
 
 const VISIT = [
-  { k: "01", t: "Book a slot", d: "Share your details and the team will confirm a time that suits you — weekdays or weekends." },
-  { k: "02", t: "A private walkthrough", d: "You'll be shown the layouts, finishes and the amenity plan by the private client team, without a crowd." },
-  { k: "03", t: "The paperwork", d: "Pricing, payment plan, RERA status and allotment terms explained in full before anything is signed." },
+  { k: "01", tKey: "contact.visit1Title", dKey: "contact.visit1Body" },
+  { k: "02", tKey: "contact.visit2Title", dKey: "contact.visit2Body" },
+  { k: "03", tKey: "contact.visit3Title", dKey: "contact.visit3Body" },
 ];
 
 export default function Contact() {
@@ -69,7 +69,7 @@ export default function Contact() {
       // (leads.js throws LeadError{queued:true}); tell the visitor it is safe
       // rather than inviting a give-up or a double-submit.
       if (err && err.queued) { markLeadCaptured(); setSent(true); }
-      else setError("err.send");
+      else setError("err.send"); // key resolved by t() in the error paragraph
     } finally {
       setSending(false);
     }
@@ -97,10 +97,10 @@ export default function Contact() {
   );
 
   const CHANNELS = [
-    { icon: Phone, k: "Sales enquiries", v: PROJECT.phone, href: `tel:${PROJECT.phone}` },
-    { icon: MessageCircle, k: "WhatsApp", v: "Message the team", href: `https://wa.me/${PROJECT.whatsapp}` },
-    { icon: Mail, k: "Email", v: PROJECT.email, href: `mailto:${PROJECT.email}` },
-    { icon: MapPin, k: "Site address", v: PROJECT.address, href: "/location" },
+    { icon: Phone, k: t("contact.chSales"), v: PROJECT.phone, href: `tel:${PROJECT.phone}` },
+    { icon: MessageCircle, k: "WhatsApp", v: t("contact.chWhatsappValue"), href: `https://wa.me/${PROJECT.whatsapp}` },
+    { icon: Mail, k: t("contact.chEmail"), v: PROJECT.email, href: `mailto:${PROJECT.email}` },
+    { icon: MapPin, k: t("contact.chAddress"), v: PROJECT.address, href: "/location" },
   ];
 
   /* The three steps below explain a site visit without ever letting anyone book
@@ -112,17 +112,17 @@ export default function Contact() {
      never became a lead. */
   const ACTIONS = [
     {
-      k: "Schedule a site visit",
-      detail: "Choose your day",
-      why: "Scale, aspect and the quiet of a low-density plan are only real when you stand in them.",
+      k: t("contact.actionVisitTitle"),
+      detail: t("contact.actionVisitDetail"),
+      why: t("contact.actionVisitWhy"),
       icon: CalendarCheck,
       cursor: "VISIT",
       onSelect: () => { trackSiteVisit("Contact page"); openVisit("Contact page"); },
     },
     {
-      k: "Download the brochure",
-      detail: "Instant download",
-      why: "Floor plans, specifications and the amenity list, to read slowly and away from the screen.",
+      k: t("contact.downloadBrochure"),
+      detail: t("contact.actionBrochureDetail"),
+      why: t("contact.actionBrochureWhy"),
       icon: FileDown,
       cursor: "DOWNLOAD",
       onSelect: () => openBrochure("Contact page"),
@@ -140,10 +140,10 @@ export default function Contact() {
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }]} />
       <PageHeader
         compact
-        eyebrow="Contact M3M Brabus"
-        title="A private"
-        accent="consultation."
-        lede="Speak with the private client team for the brochure, price list, floor plans and a viewing at your convenience."
+        eyebrow={t("contact.eyebrow")}
+        title={t("contact.headerTitle")}
+        accent={t("contact.headerAccent")}
+        lede={t("contact.headerLede")}
       />
 
       {/* channels + form */}
@@ -151,7 +151,7 @@ export default function Contact() {
         <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
           {/* channels */}
           <div className="ct-grid">
-            <p className="mono mb-6 text-[0.6rem] tracking-[0.24em] text-ink-faint">Direct lines</p>
+            <p className="mono mb-6 text-[0.6rem] tracking-[0.24em] text-ink-faint">{t("contact.directLines")}</p>
             <div className="border-t border-line">
               {CHANNELS.map((c) => (
                 <a
@@ -182,18 +182,17 @@ export default function Contact() {
               <div className="relative py-8 text-center">
                 <p className="kicker">{t("enq.received")}</p>
                 <h2 className="mt-4 font-display text-[clamp(2rem,6vw,3rem)] font-light leading-[0.95] text-ink">
-                  {t("enq.thankYou")} <span className="font-serif italic text-brass">{form.name.split(" ")[0] || "friend"}.</span>
+                  {t("enq.thankYou")} <span className="font-serif italic text-brass">{form.name.split(" ")[0] || t("contact.friend")}.</span>
                 </h2>
                 <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-ink-soft">
-                  Our private client team will reach you shortly with the brochure,
-                  pricing and a viewing invitation.
+                  {t("contact.sentBody")}
                 </p>
               </div>
             ) : (
               <div className="relative">
-                <p className="kicker">Enquiry</p>
+                <p className="kicker">{t("contact.enquiryKicker")}</p>
                 <h2 className="mt-3 font-display text-[clamp(1.8rem,3.4vw,2.4rem)] font-light leading-[1.05] text-ink">
-                  Tell us what you're <span className="font-serif italic text-brass">looking for.</span>
+                  {t("contact.formTitle")} <span className="font-serif italic text-brass">{t("contact.formTitleAccent")}</span>
                 </h2>
                 <form onSubmit={submit} onFocus={touch} onInput={touch} className="mt-7 space-y-5">
                   {/* Honeypot — invisible to people and to screen readers, skipped by
@@ -257,14 +256,14 @@ export default function Contact() {
       <section className="vs-grid container-lux pb-[clamp(5rem,13vh,9rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">Plan a site visit</span>
+          <span className="kicker">{t("contact.planVisitKicker")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-3">
           {VISIT.map((v) => (
-            <article key={v.t} className="vs border-t border-line py-7">
+            <article key={v.k} className="vs border-t border-line py-7">
               <span className="idx">{v.k}</span>
-              <h3 className="mt-3 font-display text-2xl text-ink">{v.t}</h3>
-              <p className="mt-2.5 max-w-[38ch] leading-relaxed text-ink-soft">{v.d}</p>
+              <h3 className="mt-3 font-display text-2xl text-ink">{t(v.tKey)}</h3>
+              <p className="mt-2.5 max-w-[38ch] leading-relaxed text-ink-soft">{t(v.dKey)}</p>
             </article>
           ))}
         </div>
@@ -309,8 +308,7 @@ export default function Contact() {
 
         {/* the promise the rest of the site keeps, restated at the door */}
         <p className="mono mt-8 max-w-[70ch] text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-          No price, RERA number or possession date has been published for this project ·
-          You will be sent each one the day {PROJECT.developer} issues it, and nothing before
+          {t("contact.disclaimerPre")}{PROJECT.developer}{t("contact.disclaimerPost")}
         </p>
       </section>
       <RelatedPages links={["/brochure", "/residences", "/price"]} />

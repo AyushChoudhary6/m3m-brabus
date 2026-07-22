@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { MessageCircle, Phone } from "lucide-react";
 import { trackWhatsApp, trackCall } from "../../lib/analytics.js";
 import { whatsappUrl } from "../../lib/whatsapp.js";
+import { useI18n } from "../../lib/i18n.jsx";
 import { PROJECT } from "../../lib/site.js";
 
 /**
@@ -17,6 +18,7 @@ import { PROJECT } from "../../lib/site.js";
 
 export default function WhatsAppFloat() {
   const { pathname } = useLocation();
+  const { t } = useI18n();
   const [up, setUp] = useState(false);
 
   // lift above the mobile action bar once the user starts scrolling
@@ -38,7 +40,7 @@ export default function WhatsAppFloat() {
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => trackWhatsApp("float")}
-        aria-label="Chat on WhatsApp"
+        aria-label={t("whatsapp.chatAria")}
         data-cursor="CHAT"
         className="group grid h-12 w-12 place-items-center rounded-full bg-[#25D366] text-white shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)] transition-transform duration-300 hover:scale-105 lg:h-14 lg:w-14"
       >
@@ -47,7 +49,7 @@ export default function WhatsAppFloat() {
       <a
         href={`tel:${PROJECT.phone}`}
         onClick={() => trackCall("float")}
-        aria-label="Call sales"
+        aria-label={t("whatsapp.callAria")}
         data-cursor="CALL"
         className="grid h-12 w-12 place-items-center rounded-full border border-brass/50 bg-paper/90 text-brass shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)] backdrop-blur transition-colors duration-300 hover:bg-brass hover:text-obsidian lg:h-14 lg:w-14"
       >

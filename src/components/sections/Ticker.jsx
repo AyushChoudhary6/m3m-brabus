@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import Marquee from "../ui/Marquee.jsx";
+import { useI18n } from "../../lib/i18n.jsx";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -10,15 +11,17 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    Drifts on its own; the whole band skews and shifts a touch with scroll
    velocity so it feels physically connected to the page. */
 const WORDS = [
-  "Branded Residences",
-  "Sector 58 · Gurgaon",
-  "4 & 5 BHK",
-  "Engineered with BRABUS",
-  "Golf Course Extension Road",
+  "sticker.brandedResidences",
+  "sticker.sectorGurgaon",
+  "sticker.configs",
+  "sticker.engineeredBrabus",
+  "sticker.gceRoad",
 ];
 
 export default function Ticker() {
   const root = useRef(null);
+  const { t } = useI18n();
+  const words = WORDS.map((k) => t(k));
 
   useGSAP(
     () => {
@@ -39,7 +42,7 @@ export default function Ticker() {
   return (
     <div ref={root} aria-hidden="true" className="border-y border-line py-[clamp(1.6rem,4vh,3rem)]">
       <div className="ticker-inner">
-        <Marquee items={WORDS} speed={30} />
+        <Marquee items={words} speed={30} />
       </div>
     </div>
   );

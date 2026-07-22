@@ -12,6 +12,7 @@ import Media from "../components/ui/Media.jsx";
 import BlogBody from "../components/ui/BlogBody.jsx";
 import { getPost, relatedPosts } from "../lib/blog.js";
 import { PROJECT } from "../lib/site.js";
+import { useI18n } from "../lib/i18n.jsx";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -26,6 +27,7 @@ const fmtDate = (iso) =>
 /* A slug that no longer resolves is a routing accident, not content. It gets
    a courteous way back and a noindex — never a soft 200 that Google keeps. */
 function PostNotFound() {
+  const { t } = useI18n();
   return (
     <div>
       <Seo
@@ -34,16 +36,14 @@ function PostNotFound() {
         description="This article is no longer available. Browse the M3M Brabus blog for guides on branded residences, Golf Course Extension Road and buying in Gurgaon."
         path="/blogs"
       />
-      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Blogs", path: "/blogs" }]} />
+      <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: t("blogindex.crumb"), path: "/blogs" }]} />
       <section className="container-lux py-[clamp(4rem,14vh,9rem)]">
-        <p className="kicker">404 · Article</p>
+        <p className="kicker">{t("blogpost.notFoundKicker")}</p>
         <h1 className="mt-6 max-w-[16ch] font-display text-[clamp(2.4rem,6vw,4.5rem)] font-light leading-[1] tracking-[-0.03em] text-ink">
-          This piece has <span className="font-serif italic text-brass">moved on.</span>
+          {t("blogpost.notFoundTitle1")} <span className="font-serif italic text-brass">{t("blogpost.notFoundTitle2")}</span>
         </h1>
         <p className="mt-6 max-w-[48ch] leading-relaxed text-ink-soft">
-          The article you were looking for is not here. The rest of the writing — on branded
-          residences, Golf Course Extension Road, RERA diligence and what to check on a site visit —
-          is a click away.
+          {t("blogpost.notFoundBody")}
         </p>
         <Link
           to="/blogs"
@@ -51,10 +51,10 @@ function PostNotFound() {
           className="group mt-10 inline-flex items-center gap-3 rounded-full border border-brass/50 px-7 py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 hover:bg-brass hover:text-obsidian focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-4 focus-visible:ring-offset-canvas"
         >
           <ArrowLeft size={15} className="transition-transform duration-500 group-hover:-translate-x-0.5" />
-          All articles
+          {t("blogpost.allArticles")}
         </Link>
       </section>
-      <CtaBand title="Speak to the" accent="client team." subject="Blog — article not found" />
+      <CtaBand title={t("blogpost.ctaSpeakTitle")} accent={t("blogpost.clientTeam")} subject="Blog — article not found" />
     </div>
   );
 }
@@ -64,6 +64,7 @@ export default function BlogPost() {
   const post = getPost(slug);
 
   const root = useRef(null);
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -149,11 +150,11 @@ export default function BlogPost() {
           <div className="bp-rise mono mt-8 flex flex-wrap items-center gap-3 text-[0.6rem] tracking-[0.2em] text-ink-faint">
             <time dateTime={post.date}>{fmtDate(post.date)}</time>
             <span aria-hidden="true" className="h-px w-5 bg-line" />
-            <span>{post.readMins} min read</span>
+            <span>{post.readMins} {t("blogpost.minRead")}</span>
             {post.updated && post.updated !== post.date && (
               <>
                 <span aria-hidden="true" className="h-px w-5 bg-line" />
-                <span>Updated {fmtDate(post.updated)}</span>
+                <span>{t("blogpost.updated")} {fmtDate(post.updated)}</span>
               </>
             )}
           </div>
@@ -184,8 +185,7 @@ export default function BlogPost() {
       {/* the honesty line every editorial page on this site carries */}
       <div className="container-lux pb-[clamp(3rem,8vh,5rem)]">
         <p className="mono max-w-[68ch] border-t border-line pt-6 text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-          General guidance only · Figures for {PROJECT.name} are confirmed solely in the official
-          documents issued by {PROJECT.developer}
+          {t("blogpost.guidancePrefix")} {PROJECT.name} {t("blogpost.guidanceMid")} {PROJECT.developer}
         </p>
       </div>
 
@@ -193,12 +193,12 @@ export default function BlogPost() {
       {related.length > 0 && (
         <section className="bp-rel-grid container-lux pb-[clamp(4rem,11vh,7rem)]">
           <div className="mb-8 flex items-baseline gap-5 border-t border-line pt-8">
-            <span className="kicker">Continue reading</span>
+            <span className="kicker">{t("blogpost.continueReading")}</span>
             <Link
               to="/blogs"
               className="mono ml-auto text-[0.6rem] tracking-[0.18em] text-ink-soft transition-colors hover:text-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass"
             >
-              All articles
+              {t("blogpost.allArticles")}
             </Link>
           </div>
           <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
@@ -229,7 +229,7 @@ export default function BlogPost() {
                   <div className="mono mt-auto flex items-center gap-3 pt-5 text-[0.56rem] tracking-[0.18em] text-ink-faint">
                     <time dateTime={r.date}>{fmtDate(r.date)}</time>
                     <span aria-hidden="true" className="h-px w-4 bg-line" />
-                    <span>{r.readMins} min read</span>
+                    <span>{r.readMins} {t("blogpost.minRead")}</span>
                     <ArrowUpRight
                       size={14}
                       className="ml-auto text-brass transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
@@ -242,8 +242,8 @@ export default function BlogPost() {
         </section>
       )}
 
-      <RelatedPages links={["/overview", "/price", "/contact"]} title="About the project" />
-      <CtaBand title="Ask the" accent="client team." subject={`Blog — ${post.title}`} />
+      <RelatedPages links={["/overview", "/price", "/contact"]} title={t("blogpost.relatedTitle")} />
+      <CtaBand title={t("blogpost.ctaAskTitle")} accent={t("blogpost.clientTeam")} subject={`Blog — ${post.title}`} />
     </div>
   );
 }

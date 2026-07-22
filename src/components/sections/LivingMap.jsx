@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import { ArrowUpRight } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useI18n } from "../../lib/i18n.jsx";
 import { LOCATION, PROJECT } from "../../lib/site.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -18,6 +19,7 @@ export default function LivingMap({ bare = false }) {
   const root = useRef(null);
   const mapEl = useRef(null);
   const mapRef = useRef(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (mapRef.current || !mapEl.current) return;
@@ -85,10 +87,10 @@ export default function LivingMap({ bare = false }) {
         <div className="mb-[clamp(2.5rem,6vh,4.5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
           <div className="flex items-baseline gap-5">
             <span className="idx">06</span>
-            <span className="kicker">The Address</span>
+            <span className="kicker">{t("smap.theAddress")}</span>
           </div>
           <h2 className="max-w-[18ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-            The centre of <span className="font-serif italic text-brass">new Gurugram.</span>
+            {t("smap.headingLead")} <span className="font-serif italic text-brass">{t("smap.headingAccent")}</span>
           </h2>
         </div>
       )}
@@ -96,7 +98,7 @@ export default function LivingMap({ bare = false }) {
       <div className="grid items-stretch gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
         {/* distance ledger */}
         <div className="flex flex-col">
-          <p className="mono mb-6 text-[0.6rem] tracking-[0.24em] text-ink-faint">Connectivity</p>
+          <p className="mono mb-6 text-[0.6rem] tracking-[0.24em] text-ink-faint">{t("smap.connectivity")}</p>
           <div className="border-t border-line">
             {LOCATION.map((l) => (
               <div key={l.place} className="loc-row overflow-hidden border-b border-line">
@@ -114,7 +116,7 @@ export default function LivingMap({ bare = false }) {
             data-cursor="VIEW"
             className="group mt-8 inline-flex items-center gap-2.5 self-start border-b border-brass/50 pb-1 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors hover:border-brass"
           >
-            Open in Google Maps
+            {t("smap.openInMaps")}
             <ArrowUpRight size={14} className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-0.5" />
           </a>
         </div>
@@ -127,7 +129,7 @@ export default function LivingMap({ bare = false }) {
           <div className="pointer-events-none absolute inset-x-0 top-0 h-16 [background:linear-gradient(180deg,rgba(8,6,5,0.5),transparent)]" />
           <div className="pointer-events-none absolute bottom-4 left-4 z-[500]">
             <p className="mono text-[0.58rem] tracking-[0.2em] text-brass-soft [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
-              {PROJECT.location} · GCE Road
+              {PROJECT.location} · {t("smap.gceRoad")}
             </p>
           </div>
         </div>

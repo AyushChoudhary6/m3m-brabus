@@ -7,6 +7,7 @@ import { ArrowUpRight, Phone, MessageCircle, Download, PhoneCall, FileText, Cale
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo from "../components/ui/Seo.jsx";
 import { useEnquiry } from "../components/ui/Enquiry.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT } from "../lib/site.js";
 import { whatsappUrl } from "../lib/whatsapp.js";
 import { claimConversion, track, trackCall, trackWhatsApp } from "../lib/analytics.js";
@@ -32,42 +33,43 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
  * `direct` branch below is for.
  */
 
-/* Deliberately operational, not promotional. Someone who has just handed over
-   a phone number wants to know who calls, when, and what lands in their inbox
-   — not to be sold to a second time. */
-const NEXT = [
-  {
-    icon: PhoneCall,
-    k: "A call, from a person",
-    d: "A member of the private client team calls you back, usually within one working day. No auto-dialler and no call centre — one point of contact who stays with your enquiry.",
-    when: "Usually same working day",
-  },
-  {
-    icon: FileText,
-    k: "The papers, in writing",
-    d: `The brochure, floor plans, specification and the full amenity list for the ${PROJECT.configs.toLowerCase()}. Where ${PROJECT.developer} has not published a figure — pricing, RERA, possession — you are told exactly where it stands rather than given an estimate.`,
-    when: "By email and WhatsApp",
-  },
-  {
-    icon: CalendarCheck,
-    k: "A viewing, if you would like one",
-    d: `A visit to ${PROJECT.location} is arranged around your diary. The team confirms the slot, organises access, and can send a car for the appointment.`,
-    when: "On request",
-  },
-];
-
-/* The moment after converting is when interest is highest — so the page ends
-   pointing outward, at the four things enquirers ask for next. */
-const READ_NEXT = [
-  { to: "/floor-plan", name: "Floor plans", d: `Layouts and orientations for the ${PROJECT.configs.toLowerCase()}, ${PROJECT.sizes}.` },
-  { to: "/location", name: "The address", d: `${PROJECT.address} — connectivity, the neighbourhood and what sits around it.` },
-  { to: "/amenities", name: "Amenities", d: "The clubhouse, the wellness floor and the estate, as officially listed." },
-  { to: "/faqs", name: "Questions answered", d: "The questions buyers ask most, answered without invented figures." },
-];
-
 export default function ThankYou() {
   const root = useRef(null);
   const { openEnquiry, openBrochure } = useEnquiry();
+  const { t } = useI18n();
+
+  /* Deliberately operational, not promotional. Someone who has just handed over
+     a phone number wants to know who calls, when, and what lands in their inbox
+     — not to be sold to a second time. */
+  const NEXT = [
+    {
+      icon: PhoneCall,
+      k: t("thankyou.next1Title"),
+      d: t("thankyou.next1Body"),
+      when: t("thankyou.next1When"),
+    },
+    {
+      icon: FileText,
+      k: t("thankyou.next2Title"),
+      d: `${t("thankyou.next2BodyPre")}${PROJECT.configs.toLowerCase()}${t("thankyou.next2BodyMid")}${PROJECT.developer}${t("thankyou.next2BodyPost")}`,
+      when: t("thankyou.next2When"),
+    },
+    {
+      icon: CalendarCheck,
+      k: t("thankyou.next3Title"),
+      d: `${t("thankyou.next3BodyPre")}${PROJECT.location}${t("thankyou.next3BodyPost")}`,
+      when: t("thankyou.next3When"),
+    },
+  ];
+
+  /* The moment after converting is when interest is highest — so the page ends
+     pointing outward, at the four things enquirers ask for next. */
+  const READ_NEXT = [
+    { to: "/floor-plan", name: t("thankyou.readFloorName"), d: `${t("thankyou.readFloorDescPre")}${PROJECT.configs.toLowerCase()}, ${PROJECT.sizes}.` },
+    { to: "/location", name: t("thankyou.readAddressName"), d: `${PROJECT.address}${t("thankyou.readAddressDescSuffix")}` },
+    { to: "/amenities", name: t("thankyou.readAmenitiesName"), d: t("thankyou.readAmenitiesDesc") },
+    { to: "/faqs", name: t("thankyou.readFaqsName"), d: t("thankyou.readFaqsDesc") },
+  ];
 
   /* Resolved after mount, never during render: the prerendered snapshot and
      the first client render must agree, so the direct-visit notice is added
@@ -123,22 +125,22 @@ export default function ThankYou() {
       />
 
       <PageHeader
-        eyebrow="Enquiry received"
-        title="Thank you."
-        accent="You are on the list."
-        lede={`Your details have reached the private client team for ${PROJECT.name}. Nothing further is needed from you — below is precisely what happens next, and roughly when.`}
+        eyebrow={t("thankyou.eyebrow")}
+        title={t("thankyou.title")}
+        accent={t("thankyou.accent")}
+        lede={`${t("thankyou.ledePre")}${PROJECT.name}${t("thankyou.ledePost")}`}
       />
 
       {/* what happens next */}
       <section className="steps container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">What happens next</span>
+          <span className="kicker">{t("thankyou.whatNextKicker")}</span>
         </div>
 
         {firstName && (
           <p className="mb-9 max-w-[52ch] font-display text-[clamp(1.5rem,3.2vw,2.1rem)] font-light leading-snug text-ink">
-            Thank you, <span className="font-serif italic text-brass">{firstName}.</span>
+            {t("enq.thankYou")} <span className="font-serif italic text-brass">{firstName}.</span>
           </p>
         )}
 
@@ -163,7 +165,7 @@ export default function ThankYou() {
 
         {claim.ref && (
           <p className="mono mt-8 text-[0.58rem] leading-relaxed tracking-[0.18em] text-ink-faint">
-            Reference · <span className="text-brass">{claim.ref}</span> — quote it if you call or write, and the team will find your enquiry straight away.
+            {t("thankyou.refLabel")} <span className="text-brass">{claim.ref}</span>{t("thankyou.refSuffix")}
           </p>
         )}
 
@@ -172,12 +174,10 @@ export default function ThankYou() {
         {direct && (
           <div className="mt-10 rounded-[1.25rem] border border-line bg-cream p-6 md:p-9">
             <h3 className="max-w-[36ch] font-display text-xl font-light leading-snug text-ink md:text-2xl">
-              Arrived here directly, without sending anything?
+              {t("thankyou.directTitle")}
             </h3>
             <p className="mt-4 max-w-[62ch] leading-relaxed text-ink-soft">
-              Then no enquiry has been registered — this page is simply the confirmation shown after
-              one is. Leave your details and the private client team will be in touch, or call the
-              number below and skip the form entirely.
+              {t("thankyou.directBody")}
             </p>
             <button
               type="button"
@@ -187,7 +187,7 @@ export default function ThankYou() {
             >
               <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
               <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-                Register your interest
+                {t("thankyou.registerInterest")}
               </span>
               <ArrowUpRight size={15} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
             </button>
@@ -201,13 +201,12 @@ export default function ThankYou() {
           <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
           <div className="relative grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-16">
             <div>
-              <p className="rise kicker">Rather not wait</p>
+              <p className="rise kicker">{t("thankyou.ratherNotWaitKicker")}</p>
               <h2 className="rise mt-4 max-w-[20ch] font-display text-[clamp(1.9rem,3.6vw,2.7rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-                The team is reachable <span className="font-serif italic text-brass">now.</span>
+                {t("thankyou.reachableTitle")} <span className="font-serif italic text-brass">{t("thankyou.reachableAccent")}</span>
               </h2>
               <p className="rise mt-5 max-w-[48ch] leading-relaxed text-ink-soft">
-                If your timeline is short, or you would simply rather speak to someone than wait for
-                a call, either line below reaches the same desk that has your enquiry.
+                {t("thankyou.reachableBody")}
               </p>
             </div>
 
@@ -215,7 +214,7 @@ export default function ThankYou() {
               <a
                 href={`tel:${PROJECT.phone}`}
                 onClick={() => trackCall("thank_you")}
-                aria-label={`Call the private client team on ${PROJECT.phone}`}
+                aria-label={`${t("thankyou.callAria")}${PROJECT.phone}`}
                 className="group inline-flex items-center gap-2.5 rounded-full border border-brass/50 px-7 py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 hover:bg-brass hover:text-obsidian focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
               >
                 <Phone size={14} />
@@ -235,7 +234,7 @@ export default function ThankYou() {
           </div>
 
           <div className="relative mt-9 border-t border-line pt-7">
-            <p className="rise mono text-[0.6rem] tracking-[0.24em] text-ink-faint">While you have a moment</p>
+            <p className="rise mono text-[0.6rem] tracking-[0.24em] text-ink-faint">{t("thankyou.whileMoment")}</p>
             <button
               type="button"
               onClick={cta("brochure", () => openBrochure("Thank you page"))}
@@ -243,12 +242,11 @@ export default function ThankYou() {
               className="rise group mt-4 inline-flex items-center gap-2.5 border-b border-brass/50 pb-1 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors hover:border-brass"
             >
               <Download size={14} />
-              Download the brochure
+              {t("contact.downloadBrochure")}
               <ArrowUpRight size={13} className="transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </button>
             <p className="rise mt-4 max-w-[56ch] text-sm leading-relaxed text-ink-soft">
-              It carries the floor plans, the specification and the amenity list — the same document
-              the team will email you, available immediately.
+              {t("thankyou.brochureNote")}
             </p>
           </div>
         </div>
@@ -258,7 +256,7 @@ export default function ThankYou() {
       <section className="nxt-grid container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">While you wait</span>
+          <span className="kicker">{t("thankyou.whileWaitKicker")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {READ_NEXT.map((p, i) => (
@@ -282,7 +280,7 @@ export default function ThankYou() {
           ))}
         </div>
         <p className="mono mt-9 text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-          {PROJECT.configs} · {PROJECT.address} · Details are shared as officially released by {PROJECT.developer}
+          {PROJECT.configs} · {PROJECT.address} · {t("thankyou.officiallyReleased")}{PROJECT.developer}
         </p>
       </section>
     </div>

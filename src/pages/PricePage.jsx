@@ -11,6 +11,7 @@ import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { useEnquiry } from "../components/ui/Enquiry.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 import { track } from "../lib/analytics.js";
 import { PROJECT, RESIDENCES, FAQS } from "../lib/site.js";
 import { IMG, px } from "../lib/images.js";
@@ -23,20 +24,20 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const DRIVERS = [
   {
-    k: "Configuration",
-    d: "A 4 BHK and a 5 BHK are priced as separate products, not as one rate applied to two sizes.",
+    tKeyK: "price.driverConfigK",
+    tKeyD: "price.driverConfigD",
   },
   {
-    k: "Saleable area",
-    d: `Residences run ${PROJECT.sizes}. The spread between the smallest and the largest home is the single largest factor in the final number.`,
+    tKeyK: "price.saleableArea",
+    tKeyD: "price.driverAreaD",
   },
   {
-    k: "Inventory released",
-    d: "This is an ultra-low-density collection. What is available in a given release, and when you enter it, both bear on the number quoted to you.",
+    tKeyK: "price.driverInventoryK",
+    tKeyD: "price.driverInventoryD",
   },
   {
-    k: "Payment plan chosen",
-    d: "Construction-linked and down-payment structures do not cost the same. The plan you select changes the total outlay.",
+    tKeyK: "price.driverPlanK",
+    tKeyD: "price.driverPlanD",
   },
 ];
 
@@ -45,45 +46,18 @@ const DRIVERS = [
    the point — it is where "all-inclusive" quotes quietly stop. Order follows
    how a Gurugram sheet is typed up: unit cost, then premiums, then deposits. */
 const DEVELOPER_LINES = [
-  {
-    t: "Basic sale price",
-    d: "A per sq.ft rate applied to the super (saleable) area — not the carpet area you walk on. It is the single largest line, and the one every other charge is judged against.",
-  },
-  {
-    t: "Preferential location charge",
-    d: "A premium on the placements people compete for: corner homes, a particular aspect, an unobstructed outlook. Usually quoted per sq.ft, so it scales with the size of the residence.",
-  },
-  {
-    t: "Floor rise",
-    d: "A per sq.ft increment charged above a defined base floor. Two things matter — the rate, and the floor it starts counting from. A sheet that omits the second is incomplete.",
-  },
-  {
-    t: "Club membership",
-    d: "A one-time charge for the clubhouse, pool, spa and gym. It is separate from the unit cost and separate again from the annual subscription that follows possession.",
-  },
-  {
-    t: "IFMS / maintenance deposit",
-    d: "An interest-free maintenance security held against the common estate, taken once at possession. Distinct from the recurring per sq.ft monthly maintenance, quoted separately.",
-  },
-  {
-    t: "Car parking",
-    d: "Covered parking is allotted per residence and billed as its own line. Additional bays, where released, are charged again at the rate in the sheet.",
-  },
-  {
-    t: "Power backup",
-    d: "A one-time charge per KVA of standby load provisioned to the home, with running charges billed later on consumption. Larger residences carry a larger sanctioned load.",
-  },
+  { tKeyT: "price.lineBasicT", tKeyD: "price.lineBasicD" },
+  { tKeyT: "price.lineLocationT", tKeyD: "price.lineLocationD" },
+  { tKeyT: "price.lineFloorRiseT", tKeyD: "price.lineFloorRiseD" },
+  { tKeyT: "price.lineClubT", tKeyD: "price.lineClubD" },
+  { tKeyT: "price.lineIfmsT", tKeyD: "price.lineIfmsD" },
+  { tKeyT: "price.lineParkingT", tKeyD: "price.lineParkingD" },
+  { tKeyT: "price.linePowerT", tKeyD: "price.linePowerD" },
 ];
 
 const STATUTORY_LINES = [
-  {
-    t: "Stamp duty & registration",
-    d: "Payable to the State of Haryana at conveyance, at the rate in force on that date. It is a government levy collected through the transaction, not a charge the developer sets.",
-  },
-  {
-    t: "GST on under-construction",
-    d: "Applicable while the residence is under construction, at the rate prevailing on the date of each instalment. A completed home with an occupation certificate is treated differently.",
-  },
+  { tKeyT: "price.lineStampT", tKeyD: "price.lineStampD" },
+  { tKeyT: "price.lineGstT", tKeyD: "price.lineGstD" },
 ];
 
 const PRICE_FAQ = FAQS.find((f) => f.q === "What is the price of M3M Brabus?");
@@ -93,16 +67,21 @@ const FAQ = [
   {
     q: "Why does this page not quote a per sq.ft rate?",
     a: `Because M3M has not published one. The official listing records the price as "${PROJECT.price}", and so do we. Any rate you find quoted elsewhere for this project is an estimate, not an official figure — we would rather send you the real sheet a little later than an invented one today.`,
+    tKeyQ: "price.faq1Q",
+    tKeyA: "price.faq1A",
   },
   {
     q: "How do I get the price the moment it is released?",
     a: "Register your interest with the private client team. You will be sent the price sheet, the payment plan and the charge schedule as soon as they are officially issued, along with the RERA and possession position at that date.",
+    tKeyQ: "price.faq2Q",
+    tKeyA: "price.faq2A",
   },
 ];
 
 export default function PricePage() {
   const root = useRef(null);
   const { openEnquiry, openBrochure } = useEnquiry();
+  const { t } = useI18n();
 
   /* Every price CTA is a lead, so each one is labelled before it fires. */
   const cta = (label, run) => () => {
@@ -169,49 +148,45 @@ export default function PricePage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Price", path: "/price" }]} />
       <PageHeader
-        eyebrow="M3M Brabus Price"
-        title="The price is"
-        accent="not out yet."
-        lede={`M3M has not released pricing for Brabus — the official listing reads "${PROJECT.price}", and so does this page. Here is what will set the number, what the sheet will carry, and how to be among the first to see it.`}
+        eyebrow={t("price.eyebrow")}
+        title={t("price.title")}
+        accent={t("price.accent")}
+        lede={t("price.lede").replace("{price}", PROJECT.price)}
       />
 
       {/* the status, stated plainly */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">Where pricing stands</span>
+          <span className="kicker">{t("price.kickerStatus")}</span>
         </div>
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
           <div>
-            <p className="rise mono text-[0.6rem] tracking-[0.24em] text-ink-faint">Current status</p>
+            <p className="rise mono text-[0.6rem] tracking-[0.24em] text-ink-faint">{t("price.currentStatus")}</p>
             <p className="rise mt-4 font-display text-[clamp(2.4rem,6vw,4rem)] font-light leading-[1] tracking-[-0.03em] text-ink">
               <span className="font-serif italic text-brass">{PROJECT.price}</span>
             </p>
             <p className="rise mt-6 max-w-[48ch] leading-relaxed text-ink-soft">
-              No basic sale price, no per sq.ft rate and no payment plan have been published for
-              {" "}{PROJECT.name} at this stage. Nor has a launch price been set out for either
-              configuration. We publish only what {PROJECT.developer} has issued — where a figure
-              does not exist officially, you will not find one invented here.
+              {t("price.statusNoPrice").replace("{name}", PROJECT.name).replace("{developer}", PROJECT.developer)}
             </p>
             <p className="rise mt-4 max-w-[48ch] leading-relaxed text-ink-soft">
-              The same applies to the two questions that usually follow. RERA is recorded as
-              {" "}<span className="text-ink">{PROJECT.rera.toLowerCase()}</span>, and possession as
-              {" "}<span className="text-ink">{PROJECT.possession.toLowerCase()}</span>. Ask us and we
-              will tell you exactly where each stands on the day you ask.
+              {t("price.statusReraPart1")}
+              {" "}<span className="text-ink">{PROJECT.rera.toLowerCase()}</span>{t("price.statusReraPart2")}
+              {" "}<span className="text-ink">{PROJECT.possession.toLowerCase()}</span>{t("price.statusReraPart3")}
             </p>
           </div>
 
           <dl className="rise self-start border-t border-line">
             {[
-              { k: "Price", v: PROJECT.price },
-              { k: "Payment plan", v: "Issued with the price sheet" },
-              { k: "RERA", v: PROJECT.rera },
-              { k: "Possession", v: PROJECT.possession },
-              { k: "Configurations", v: PROJECT.configs },
-              { k: "Residence sizes", v: PROJECT.sizes },
-              { k: "Address", v: PROJECT.address },
+              { id: "price", k: t("price.labelPrice"), v: PROJECT.price },
+              { id: "plan", k: t("price.labelPaymentPlan"), v: t("price.valIssuedWithSheet") },
+              { id: "rera", k: t("price.labelRera"), v: PROJECT.rera },
+              { id: "possession", k: t("price.labelPossession"), v: PROJECT.possession },
+              { id: "configs", k: t("price.labelConfigurations"), v: PROJECT.configs },
+              { id: "sizes", k: t("price.labelResidenceSizes"), v: PROJECT.sizes },
+              { id: "address", k: t("price.labelAddress"), v: PROJECT.address },
             ].map((f) => (
-              <div key={f.k} className="grid grid-cols-1 gap-1 border-b border-line py-5 sm:grid-cols-[minmax(0,11rem)_1fr] sm:gap-8">
+              <div key={f.id} className="grid grid-cols-1 gap-1 border-b border-line py-5 sm:grid-cols-[minmax(0,11rem)_1fr] sm:gap-8">
                 <dt className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{f.k}</dt>
                 <dd className="text-ink">{f.v}</dd>
               </div>
@@ -224,31 +199,31 @@ export default function PricePage() {
       <section className="drv-grid container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">What will determine your number</span>
+          <span className="kicker">{t("price.kickerDetermine")}</span>
         </div>
 
         <div className="mb-10 overflow-x-auto">
           <div className="min-w-[520px]">
             <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-6 border-b border-line pb-4">
-              <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">Priced separately</span>
+              <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{t("price.pricedSeparately")}</span>
               {RESIDENCES.map((r) => (
                 <span key={r.id} className="font-display text-lg text-ink">{r.name}</span>
               ))}
             </div>
             <div className="drv grid grid-cols-[1.2fr_1fr_1fr] items-baseline gap-6 border-b border-line-soft py-4">
-              <span className="mono text-[0.62rem] tracking-[0.14em] text-ink-faint">Saleable area</span>
+              <span className="mono text-[0.62rem] tracking-[0.14em] text-ink-faint">{t("price.saleableArea")}</span>
               {RESIDENCES.map((r) => (
                 <span key={r.id} className="text-sm text-ink">{r.area}</span>
               ))}
             </div>
             <div className="drv grid grid-cols-[1.2fr_1fr_1fr] items-baseline gap-6 border-b border-line-soft py-4">
-              <span className="mono text-[0.62rem] tracking-[0.14em] text-ink-faint">Orientation</span>
+              <span className="mono text-[0.62rem] tracking-[0.14em] text-ink-faint">{t("price.orientation")}</span>
               {RESIDENCES.map((r) => (
                 <span key={r.id} className="text-sm text-ink">{r.facing}</span>
               ))}
             </div>
             <div className="drv grid grid-cols-[1.2fr_1fr_1fr] items-baseline gap-6 border-b border-line-soft py-4">
-              <span className="mono text-[0.62rem] tracking-[0.14em] text-ink-faint">Price</span>
+              <span className="mono text-[0.62rem] tracking-[0.14em] text-ink-faint">{t("price.labelPrice")}</span>
               {RESIDENCES.map((r) => (
                 <span key={r.id} className="text-sm text-brass">{PROJECT.price}</span>
               ))}
@@ -258,12 +233,12 @@ export default function PricePage() {
 
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {DRIVERS.map((d, i) => (
-            <div key={d.k} className="drv group border-b border-line py-6">
+            <div key={d.tKeyK} className="drv group border-b border-line py-6">
               <span className="idx">{String(i + 1).padStart(2, "0")}</span>
               <h2 className="mt-3 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
-                {d.k}
+                {t(d.tKeyK)}
               </h2>
-              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{d.d}</p>
+              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{t(d.tKeyD).replace("{sizes}", PROJECT.sizes)}</p>
             </div>
           ))}
         </div>
@@ -275,14 +250,12 @@ export default function PricePage() {
           <div className="relative overflow-hidden rounded-[1.5rem] border border-brass/25 bg-paper p-8 md:p-11">
             <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
             <div className="relative">
-              <p className="rise kicker">Price request</p>
+              <p className="rise kicker">{t("price.priceRequest")}</p>
               <h2 className="rise mt-4 max-w-[16ch] font-display text-[clamp(1.9rem,3.6vw,2.7rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-                Be sent the sheet <span className="font-serif italic text-brass">the day it exists.</span>
+                {t("price.beSentSheet")} <span className="font-serif italic text-brass">{t("price.dayItExists")}</span>
               </h2>
               <p className="rise mt-5 max-w-[46ch] leading-relaxed text-ink-soft">
-                Register once and the private client team will send you the official price list,
-                payment plan, charge schedule and floor plans the moment {PROJECT.developer} releases
-                them — with the RERA and possession position stated as it stands on that date.
+                {t("price.requestBody").replace("{developer}", PROJECT.developer)}
               </p>
 
               {/* Three ways to act. Deliberately NOT labelled "download price list":
@@ -298,7 +271,7 @@ export default function PricePage() {
                 >
                   <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
                   <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-                    Request the cost sheet
+                    {t("price.requestCostSheet")}
                   </span>
                   <ArrowUpRight size={15} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
                 </button>
@@ -309,21 +282,21 @@ export default function PricePage() {
                   className="group inline-flex items-center gap-2.5 rounded-full border border-line px-7 py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors duration-500 hover:border-brass/50 hover:text-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
                 >
                   <Download size={14} className="text-brass" />
-                  Brochure &amp; floor plans
+                  {t("price.brochureFloorPlans")}
                 </button>
                 <a
                   href={`tel:${PROJECT.phone}`}
                   onClick={() => track("cta_click", { location: "price_page", label: "call" })}
-                  aria-label={`Talk to a consultant on ${PROJECT.phone}`}
+                  aria-label={t("price.talkConsultantAria").replace("{phone}", PROJECT.phone)}
                   className="mono inline-flex items-center gap-2 text-[0.68rem] tracking-[0.18em] text-ink-soft transition-colors hover:text-ink"
                 >
                   <Phone size={13} className="text-brass" />
-                  Talk to a consultant · {PROJECT.phone}
+                  {t("price.talkConsultant")} · {PROJECT.phone}
                 </a>
               </div>
 
               <p className="rise mono mt-8 text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-                No estimated rates are circulated · Official documents only
+                {t("price.noEstimatedRates")}
               </p>
             </div>
           </div>
@@ -345,48 +318,45 @@ export default function PricePage() {
       <section className="sheet container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">03</span>
-          <span className="kicker">What the cost sheet carries</span>
+          <span className="kicker">{t("price.kickerSheetCarries")}</span>
         </div>
         <p className="mb-10 max-w-[62ch] leading-relaxed text-ink-soft">
-          A price at this level is never one number. The document that answers the question is a cost
-          sheet, and it is itemised — which is why two quotes on the same residence can differ
-          without either being wrong. These are the lines it carries. The amounts against them are
-          not published today, so none are shown here.
+          {t("price.sheetIntro")}
         </p>
 
-        <p className="mono text-[0.56rem] tracking-[0.2em] text-brass">Charged by the developer</p>
+        <p className="mono text-[0.56rem] tracking-[0.2em] text-brass">{t("price.chargedByDeveloper")}</p>
         <dl className="mt-4 border-t border-line">
           {DEVELOPER_LINES.map((l, i) => (
             <div
-              key={l.t}
+              key={l.tKeyT}
               className="sheet-row grid grid-cols-1 gap-x-10 gap-y-2 border-b border-line py-5 sm:grid-cols-[minmax(0,15rem)_1fr_auto]"
             >
               <dt className="flex items-baseline gap-3 font-display text-lg font-light leading-snug text-ink">
                 <span className="idx shrink-0">{String(i + 1).padStart(2, "0")}</span>
-                {l.t}
+                {t(l.tKeyT)}
               </dt>
-              <dd className="max-w-[58ch] text-sm leading-relaxed text-ink-soft">{l.d}</dd>
+              <dd className="max-w-[58ch] text-sm leading-relaxed text-ink-soft">{t(l.tKeyD)}</dd>
               <dd className="mono self-baseline text-[0.56rem] tracking-[0.18em] text-ink-faint sm:text-right">
-                On request
+                {t("price.onRequest")}
               </dd>
             </div>
           ))}
         </dl>
 
-        <p className="mono mt-12 text-[0.56rem] tracking-[0.2em] text-brass">Payable to the government</p>
+        <p className="mono mt-12 text-[0.56rem] tracking-[0.2em] text-brass">{t("price.payableToGovt")}</p>
         <dl className="mt-4 border-t border-line">
           {STATUTORY_LINES.map((l, i) => (
             <div
-              key={l.t}
+              key={l.tKeyT}
               className="sheet-row grid grid-cols-1 gap-x-10 gap-y-2 border-b border-line py-5 sm:grid-cols-[minmax(0,15rem)_1fr_auto]"
             >
               <dt className="flex items-baseline gap-3 font-display text-lg font-light leading-snug text-ink">
                 <span className="idx shrink-0">{String(DEVELOPER_LINES.length + i + 1).padStart(2, "0")}</span>
-                {l.t}
+                {t(l.tKeyT)}
               </dt>
-              <dd className="max-w-[58ch] text-sm leading-relaxed text-ink-soft">{l.d}</dd>
+              <dd className="max-w-[58ch] text-sm leading-relaxed text-ink-soft">{t(l.tKeyD)}</dd>
               <dd className="mono self-baseline text-[0.56rem] tracking-[0.18em] text-ink-faint sm:text-right">
-                At prevailing rate
+                {t("price.atPrevailingRate")}
               </dd>
             </div>
           ))}
@@ -396,15 +366,10 @@ export default function PricePage() {
             the most useful thing a buyer can take away from this page */}
         <div className="rise mt-12 rounded-[1.25rem] border border-line bg-cream p-6 md:p-9">
           <h3 className="max-w-[34ch] font-display text-xl font-light leading-snug text-ink md:text-2xl">
-            &ldquo;All-inclusive&rdquo; and &ldquo;plus government charges&rdquo; are not the same quote
+            {t("price.calloutTitle")}
           </h3>
           <p className="mt-4 max-w-[64ch] leading-relaxed text-ink-soft">
-            An all-inclusive figure normally folds the developer&rsquo;s own lines — basic price,
-            location charge, floor rise, club, parking, power backup, maintenance deposit — into a
-            single number. It rarely includes stamp duty, registration or GST, because those are
-            statutory and move with the rate in force on the day you pay. A quote described as
-            &ldquo;plus government charges&rdquo; is stating the same thing openly. Before you compare
-            two numbers, establish which of the two you are holding.
+            {t("price.calloutBody")}
           </p>
         </div>
 
@@ -413,15 +378,13 @@ export default function PricePage() {
             to="/payment-plan"
             className="group inline-flex items-center gap-2 border-b border-brass/40 pb-1 font-sans text-[0.7rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors hover:border-brass"
           >
-            When each instalment falls due
+            {t("price.whenInstalmentDue")}
             <ArrowUpRight size={13} className="transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </Link>
         </div>
 
         <p className="mono mt-8 text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-          Line items are indicative of a standard schedule in this segment · No price is officially
-          published for {PROJECT.name}, and any figure shared on enquiry is subject to confirmation
-          by {PROJECT.developer}
+          {t("price.sheetFootnote").replace("{name}", PROJECT.name).replace("{developer}", PROJECT.developer)}
         </p>
       </section>
 
@@ -429,20 +392,20 @@ export default function PricePage() {
       <section className="faq container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">04</span>
-          <span className="kicker">Pricing questions</span>
+          <span className="kicker">{t("price.kickerFaq")}</span>
         </div>
         <div className="border-t border-line">
           {FAQ.map((f) => (
             <div key={f.q} className="faq-row grid grid-cols-1 gap-3 border-b border-line py-7 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
-              <h3 className="max-w-[26ch] font-display text-xl leading-snug text-ink md:text-2xl">{f.q}</h3>
-              <p className="max-w-[58ch] leading-relaxed text-ink-soft">{f.a}</p>
+              <h3 className="max-w-[26ch] font-display text-xl leading-snug text-ink md:text-2xl">{f.tKeyQ ? t(f.tKeyQ) : f.q}</h3>
+              <p className="max-w-[58ch] leading-relaxed text-ink-soft">{f.tKeyA ? t(f.tKeyA).replace("{price}", PROJECT.price) : f.a}</p>
             </div>
           ))}
         </div>
       </section>
 
       <RelatedPages links={["/payment-plan", "/residences", "/contact"]} />
-      <CtaBand title="Ask for the" accent="price list." subject="Price" />
+      <CtaBand title={t("price.ctaTitle")} accent={t("price.ctaAccent")} subject="Price" />
     </div>
   );
 }

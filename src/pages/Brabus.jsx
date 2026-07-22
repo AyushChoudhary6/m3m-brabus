@@ -10,25 +10,27 @@ import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { IMG, px } from "../lib/images.js";
 import { PROJECT } from "../lib/site.js";
+import { useI18n } from "../lib/i18n.jsx";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /* The partnership, told on its own terms — distinct from the homepage. */
 const ETHOS = [
-  { k: "01", t: "Luxury", d: "Bespoke interiors and premium finishes — Italian marble, branded fittings, materials chosen the way a marque chooses its own." },
-  { k: "02", t: "Performance", d: "Systems engineered to perform: VRV climate control and smart-home integration, tuned to run quietly and precisely." },
-  { k: "03", t: "Exclusivity", d: "An ultra-low-density plan and a limited collection — a villa-like home in a high-rise format, for the few." },
+  { k: "01", key: "luxury" },
+  { k: "02", key: "performance" },
+  { k: "03", key: "exclusivity" },
 ];
 
 const MEANING = [
-  { t: "A design language, not a logo", d: "The marque's ethos shapes proportion, material and detail — the residence is designed to its standard, not merely badged with its name." },
-  { t: "Finished to a marque's measure", d: "Italian marble, modular kitchens with branded fittings and premium hardware — specified rather than left to the buyer." },
-  { t: "Engineered to perform", d: "VRV air conditioning, smart-home integration and energy-efficient systems, so the building behaves as precisely as it looks." },
-  { t: "Scarcity by design", d: "Ultra-low density and a limited collection — the value of a branded residence rests on how few there are." },
+  { key: "designLanguage" },
+  { key: "measure" },
+  { key: "perform" },
+  { key: "scarcity" },
 ];
 
 export default function Brabus() {
   const root = useRef(null);
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -69,25 +71,25 @@ export default function Brabus() {
         path="/brabus"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "BRABUS", path: "/brabus" }])}
       />
-      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "BRABUS", path: "/brabus" }]} />
+      <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: "BRABUS", path: "/brabus" }]} />
       <PageHeader
         compact
-        eyebrow="M3M Brabus · The BRABUS Partnership"
-        title="Not badged."
-        accent="Engineered."
-        lede={`${PROJECT.developer} presents a branded residence inspired by ${PROJECT.partner} — the German marque whose ethos of luxury, performance and exclusivity shapes every interior.`}
+        eyebrow={t("brabus.eyebrow")}
+        title={t("brabus.title")}
+        accent={t("brabus.accent")}
+        lede={`${PROJECT.developer} ${t("brabus.ledePart1")} ${PROJECT.partner} ${t("brabus.ledePart2")}`}
       />
 
       {/* wide image */}
       <section className="container-lux pb-[clamp(3rem,9vh,6rem)]">
         <div className="br-img-wrap relative aspect-[16/9] overflow-hidden rounded-[1.5rem] border border-line">
           <div className="br-img-inner ed-breath absolute inset-0 scale-[1.06]">
-            <Media src={px(IMG.facade, 2000)} alt="BRABUS-inspired craftsmanship" priority sizes="100vw" />
+            <Media src={px(IMG.facade, 2000)} alt={t("brabus.imgAlt")} priority sizes="100vw" />
           </div>
           <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_55%,rgba(8,6,5,0.65))]" />
           <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
           <span className="mono absolute bottom-5 left-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">
-            Inspired by {PROJECT.partner}
+            {t("brabus.inspiredBy")} {PROJECT.partner}
           </span>
         </div>
       </section>
@@ -96,14 +98,14 @@ export default function Brabus() {
       <section className="container-lux py-[clamp(3rem,9vh,6rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">The ethos</span>
+          <span className="kicker">{t("brabus.ethosKicker")}</span>
         </div>
         <div className="border-t border-line">
           {ETHOS.map((m) => (
-            <div key={m.t} className="mq group grid gap-4 border-b border-line py-8 md:grid-cols-[5rem_1fr_1.3fr] md:gap-10">
+            <div key={m.key} className="mq group grid gap-4 border-b border-line py-8 md:grid-cols-[5rem_1fr_1.3fr] md:gap-10">
               <span className="idx pt-2">{m.k}</span>
-              <h2 className="font-display text-2xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-3xl">{m.t}</h2>
-              <p className="max-w-[46ch] leading-relaxed text-ink-soft">{m.d}</p>
+              <h2 className="font-display text-2xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-3xl">{t(`brabus.ethos.${m.key}.t`)}</h2>
+              <p className="max-w-[46ch] leading-relaxed text-ink-soft">{t(`brabus.ethos.${m.key}.d`)}</p>
             </div>
           ))}
         </div>
@@ -112,10 +114,10 @@ export default function Brabus() {
       {/* quote */}
       <section className="quote container-lux py-[clamp(3rem,10vh,7rem)]">
         <blockquote className="mx-auto max-w-[22ch] text-center font-display text-[clamp(1.8rem,5vw,3.6rem)] font-light leading-[1.1] tracking-[-0.02em] text-ink">
-          {"A residence should be".split(" ").map((w, i) => (
+          {t("brabus.quoteA").split(" ").map((w, i) => (
             <span key={i} className="quote-word mr-[0.25em] inline-block">{w}</span>
           ))}
-          {"engineered, not decorated.".split(" ").map((w, i) => (
+          {t("brabus.quoteB").split(" ").map((w, i) => (
             <span key={`b${i}`} className="quote-word mr-[0.25em] inline-block font-serif italic text-brass">{w}</span>
           ))}
         </blockquote>
@@ -125,20 +127,20 @@ export default function Brabus() {
       <section className="mn-grid container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">What a branded residence means</span>
+          <span className="kicker">{t("brabus.meaningKicker")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {MEANING.map((m) => (
-            <article key={m.t} className="mn group border-b border-line py-7">
-              <h2 className="font-display text-2xl text-ink transition-colors duration-300 group-hover:text-brass-soft">{m.t}</h2>
-              <p className="mt-2.5 max-w-[46ch] leading-relaxed text-ink-soft">{m.d}</p>
+            <article key={m.key} className="mn group border-b border-line py-7">
+              <h2 className="font-display text-2xl text-ink transition-colors duration-300 group-hover:text-brass-soft">{t(`brabus.meaning.${m.key}.t`)}</h2>
+              <p className="mt-2.5 max-w-[46ch] leading-relaxed text-ink-soft">{t(`brabus.meaning.${m.key}.d`)}</p>
             </article>
           ))}
         </div>
       </section>
 
       <RelatedPages links={["/residences", "/amenities", "/gallery"]} />
-      <CtaBand title="Own a piece of" accent="the marque." subject="BRABUS" />
+      <CtaBand title={t("brabus.ctaTitle")} accent={t("brabus.ctaAccent")} subject="BRABUS" />
     </div>
   );
 }

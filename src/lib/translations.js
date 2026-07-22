@@ -1,9 +1,16 @@
 // ============================================================
 // UI copy in English + Arabic (for Dubai / UAE buyers).
 // Keys are flat; missing Arabic keys fall back to English.
+//
+// This file holds the hand-written base copy. Bulk page/section copy
+// extracted during the full-site i18n sweep lives in translations.generated.js
+// and is merged in below (generated keys use page-/section-scoped prefixes, so
+// they never collide with the base keys here).
 // ============================================================
 
-export const TRANSLATIONS = {
+import { GENERATED } from "./translations.generated.js";
+
+const BASE = {
   en: {
     // nav
     "nav.home": "Home",
@@ -179,4 +186,9 @@ export const TRANSLATIONS = {
     "foot.sales": "استفسارات المبيعات",
     "foot.rights": "جميع الحقوق محفوظة.",
   },
+};
+
+export const TRANSLATIONS = {
+  en: { ...BASE.en, ...GENERATED.en },
+  ar: { ...BASE.ar, ...GENERATED.ar },
 };

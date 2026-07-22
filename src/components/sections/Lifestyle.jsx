@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { ArrowUpRight } from "lucide-react";
 import { icon } from "../../lib/icons.js";
+import { useI18n } from "../../lib/i18n.jsx";
 import { AMENITY_CATEGORY, AMENITY_COUNT } from "../../lib/amenities.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -40,19 +41,19 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    home, VRV) sits inside the residence, not in the private world outside it,
    and it is carried by the Residences chapter instead. */
 const PANELS = [
-  { cat: "clubhouse", n: "The Club", d: "A multi-level club and lounge, with the gym inside it." },
-  { cat: "wellness", n: "The Water", d: "A pool held at temperature through the year, and the still rooms beside it." },
-  { cat: "lifestyle", n: "The Table", d: "A restaurant within the gates, and a hall for the evening the house cannot hold." },
-  { cat: "outdoor", n: "The Grounds", d: "Gardens and green courts held between the towers, not squeezed around them." },
-  { cat: "sports", n: "The Court", d: "Games indoors and out, and a run laid through the landscape." },
-  { cat: "kids", n: "The Children's Ground", d: "Play kept inside the security line rather than beyond it." },
-  { cat: "security", n: "The Gate", d: "Manned gates, cameras throughout, and covered parking to each residence." },
-].map(({ cat, n, d }) => {
+  { cat: "clubhouse", n: "The Club", nKey: "slifestyle.clubName", d: "A multi-level club and lounge, with the gym inside it.", dKey: "slifestyle.clubDesc" },
+  { cat: "wellness", n: "The Water", nKey: "slifestyle.waterName", d: "A pool held at temperature through the year, and the still rooms beside it.", dKey: "slifestyle.waterDesc" },
+  { cat: "lifestyle", n: "The Table", nKey: "slifestyle.tableName", d: "A restaurant within the gates, and a hall for the evening the house cannot hold.", dKey: "slifestyle.tableDesc" },
+  { cat: "outdoor", n: "The Grounds", nKey: "slifestyle.groundsName", d: "Gardens and green courts held between the towers, not squeezed around them.", dKey: "slifestyle.groundsDesc" },
+  { cat: "sports", n: "The Court", nKey: "slifestyle.courtName", d: "Games indoors and out, and a run laid through the landscape.", dKey: "slifestyle.courtDesc" },
+  { cat: "kids", n: "The Children's Ground", nKey: "slifestyle.kidsName", d: "Play kept inside the security line rather than beyond it.", dKey: "slifestyle.kidsDesc" },
+  { cat: "security", n: "The Gate", nKey: "slifestyle.gateName", d: "Manned gates, cameras throughout, and covered parking to each residence.", dKey: "slifestyle.gateDesc" },
+].map(({ cat, n, nKey, d, dKey }) => {
   const c = AMENITY_CATEGORY[cat];
   // A renamed or retired category should surface as a build-time failure, not
   // as a silently empty plate in the tour.
   if (!c) throw new Error(`Lifestyle: no amenity category "${cat}"`);
-  return { n, d, img: cat, icon: c.icon, items: c.items };
+  return { n, nKey, d, dKey, img: cat, icon: c.icon, items: c.items };
 });
 
 const TOTAL = PANELS.length + 1; // the index card closes the sequence
@@ -67,6 +68,7 @@ const field = (i) =>
 export default function Lifestyle() {
   const root = useRef(null);
   const track = useRef(null);
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -112,10 +114,10 @@ export default function Lifestyle() {
           <div className="grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
             <div className="flex items-baseline gap-5">
               <span className="idx">05</span>
-              <span className="kicker">The Lifestyle</span>
+              <span className="kicker">{t("slifestyle.kicker")}</span>
             </div>
             <h2 className="max-w-[20ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-              A private world <span className="font-serif italic text-brass">within the walls.</span>
+              {t("slifestyle.headingLead")} <span className="font-serif italic text-brass">{t("slifestyle.headingAccent")}</span>
             </h2>
           </div>
 
@@ -125,7 +127,7 @@ export default function Lifestyle() {
             </div>
             {/* Said once, plainly, rather than implied by a missing picture. */}
             <p className="mono max-w-[46ch] text-[0.56rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-              Representative imagery · these are not photographs of this address
+              {t("slifestyle.repImagery")}
             </p>
           </div>
         </div>
@@ -190,8 +192,8 @@ export default function Lifestyle() {
                         aria-hidden="true"
                         className="mb-5 block h-px w-10 origin-left bg-brass/50 transition-transform duration-[900ms] ease-lux group-hover:scale-x-[2.4]"
                       />
-                      <h3 className="font-display text-xl leading-tight text-ink md:text-2xl">{p.n}</h3>
-                      <p className="mt-2 max-w-[32ch] text-[0.82rem] leading-relaxed text-ink-soft">{p.d}</p>
+                      <h3 className="font-display text-xl leading-tight text-ink md:text-2xl">{t(p.nKey)}</h3>
+                      <p className="mt-2 max-w-[32ch] text-[0.82rem] leading-relaxed text-ink-soft">{t(p.dKey)}</p>
 
                       <ul className="mt-5 border-t border-line-soft">
                         {p.items.map((it) => (
@@ -234,15 +236,14 @@ export default function Lifestyle() {
                     className="mb-5 block h-px w-10 origin-left bg-brass/50 transition-transform duration-[900ms] ease-lux group-hover:scale-x-[2.4]"
                   />
                   <h3 className="max-w-[12ch] font-display text-xl font-light leading-tight text-ink md:text-2xl">
-                    {AMENITY_COUNT} named facilities,{" "}
-                    <span className="font-serif italic text-brass">and the gaps.</span>
+                    {AMENITY_COUNT} {t("slifestyle.namedFacilities")}{" "}
+                    <span className="font-serif italic text-brass">{t("slifestyle.andTheGaps")}</span>
                   </h3>
                   <p className="mt-3 max-w-[32ch] text-[0.82rem] leading-relaxed text-ink-soft">
-                    The complete set as published, grouped by occasion — with what M3M has not
-                    announced stated in the same breath.
+                    {t("slifestyle.indexDesc")}
                   </p>
                   <span className="mono mt-6 inline-flex items-center gap-2 border-b border-brass/40 pb-1 text-[0.62rem] tracking-[0.18em] text-brass transition-colors duration-500 group-hover:border-brass">
-                    The amenity index
+                    {t("slifestyle.amenityIndex")}
                     <ArrowUpRight
                       size={13}
                       aria-hidden="true"

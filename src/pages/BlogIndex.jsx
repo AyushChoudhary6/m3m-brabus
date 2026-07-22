@@ -11,6 +11,7 @@ import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { POSTS, CATEGORIES } from "../lib/blog.js";
 import { PROJECT } from "../lib/site.js";
+import { useI18n } from "../lib/i18n.jsx";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -35,6 +36,7 @@ const LIVE_CATEGORIES = CATEGORIES.filter((c) => POSTS.some((p) => p.category ==
 export default function BlogIndex() {
   const root = useRef(null);
   const [filter, setFilter] = useState("All");
+  const { t } = useI18n();
 
   const shown = filter === "All" ? POSTS : POSTS.filter((p) => p.category === filter);
 
@@ -87,16 +89,16 @@ export default function BlogIndex() {
       <Breadcrumbs trail={TRAIL} />
       <PageHeader
         compact
-        eyebrow="M3M Brabus Blog"
-        title="What to know"
-        accent="before you buy."
-        lede="Branded residences, Golf Course Extension Road, RERA diligence and the questions worth asking on a site visit — explained plainly, with no figure invented to fill a gap."
+        eyebrow={t("blogindex.eyebrow")}
+        title={t("blogindex.title")}
+        accent={t("blogindex.accent")}
+        lede={t("blogindex.lede")}
       />
 
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
         {/* category filter */}
         <div className="mb-[clamp(2rem,5vh,3rem)] flex flex-wrap items-center gap-2 border-b border-line pb-6">
-          <h2 className="sr-only">Filter articles by category</h2>
+          <h2 className="sr-only">{t("blogindex.filterHeading")}</h2>
           {["All", ...LIVE_CATEGORIES].map((c) => (
             <button
               key={c}
@@ -110,11 +112,11 @@ export default function BlogIndex() {
                   : "border border-line text-ink-soft hover:text-ink"
               }`}
             >
-              {c}
+              {c === "All" ? t("blogindex.filterAll") : c}
             </button>
           ))}
           <span className="mono ml-auto text-[0.6rem] tracking-[0.2em] text-ink-faint">
-            {String(shown.length).padStart(2, "0")} {shown.length === 1 ? "article" : "articles"}
+            {String(shown.length).padStart(2, "0")} {shown.length === 1 ? t("blogindex.article") : t("blogindex.articles")}
           </span>
         </div>
 
@@ -153,7 +155,7 @@ export default function BlogIndex() {
                   <div className="mono mt-auto flex items-center gap-3 pt-6 text-[0.58rem] tracking-[0.18em] text-ink-faint">
                     <time dateTime={p.date}>{fmtDate(p.date)}</time>
                     <span aria-hidden="true" className="h-px w-4 bg-line" />
-                    <span>{p.readMins} min read</span>
+                    <span>{p.readMins} {t("blogpost.minRead")}</span>
                     <ArrowUpRight
                       size={14}
                       className="ml-auto text-brass transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
@@ -165,13 +167,12 @@ export default function BlogIndex() {
           </div>
         ) : (
           <p className="max-w-[48ch] leading-relaxed text-ink-soft">
-            Nothing published under this heading yet. Choose <em className="font-serif italic text-brass">All</em> to
-            see every article.
+            {t("blogindex.emptyPre")} <em className="font-serif italic text-brass">{t("blogindex.filterAll")}</em> {t("blogindex.emptyPost")}
           </p>
         )}
       </section>
 
-      <CtaBand title="Questions the blog" accent="cannot answer." subject="Blog" />
+      <CtaBand title={t("blogindex.ctaTitle")} accent={t("blogindex.ctaAccent")} subject="Blog" />
     </div>
   );
 }

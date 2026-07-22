@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
+import { useI18n } from "../lib/i18n.jsx";
 import { FOOTER_NAV, PROJECT } from "../lib/site.js";
 
 /* Ch. 21 — footer navigation in four columns beside the brand block.
    Every route on the site is reachable from here, so nothing is orphaned. */
 export default function Footer() {
+  const { t } = useI18n();
   return (
     <footer className="border-t border-line bg-cream">
       <div className="container-lux py-20">
@@ -14,8 +16,7 @@ export default function Footer() {
               M3M <span className="font-serif italic text-brass">Brabus</span>
             </span>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-ink-soft">
-              Branded residences at {PROJECT.location}, on Golf Course Extension
-              Road — engineered in partnership with {PROJECT.partner}. {PROJECT.configs}.
+              {t("footer.brandLinePre")} {PROJECT.location}{t("footer.brandLineMid")} {PROJECT.partner}. {PROJECT.configs}.
             </p>
 
             <div className="mt-7 space-y-2 text-sm">
@@ -52,20 +53,16 @@ export default function Footer() {
         </div>
 
         <p className="mt-16 max-w-3xl text-xs leading-relaxed text-ink-faint">
-          {PROJECT.rera}. This website is for information only and does not
-          constitute an offer or a contract. All imagery is artistic and
-          indicative. Areas, specifications and figures are subject to the
-          official RERA listing and may change at the developer's discretion.
-          See our{" "}
+          {PROJECT.rera}. {t("footer.legalBody")}{" "}
           <Link to="/disclaimer" className="underline underline-offset-2 hover:text-brass">
-            disclaimer
+            {t("footer.disclaimerLink")}
           </Link>
           .
         </p>
 
         <div className="mt-8 flex flex-col gap-3 border-t border-line pt-8 text-xs text-ink-faint md:flex-row md:items-center md:justify-between">
-          <span>© {new Date().getFullYear()} M3M Brabus. All rights reserved.</span>
-          <span>Developed by {PROJECT.developer} · in partnership with {PROJECT.partner}</span>
+          <span>© {new Date().getFullYear()} M3M Brabus. {t("footer.rightsReserved")}</span>
+          <span>{t("footer.developedBy")} {PROJECT.developer} {t("footer.inPartnership")} {PROJECT.partner}</span>
         </div>
       </div>
     </footer>

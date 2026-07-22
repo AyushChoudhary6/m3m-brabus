@@ -11,55 +11,63 @@ import CtaBand from "../components/sections/CtaBand.jsx";
 import Magnetic from "../components/ui/Magnetic.jsx";
 import Media from "../components/ui/Media.jsx";
 import { useEnquiry } from "../components/ui/Enquiry.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT, RESIDENCES } from "../lib/site.js";
 import { IMG, px } from "../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/* What the brochure carries. Each row states plainly where a figure is
-   unpublished — nothing here quotes a number the official listing doesn't. */
-const CONTENTS = [
-  {
-    t: "Floor plans",
-    d: `Layouts for the ${PROJECT.configs.toLowerCase()} — ${RESIDENCES[0].area} and ${RESIDENCES[1].area} — with orientation, the private lift lobby and the three-side-open core drawn room by room.`,
-    n: "Plans",
-  },
-  {
-    t: "Specifications",
-    d: "The full finish schedule: Italian marble flooring, modular kitchen with branded fittings, VRV air conditioning and smart-home integration.",
-    n: "Finishes",
-  },
-  {
-    t: "Amenities",
-    d: "The grand clubhouse, temperature-controlled pool, spa with sauna and steam, gym, event hall, landscaped gardens, play areas, games and restaurant.",
-    n: "The club",
-  },
-  {
-    t: "Location & connectivity",
-    d: `${PROJECT.address} — the address mapped against Golf Course Extension Road, Golf Course Road, Cyber City, NH-8, Sohna Road, IGI Airport and nearby metro.`,
-    n: "Sector 58",
-  },
-  {
-    t: "Price list & payment plan",
-    d: `Pricing is ${PROJECT.price.toLowerCase()} — it has not been publicly released. Register through the form and the price sheet and payment plan reach you the moment they are announced.`,
-    n: PROJECT.price,
-  },
-  {
-    t: "Project & approval status",
-    d: `Possession: ${PROJECT.possession.toLowerCase()}. ${PROJECT.rera}. We publish only what the developer has released, and share the current status directly.`,
-    n: "On request",
-  },
-];
-
-const ASSURANCES = [
-  "Sent straight to you — no third-party listing portals",
-  "Official developer material only, nothing invented",
-  "One conversation, no obligation to proceed",
-];
-
 export default function BrochurePage() {
   const root = useRef(null);
   const { openBrochure } = useEnquiry();
+  const { t } = useI18n();
+
+  /* What the brochure carries. Each row states plainly where a figure is
+     unpublished — nothing here quotes a number the official listing doesn't. */
+  const CONTENTS = [
+    {
+      id: "floor",
+      t: t("brochure.contentsFloorT"),
+      d: `${t("brochure.contentsFloorD1")} ${PROJECT.configs.toLowerCase()} — ${RESIDENCES[0].area} / ${RESIDENCES[1].area} — ${t("brochure.contentsFloorD2")}`,
+      n: t("brochure.contentsFloorN"),
+    },
+    {
+      id: "spec",
+      t: t("brochure.contentsSpecT"),
+      d: t("brochure.contentsSpecD"),
+      n: t("brochure.contentsSpecN"),
+    },
+    {
+      id: "amenity",
+      t: t("brochure.contentsAmenityT"),
+      d: t("brochure.contentsAmenityD"),
+      n: t("brochure.contentsAmenityN"),
+    },
+    {
+      id: "location",
+      t: t("brochure.contentsLocationT"),
+      d: `${PROJECT.address} — ${t("brochure.contentsLocationD")}`,
+      n: t("brochure.contentsLocationN"),
+    },
+    {
+      id: "price",
+      t: t("brochure.contentsPriceT"),
+      d: `${t("brochure.contentsPriceD1")} ${PROJECT.price.toLowerCase()} — ${t("brochure.contentsPriceD2")}`,
+      n: PROJECT.price,
+    },
+    {
+      id: "status",
+      t: t("brochure.contentsStatusT"),
+      d: `${t("brochure.contentsStatusD1")} ${PROJECT.possession.toLowerCase()}. ${PROJECT.rera}. ${t("brochure.contentsStatusD2")}`,
+      n: t("brochure.contentsStatusN"),
+    },
+  ];
+
+  const ASSURANCES = [
+    t("brochure.assurance1"),
+    t("brochure.assurance2"),
+    t("brochure.assurance3"),
+  ];
 
   useGSAP(
     () => {
@@ -98,24 +106,24 @@ export default function BrochurePage() {
         path="/brochure"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Brochure", path: "/brochure" }])}
       />
-      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Brochure", path: "/brochure" }]} />
+      <Breadcrumbs trail={[{ name: t("breadcrumb.home"), path: "/" }, { name: t("breadcrumb.brochure"), path: "/brochure" }]} />
       <PageHeader
-        eyebrow="M3M Brabus Brochure"
-        title="The full book,"
-        accent="sent to you directly."
-        lede={`Floor plans, specifications, amenities and the location dossier for ${PROJECT.name} — ${PROJECT.configs.toLowerCase()} of ${PROJECT.sizes} at ${PROJECT.location}. Leave your details and the brochure arrives from the private client team.`}
+        eyebrow={t("brochure.eyebrow")}
+        title={t("brochure.title")}
+        accent={t("brochure.accent")}
+        lede={`${t("brochure.ledeA")} ${PROJECT.name} — ${PROJECT.configs.toLowerCase()} · ${PROJECT.sizes} · ${PROJECT.location}. ${t("brochure.ledeB")}`}
       />
 
       {/* what's inside */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">What's inside the brochure</span>
+          <span className="kicker">{t("brochure.insideKicker")}</span>
         </div>
         <div className="border-t border-line">
           {CONTENTS.map((c, i) => (
             <article
-              key={c.t}
+              key={c.id}
               className="rise group grid grid-cols-1 gap-2 border-b border-line py-6 transition-colors duration-500 hover:bg-brass/[0.035] sm:grid-cols-[3rem_minmax(0,16rem)_1fr] sm:items-baseline sm:gap-8"
             >
               <span className="idx">{String(i + 1).padStart(2, "0")}</span>
@@ -130,7 +138,7 @@ export default function BrochurePage() {
           ))}
         </div>
         <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          Contents are indicative and subject to the final approved plan
+          {t("brochure.contentsNote")}
         </p>
       </section>
 
@@ -138,14 +146,13 @@ export default function BrochurePage() {
       <section className="dl container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="grid items-center gap-10 border-t border-line pt-[clamp(3rem,8vh,5rem)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div>
-            <span className="dl-rise kicker">Download</span>
+            <span className="dl-rise kicker">{t("brochure.downloadKicker")}</span>
             <h2 className="dl-rise mt-4 max-w-[14ch] font-display text-[clamp(2.1rem,5vw,3.6rem)] font-light leading-[1.02] tracking-[-0.02em] text-ink">
-              Request the{" "}
-              <span className="font-serif italic text-brass">brochure.</span>
+              {t("brochure.requestTitleA")}{" "}
+              <span className="font-serif italic text-brass">{t("brochure.requestTitleB")}</span>
             </h2>
             <p className="dl-rise mt-5 max-w-[46ch] leading-relaxed text-ink-soft">
-              A short form unlocks the download — just your name and phone, so the team can answer
-              anything the book leaves open. The file starts downloading the moment you submit.
+              {t("brochure.downloadBody")}
             </p>
 
             <div className="dl-rise mt-9">
@@ -158,7 +165,7 @@ export default function BrochurePage() {
                 >
                   <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
                   <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-                    Download the brochure
+                    {t("brochure.downloadCta")}
                   </span>
                   <ArrowUpRight size={15} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
                 </button>
@@ -175,7 +182,7 @@ export default function BrochurePage() {
             </ul>
 
             <p className="dl-rise mono mt-6 text-[0.62rem] leading-relaxed tracking-[0.14em] text-ink-faint">
-              Or call {PROJECT.phone} · {PROJECT.email}
+              {t("brochure.orCall")} {PROJECT.phone} · {PROJECT.email}
             </p>
           </div>
 
@@ -183,7 +190,7 @@ export default function BrochurePage() {
             <div className="br-img-inner ed-breath absolute inset-0 scale-[1.06]">
               <Media
                 src={px(IMG.lobby, 1400)}
-                alt={`${PROJECT.name} — brochure cover imagery, the lobby`}
+                alt={`${PROJECT.name} — ${t("brochure.coverAlt")}`}
                 sizes="(max-width:1024px) 100vw, 44vw"
               />
             </div>
@@ -199,21 +206,18 @@ export default function BrochurePage() {
       {/* no obligation note */}
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="border-t border-line pt-8">
-          <span className="rise kicker">No obligation</span>
+          <span className="rise kicker">{t("brochure.noObligationKicker")}</span>
           <p className="rise mt-5 max-w-[62ch] font-serif text-[clamp(1.15rem,2.2vw,1.5rem)] italic leading-relaxed text-ink">
-            The brochure is shared directly by the private client team — nothing is sold on this page,
-            and there is no commitment attached to asking for it.
+            {t("brochure.noObligationP1")}
           </p>
           <p className="rise mt-5 max-w-[62ch] text-sm leading-relaxed text-ink-soft">
-            Your details are used to send the material and to answer your questions, nothing else. Where a
-            figure is not yet published by {PROJECT.developer} — price, RERA registration or possession —
-            the brochure says so plainly, and we follow up the moment it is released.
+            {t("brochure.noObligationP2A")} {PROJECT.developer} {t("brochure.noObligationP2B")}
           </p>
         </div>
       </section>
 
       <RelatedPages links={["/residences", "/amenities", "/location", "/contact"]} />
-      <CtaBand title="Ask for the" accent="full book." subject="Brochure" />
+      <CtaBand title={t("brochure.ctaTitle")} accent={t("brochure.ctaAccent")} subject="Brochure" />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import { ArrowUpRight } from "lucide-react";
 import Fact from "../ui/Fact.jsx";
 import { useEnquiry } from "../ui/Enquiry.jsx";
+import { useI18n } from "../../lib/i18n.jsx";
 import { PROJECT_FACTS, PRICE, OFFICIAL_SOURCE, hasValue } from "../../lib/facts.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -30,6 +31,7 @@ const NOTE_INDEX = new Map(NOTED.map((f, i) => [f.key, i + 1]));
 export default function ProjectHighlights() {
   const root = useRef(null);
   const { openEnquiry } = useEnquiry();
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -64,7 +66,7 @@ export default function ProjectHighlights() {
       <div className="container-lux">
         <div className="ph-rise mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
           <span className="idx">03</span>
-          <span className="kicker">Key facts</span>
+          <span className="kicker">{t("shighlights.keyFacts")}</span>
         </div>
 
         <div className="mb-[clamp(2rem,5vh,3rem)] grid gap-x-16 gap-y-5 lg:grid-cols-[1fr_0.9fr] lg:items-end">
@@ -72,12 +74,10 @@ export default function ProjectHighlights() {
             id="project-highlights-heading"
             className="ph-rise max-w-[18ch] font-display text-[clamp(1.9rem,4.4vw,3.1rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink"
           >
-            What is on record — <span className="font-serif italic text-brass">and what is not yet.</span>
+            {t("shighlights.headingLead")} <span className="font-serif italic text-brass">{t("shighlights.headingAccent")}</span>
           </h2>
           <p className="ph-rise max-w-[46ch] leading-relaxed text-ink-soft">
-            {KNOWN_COUNT} of the {FACTS.length} figures asked for first are published by M3M,
-            and are stated here exactly as issued. The rest are not out — so they are marked in gold
-            rather than guessed at. Ask for any one and it is sent to you the day it exists.
+            {KNOWN_COUNT} {t("shighlights.ofThe")} {FACTS.length} {t("shighlights.paraTail")}
           </p>
         </div>
 
@@ -133,7 +133,7 @@ export default function ProjectHighlights() {
               data-cursor="ASK"
               className="group/cta inline-flex items-center gap-2.5 border-b border-brass/50 pb-1 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors hover:border-brass focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
             >
-              Ask for the unpublished figures
+              {t("shighlights.askUnpublished")}
               <ArrowUpRight size={14} className="transition-transform duration-500 group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-0.5" />
             </button>
             <a
@@ -142,7 +142,7 @@ export default function ProjectHighlights() {
               rel="noopener noreferrer"
               className="mono text-[0.58rem] tracking-[0.18em] text-ink-faint transition-colors hover:text-ink-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
             >
-              Source · official M3M listing
+              {t("shighlights.sourceListing")}
             </a>
           </div>
         </div>

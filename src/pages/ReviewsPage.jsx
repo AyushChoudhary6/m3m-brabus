@@ -10,6 +10,7 @@ import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { useEnquiry } from "../components/ui/Enquiry.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 import { track } from "../lib/analytics.js";
 import { PROJECT, RESIDENCES } from "../lib/site.js";
 import { OFFICIAL_SOURCE } from "../lib/facts.js";
@@ -21,108 +22,70 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    reviewer names — none exist, so none are published. Every line below is
    traceable to the official M3M listing or is plainly marked unpublished. */
 
-const ASSESSED = [
-  {
-    k: "The proposition",
-    v: "A branded residence developed by M3M India and inspired by BRABUS, the German luxury automotive marque. The brand shapes the design language, bespoke interiors and finish standard rather than the construction itself — worth understanding precisely for what it is.",
-  },
-  {
-    k: "Architecture",
-    v: "Open-core planning, with each residence open on three sides. In a Gurugram high-rise market where cross-ventilation is often sacrificed to floor-plate efficiency, three-side-open homes are a genuine and uncommon structural advantage — not a marketing line.",
-  },
-  {
-    k: "Density",
-    v: "An ultra-low-density plan: a limited collection across a generous address. Lower density is the single attribute that most reliably preserves privacy, lift-waiting times and common-area quality a decade after handover.",
-  },
-  {
-    k: "Residence sizes",
-    v: `${PROJECT.configs} of ${PROJECT.sizes}. These are villa-scale floor areas in a vertical format, which places the project in the top tier of Gurugram apartment sizing rather than the mainstream luxury bracket.`,
-  },
-  {
-    k: "Address",
-    v: "Sector 58, on Golf Course Extension Road — an established luxury corridor with direct links to Golf Course Road, Cyber City, NH-8 and Sohna Road, and metro connectivity nearby. The belt was laid out after Gurugram's older spines and reads that way on the ground: wider frontage, newer sanctioned plans, and recent luxury stock concentrated along it rather than inserted between older buildings. A road planned as a whole ages differently from one retrofitted. Exact drive times are not published by the developer, so we do not quote any.",
-  },
-  {
-    k: "Specification",
-    v: "Italian marble flooring, modular kitchens with branded fittings, VRV air conditioning and smart-home integration. A credible, current specification for the segment; the detail that matters is the final approved schedule, which is issued on request.",
-  },
-];
-
-const STRENGTHS = [
-  {
-    t: "Light and air are designed in, not optional",
-    d: "Three open sides per residence means daylight and cross-ventilation reach each room rather than only the corner ones. In a market that routinely trades ventilation for floor-plate efficiency, it is the plan's most easily verified advantage — you can stand in a room and test it.",
-  },
-  {
-    t: "Scale that cannot be added later",
-    d: `Homes of ${PROJECT.sizes} are fixed at the structural grid on the day a building is sanctioned. No interior work turns two ordinary flats into one properly planned home, because the columns, the cores and the service risers do not move. Scarcity here is a product of construction rather than of marketing.`,
-  },
-  {
-    t: "A marque sets a floor under the finish",
-    d: `${PROJECT.partner} is built on bespoke engineering and restraint rather than ornament, and a name of that standing has more to lose from a poor handover than any single project earns. Applied to interiors, the ethos reads as materials and precision — legible long after the sales campaign has closed.`,
-  },
-  {
-    t: "Amenity depth within the address",
-    d: "A grand clubhouse, temperature-controlled pool, spa with sauna and steam, gym, event hall, landscaped gardens, restaurant and 24/7 CCTV security — a self-contained programme rather than a token podium deck.",
-  },
-];
-
-const UNPUBLISHED = [
-  { k: "Price", v: PROJECT.price, note: "No price sheet, per-sq.ft rate or unit-wise pricing has been publicly released." },
-  { k: "RERA", v: PROJECT.rera, note: "No RERA registration number is published on the official listing at this stage." },
-  { k: "Possession", v: PROJECT.possession, note: "No handover date or construction milestone schedule has been announced." },
-  { k: "Tower & unit count", v: "Not published", note: "The number of towers, floors and total units is not stated officially — treat any figure you see elsewhere as unverified." },
-  { k: "Land area", v: "Not published", note: "Total site area has not been released, so density cannot be expressed numerically yet." },
-];
-
-const VERIFY = [
-  {
-    t: "RERA registration",
-    d: "Ask for the registration number and check it yourself on the Haryana RERA portal. Confirm the registered project name, promoter entity, sanctioned plan and the declared completion date — not the marketing timeline.",
-  },
-  {
-    t: "The sanctioned plan itself",
-    d: "Density, heights and open space only become real once they appear on the approved drawing. Ask to see the sanctioned plan, not the brochure's rendering of it, and check that the layout you were shown is the layout that was sanctioned.",
-  },
-  {
-    t: "The price sheet in writing",
-    d: "Request the rate per sq.ft, the basis of area (carpet, built-up or saleable), and every charge outside the base price: PLC, club membership, EDC and IDC, IFMS, power backup and parking. A headline number without these is not a price.",
-  },
-  {
-    t: "Payment plan and exit terms",
-    d: "Get the construction-linked or down-payment schedule, the interest or rebate treatment, and the cancellation and transfer clauses. Read the allotment letter and builder-buyer agreement before any booking amount moves.",
-  },
-  {
-    t: "Possession timeline",
-    d: "Ask for the RERA-declared completion date and the delay-compensation clause in the agreement. Verbal handover estimates carry no weight; the registered date does.",
-  },
-  {
-    t: "The approved specification schedule",
-    d: "Marketing collateral is indicative. Ask for the annexed specification list in the agreement, brand by brand, and confirm what is standard versus an upgrade.",
-  },
-  {
-    t: "The brand agreement",
-    d: "For any branded residence, ask in writing what the brand association covers — design, interiors, fit-out, ongoing services — and for how long. It is a fair question and a serious developer will answer it.",
-  },
-];
-
-const SUITS = [
-  "Buyers who want villa-scale floor area without leaving a serviced, secure vertical address.",
-  "End-users who value daylight, cross-ventilation and low density over headline amenity counts.",
-  "Buyers already anchored to the Golf Course Extension Road corridor for work or schooling.",
-  "Those comfortable registering interest at a pre-price stage in exchange for early selection of floor and orientation.",
-];
-
-const RECONSIDER = [
-  "Buyers who need a confirmed possession date today — it has not been announced.",
-  "Investors underwriting a specific yield or exit, which is not possible before pricing is released.",
-  "Anyone who requires a published RERA number before a first site visit or conversation.",
-  "Buyers seeking compact or entry-level configurations; the collection begins at 4 BHK.",
-];
-
 export default function ReviewsPage() {
   const root = useRef(null);
   const { openEnquiry } = useEnquiry();
+  const { t } = useI18n();
+
+  const ASSESSED = [
+    { id: "proposition", k: t("reviews.assessPropositionK"), v: t("reviews.assessPropositionV") },
+    { id: "architecture", k: t("reviews.assessArchK"), v: t("reviews.assessArchV") },
+    { id: "density", k: t("reviews.assessDensityK"), v: t("reviews.assessDensityV") },
+    {
+      id: "sizes",
+      k: t("reviews.assessSizesK"),
+      v: `${PROJECT.configs} — ${PROJECT.sizes}. ${t("reviews.assessSizesV")}`,
+    },
+    { id: "address", k: t("reviews.assessAddressK"), v: t("reviews.assessAddressV") },
+    { id: "specification", k: t("reviews.assessSpecK"), v: t("reviews.assessSpecV") },
+  ];
+
+  const STRENGTHS = [
+    { id: "light", t: t("reviews.strLightT"), d: t("reviews.strLightD") },
+    {
+      id: "scale",
+      t: t("reviews.strScaleT"),
+      d: `${t("reviews.strScaleD1")} ${PROJECT.sizes} ${t("reviews.strScaleD2")}`,
+    },
+    { id: "marque", t: t("reviews.strMarqueT"), d: `${PROJECT.partner} ${t("reviews.strMarqueD")}` },
+    { id: "amenity", t: t("reviews.strAmenityT"), d: t("reviews.strAmenityD") },
+  ];
+
+  const UNPUBLISHED = [
+    { id: "price", k: t("reviews.unpubPriceK"), v: PROJECT.price, note: t("reviews.unpubPriceNote") },
+    { id: "rera", k: t("reviews.unpubReraK"), v: PROJECT.rera, note: t("reviews.unpubReraNote") },
+    { id: "possession", k: t("reviews.unpubPossessionK"), v: PROJECT.possession, note: t("reviews.unpubPossessionNote") },
+    { id: "towers", k: t("reviews.unpubTowerK"), v: t("reviews.notPublished"), note: t("reviews.unpubTowerNote") },
+    { id: "land", k: t("reviews.unpubLandK"), v: t("reviews.notPublished"), note: t("reviews.unpubLandNote") },
+  ];
+
+  const VERIFY = [
+    { id: "rera", t: t("reviews.verifyReraT"), d: t("reviews.verifyReraD") },
+    { id: "plan", t: t("reviews.verifyPlanT"), d: t("reviews.verifyPlanD") },
+    { id: "price", t: t("reviews.verifyPriceT"), d: t("reviews.verifyPriceD") },
+    { id: "payment", t: t("reviews.verifyPaymentT"), d: t("reviews.verifyPaymentD") },
+    { id: "possession", t: t("reviews.verifyPossessionT"), d: t("reviews.verifyPossessionD") },
+    { id: "spec", t: t("reviews.verifySpecT"), d: t("reviews.verifySpecD") },
+    { id: "brand", t: t("reviews.verifyBrandT"), d: t("reviews.verifyBrandD") },
+  ];
+
+  const SUITS = [
+    t("reviews.suits1"),
+    t("reviews.suits2"),
+    t("reviews.suits3"),
+    t("reviews.suits4"),
+  ];
+
+  const RECONSIDER = [
+    t("reviews.reconsider1"),
+    t("reviews.reconsider2"),
+    t("reviews.reconsider3"),
+    t("reviews.reconsider4"),
+  ];
+
+  const residencesJoined = RESIDENCES.map((r) => r.name.replace(" Residence", "")).join(
+    ` ${t("reviews.and")} `,
+  );
 
   useGSAP(
     () => {
@@ -162,24 +125,20 @@ export default function ReviewsPage() {
         path="/reviews"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Reviews", path: "/reviews" }])}
       />
-      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Reviews", path: "/reviews" }]} />
+      <Breadcrumbs trail={[{ name: t("breadcrumb.home"), path: "/" }, { name: t("breadcrumb.reviews"), path: "/reviews" }]} />
       <PageHeader
-        eyebrow="M3M Brabus Review"
-        title="What M3M Brabus"
-        accent="actually offers."
-        lede="An editorial assessment written on verifiable attributes only — architecture, density, scale, address and specification. We publish no star ratings and no customer testimonials, because none have been verified. Where a figure is unpublished, we say so."
+        eyebrow={t("reviews.eyebrow")}
+        title={t("reviews.title")}
+        accent={t("reviews.accent")}
+        lede={t("reviews.lede")}
       />
 
       {/* editorial disclosure */}
       <section className="container-lux pb-[clamp(2.5rem,7vh,4rem)]">
         <div className="rise border-y border-line py-6">
-          <p className="mono text-[0.58rem] tracking-[0.2em] text-brass-soft">Editorial note</p>
+          <p className="mono text-[0.58rem] tracking-[0.2em] text-brass-soft">{t("reviews.editorialNote")}</p>
           <p className="mt-3 max-w-[70ch] leading-relaxed text-ink-soft">
-            This page is an assessment by our editorial team, not a collection of customer reviews.
-            We do not host ratings, quotes or testimonials for {PROJECT.name}, and we do not publish
-            aggregate scores. Every claim below is drawn from the official {PROJECT.developer} listing
-            or is explicitly flagged as unpublished. You are welcome to check it against the source
-            yourself — a review of this kind is only worth reading if it is traceable.
+            {t("reviews.disclosureA")} {PROJECT.name}{t("reviews.disclosureB")} {PROJECT.developer} {t("reviews.disclosureC")}
           </p>
           {/* the page's whole credibility rests on traceability, so the source is linked, not cited */}
           <a
@@ -188,7 +147,7 @@ export default function ReviewsPage() {
             rel="noopener noreferrer"
             className="mono mt-4 inline-flex items-center gap-1.5 text-[0.58rem] tracking-[0.18em] text-brass transition-colors hover:text-brass-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
           >
-            Facts as published by {PROJECT.developer}
+            {t("reviews.factsAsPublished")} {PROJECT.developer}
             <ArrowUpRight size={12} />
           </a>
         </div>
@@ -198,12 +157,12 @@ export default function ReviewsPage() {
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">The assessment</span>
+          <span className="kicker">{t("reviews.assessmentKicker")}</span>
         </div>
         <dl className="border-t border-line">
           {ASSESSED.map((a) => (
             <div
-              key={a.k}
+              key={a.id}
               className="blk grid grid-cols-1 gap-2 border-b border-line py-6 sm:grid-cols-[minmax(0,14rem)_1fr] sm:gap-8"
             >
               <dt className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{a.k}</dt>
@@ -217,12 +176,12 @@ export default function ReviewsPage() {
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="rv-img-wrap relative aspect-[16/9] overflow-hidden rounded-[1.5rem] border border-line">
           <div className="rv-img-inner ed-breath absolute inset-0 scale-[1.06]">
-            <Media src={px(IMG.heroExterior, 2000)} alt={`${PROJECT.name} — the tower at ${PROJECT.location}`} sizes="100vw" />
+            <Media src={px(IMG.heroExterior, 2000)} alt={`${PROJECT.name} — ${t("reviews.towerAlt")} ${PROJECT.location}`} sizes="100vw" />
           </div>
           <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_55%,rgba(8,6,5,0.65))]" />
           <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
           <span className="mono absolute bottom-5 left-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">
-            Official render · {PROJECT.address}
+            {t("reviews.officialRender")} · {PROJECT.address}
           </span>
         </div>
       </section>
@@ -231,11 +190,11 @@ export default function ReviewsPage() {
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">What stands up to scrutiny</span>
+          <span className="kicker">{t("reviews.strengthsKicker")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {STRENGTHS.map((s, i) => (
-            <article key={s.t} className="blk group border-b border-line py-6">
+            <article key={s.id} className="blk group border-b border-line py-6">
               <span className="idx">{String(i + 1).padStart(2, "0")}</span>
               <h2 className="mt-3 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">
                 {s.t}
@@ -250,22 +209,20 @@ export default function ReviewsPage() {
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">03</span>
-          <span className="kicker">Not yet published</span>
+          <span className="kicker">{t("reviews.unpubKicker")}</span>
         </div>
         <p className="blk mb-8 max-w-[62ch] leading-relaxed text-ink-soft">
-          The honest part of any early-stage review is what cannot be assessed. {PROJECT.developer} has
-          not released the following, and we will not estimate them on its behalf. If you find these
-          figures quoted elsewhere, ask for the source before you rely on them.
+          {t("reviews.unpubIntroA")} {PROJECT.developer} {t("reviews.unpubIntroB")}
         </p>
         <div className="overflow-x-auto">
           <div className="min-w-[560px]">
             <div className="grid grid-cols-[1fr_1fr_1.6fr] gap-6 border-b border-line pb-4">
-              <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">Item</span>
-              <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">Official status</span>
-              <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">What that means</span>
+              <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{t("reviews.colItem")}</span>
+              <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{t("reviews.colStatus")}</span>
+              <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{t("reviews.colMeaning")}</span>
             </div>
             {UNPUBLISHED.map((u) => (
-              <div key={u.k} className="blk grid grid-cols-[1fr_1fr_1.6fr] items-baseline gap-6 border-b border-line-soft py-5">
+              <div key={u.id} className="blk grid grid-cols-[1fr_1fr_1.6fr] items-baseline gap-6 border-b border-line-soft py-5">
                 <span className="font-display text-lg text-ink">{u.k}</span>
                 <span className="font-serif text-sm italic text-brass">{u.v}</span>
                 <span className="text-sm leading-relaxed text-ink-soft">{u.note}</span>
@@ -287,12 +244,12 @@ export default function ReviewsPage() {
           >
             <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
             <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-              Be sent each figure as it is released
+              {t("reviews.figureCta")}
             </span>
             <ArrowUpRight size={15} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
           </button>
           <span className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">
-            Official documents only · no estimates circulated
+            {t("reviews.docsOnly")}
           </span>
         </div>
       </section>
@@ -301,18 +258,15 @@ export default function ReviewsPage() {
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">04</span>
-          <span className="kicker">What to verify before you buy</span>
+          <span className="kicker">{t("reviews.verifyKicker")}</span>
         </div>
         <p className="blk mb-8 max-w-[62ch] leading-relaxed text-ink-soft">
-          Reasoning is not diligence. Everything argued above is checkable, but none of it is proof —
-          an assessment survives only on contact with documents. Each item below names the paper to
-          ask for rather than the reassurance to accept, and if any one of them is not yet available,
-          that is itself an answer worth having early.
+          {t("reviews.verifyIntro")}
         </p>
         <ol className="border-t border-line">
           {VERIFY.map((v, i) => (
             <li
-              key={v.t}
+              key={v.id}
               className="blk grid grid-cols-1 gap-2 border-b border-line py-6 sm:grid-cols-[minmax(0,3rem)_1fr] sm:gap-8"
             >
               <span className="idx">{String(i + 1).padStart(2, "0")}</span>
@@ -329,24 +283,20 @@ export default function ReviewsPage() {
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">05</span>
-          <span className="kicker">Who it suits</span>
+          <span className="kicker">{t("reviews.suitsKicker")}</span>
         </div>
 
         {/* the resale question is the one buyers ask last and worry about first;
             with no pricing published it can only be answered structurally, and
             answering it honestly means stating the downside in the same breath */}
         <p className="blk mb-[clamp(2rem,5vh,3rem)] max-w-[70ch] leading-relaxed text-ink-soft">
-          A home of this size self-selects its market: end-users buying to live in it rather than to
-          trade it. That pool is narrow, and honesty requires saying that a narrow pool cuts both
-          ways — it steadies a building, and it slows a sale. What supports resale in this segment is
-          not the volume of demand but the scarcity of alternatives; a seller with one of very few
-          comparable homes on the corridor is not competing against fifty identical listings.
+          {t("reviews.resaleP")}
         </p>
 
         <div className="grid gap-x-14 gap-y-10 md:grid-cols-2">
           <div className="blk border-t border-line pt-6">
             <h2 className="font-display text-2xl font-light text-ink md:text-3xl">
-              A strong <span className="font-serif italic text-brass">fit for</span>
+              {t("reviews.strongFitA")} <span className="font-serif italic text-brass">{t("reviews.strongFitB")}</span>
             </h2>
             <ul className="mt-5">
               {SUITS.map((s) => (
@@ -356,7 +306,7 @@ export default function ReviewsPage() {
           </div>
           <div className="blk border-t border-line pt-6">
             <h2 className="font-display text-2xl font-light text-ink md:text-3xl">
-              Worth <span className="font-serif italic text-brass">pausing on</span>
+              {t("reviews.pausingA")} <span className="font-serif italic text-brass">{t("reviews.pausingB")}</span>
             </h2>
             <ul className="mt-5">
               {RECONSIDER.map((s) => (
@@ -367,20 +317,19 @@ export default function ReviewsPage() {
         </div>
 
         <div className="blk mt-[clamp(3rem,8vh,5rem)] border-t border-line pt-8">
-          <p className="mono text-[0.58rem] tracking-[0.2em] text-brass-soft">In short</p>
+          <p className="mono text-[0.58rem] tracking-[0.2em] text-brass-soft">{t("reviews.inShortLabel")}</p>
           <p className="mt-4 max-w-[70ch] font-display text-[clamp(1.3rem,2.4vw,1.9rem)] font-light leading-[1.35] text-ink">
-            The architecture and the scale are verifiable today —{" "}
-            {RESIDENCES.map((r) => r.name.replace(" Residence", "")).join(" and ")} homes of {PROJECT.sizes},
-            open on three sides, at low density on Golf Course Extension Road.{" "}
+            {t("reviews.inShortA")}{" "}
+            {residencesJoined} {t("reviews.inShortHomesOf")} {PROJECT.sizes}{t("reviews.inShortTail")}{" "}
             <span className="font-serif italic text-brass">
-              The commercial terms are not yet public, so judge those only when the paperwork arrives.
+              {t("reviews.inShortSpan")}
             </span>
           </p>
         </div>
       </section>
 
       <RelatedPages links={["/overview", "/residences", "/brabus", "/contact"]} />
-      <CtaBand title="Ask the" accent="hard questions." subject="Reviews" />
+      <CtaBand title={t("reviews.ctaTitle")} accent={t("reviews.ctaAccent")} subject="Reviews" />
     </div>
   );
 }

@@ -11,10 +11,12 @@ import { PROJECT } from "../../lib/site.js";
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /** Closing enquiry band — used at the foot of every inner page. */
-export default function CtaBand({ title = "Your residence", accent = "awaits.", subject = "" }) {
+export default function CtaBand({ title, accent, subject = "" }) {
   const root = useRef(null);
   const { openEnquiry, openBrochure } = useEnquiry();
   const { t } = useI18n();
+  const heading = title ?? t("sctaband.defaultTitle");
+  const headingAccent = accent ?? t("sctaband.defaultAccent");
 
   useGSAP(
     () => {
@@ -35,7 +37,7 @@ export default function CtaBand({ title = "Your residence", accent = "awaits.", 
       <div className="container-lux relative py-[clamp(4.5rem,12vh,8rem)] text-center">
         <p className="cta-rise kicker">{t("enq.consultation")}</p>
         <h2 className="cta-rise mx-auto mt-5 max-w-[16ch] font-display text-[clamp(2.2rem,6vw,4.5rem)] font-light leading-[1] tracking-[-0.02em] text-ink">
-          {title} <span className="font-serif italic text-brass">{accent}</span>
+          {heading} <span className="font-serif italic text-brass">{headingAccent}</span>
         </h2>
         <p className="cta-rise mx-auto mt-6 max-w-md text-ink-soft">
 {PROJECT.configs} · {PROJECT.location}. {t("enq.ctaBody")}
@@ -62,7 +64,7 @@ export default function CtaBand({ title = "Your residence", accent = "awaits.", 
             data-cursor="DOWNLOAD"
             className="group inline-flex items-center gap-2.5 border-b border-brass/50 pb-1 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors hover:border-brass"
           >
-            Download brochure
+            {t("cta.downloadBrochure")}
             <ArrowUpRight size={14} className="transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </button>
           <a

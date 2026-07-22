@@ -37,12 +37,12 @@ const srcSetOf = (variants) => variants.map(([w, url]) => `${url} ${w}w`).join("
 const LEDGER = [
   { key: "configs", text: PROJECT.configs },
   { key: "location", text: PROJECT.location },
-  { key: PRICE.key, fact: PRICE, idle: "Price on request", aria: "Price on request — pricing is not yet published; tap to request it" },
+  { key: PRICE.key, fact: PRICE, idle: "shero.priceOnRequest", aria: "shero.priceOnRequestAria" },
   {
     key: PROJECT_FACT.rera.key,
     fact: PROJECT_FACT.rera,
-    idle: "RERA status on request",
-    aria: "RERA status on request — no registration number is published yet",
+    idle: "shero.reraOnRequest",
+    aria: "shero.reraOnRequestAria",
   },
 ];
 
@@ -233,7 +233,7 @@ export default function Hero() {
                 playsInline
                 preload="none"
                 onPlaying={() => setFilmPlaying(true)}
-                aria-label="M3M Brabus branded residences — cinematic film"
+                aria-label={t("shero.filmAria")}
               />
             </div>
 
@@ -247,14 +247,14 @@ export default function Hero() {
             <div className="relative z-10 flex h-full flex-col justify-between p-6 pt-20 md:p-10 lg:p-14">
               {/* top ledger */}
               <div className="hero-fade flex items-center justify-between">
-                <span className="kicker text-champagne">{PROJECT.developer} · with {PROJECT.partner}</span>
-                <span className="mono hidden text-[0.6rem] tracking-[0.24em] text-ink-faint sm:block">Sector 58 · Gurgaon</span>
+                <span className="kicker text-champagne">{PROJECT.developer} · {t("shero.with")} {PROJECT.partner}</span>
+                <span className="mono hidden text-[0.6rem] tracking-[0.24em] text-ink-faint sm:block">{t("shero.sectorGurgaon")}</span>
               </div>
 
               {/* bottom block */}
               <div className="max-w-3xl">
                 <h1 className="font-display text-[clamp(2.3rem,6vw,6rem)] font-light leading-[0.94] tracking-[-0.03em] text-bone">
-                  <span className="ed-line"><span>The art of living,</span></span>
+                  <span className="ed-line"><span>{t("shero.headlineLead")}</span></span>
                   <span className="ed-line">
                     <span
                       className="gold-sweep font-serif italic"
@@ -267,7 +267,7 @@ export default function Hero() {
                         backgroundClip: "text",
                       }}
                     >
-                      engineered.
+                      {t("shero.headlineAccent")}
                     </span>
                   </span>
                 </h1>
@@ -294,11 +294,11 @@ export default function Hero() {
                             track("hero_fact_request", { fact: item.fact.key });
                             openEnquiry(item.fact.label);
                           }}
-                          aria-label={item.aria}
+                          aria-label={t(item.aria)}
                           data-cursor="ASK"
                           className="inline-flex items-center gap-1.5 rounded-sm text-brass underline decoration-brass/35 decoration-dotted underline-offset-4 transition-colors duration-300 hover:text-brass-soft hover:decoration-brass-soft focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-brass"
                         >
-                          {item.idle}
+                          {t(item.idle)}
                           <ArrowUpRight size={11} strokeWidth={1.6} aria-hidden="true" />
                         </button>
                       ) : (
@@ -338,7 +338,7 @@ export default function Hero() {
 
             {/* scroll cue */}
             <div className="hero-cue pointer-events-none absolute bottom-6 right-6 z-10 hidden items-center gap-2 md:flex lg:bottom-8 lg:right-8">
-              <span className="mono text-[0.56rem] tracking-[0.24em] text-ink-faint">Scroll to enter</span>
+              <span className="mono text-[0.56rem] tracking-[0.24em] text-ink-faint">{t("shero.scrollToEnter")}</span>
               <span className="h-px w-8 bg-gradient-to-r from-brass to-transparent" />
             </div>
           </div>

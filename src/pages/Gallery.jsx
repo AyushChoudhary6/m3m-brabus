@@ -11,6 +11,7 @@ import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
 import { useEnquiry } from "../components/ui/Enquiry.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 import usePresence from "../lib/usePresence.js";
 import { PROJECT } from "../lib/site.js";
 import { IMG, px } from "../lib/images.js";
@@ -41,32 +42,29 @@ const PLATES = [
   {
     no: "I",
     id: IMG.tower,
-    name: "The Towers",
-    subject: "Architecture · at dusk",
-    lede: "The silhouette on the Golf Course Extension skyline.",
-    body:
-      "The towers at dusk, seen across the landscaped grounds — the only published view of the building in its setting, and the one worth the longest look. Massing, the ratio of glass to solid, and the way the base meets the ground are all settled at this scale and cannot be retrofitted afterwards. Read it as an elevation study rather than a census: no tower count, floor count or land area has been released, and this render asserts none of them.",
-    alt: "Official M3M Brabus render — the towers at dusk above the landscaped grounds, Sector 58, Gurgaon",
+    nameKey: "gallery.plate1Name",
+    subjectKey: "gallery.plate1Subject",
+    ledeKey: "gallery.plate1Lede",
+    bodyKey: "gallery.plate1Body",
+    altKey: "gallery.plate1Alt",
   },
   {
     no: "II",
     id: IMG.arrival,
-    name: "The Arrival",
-    subject: "Approach · the porte-cochère",
-    lede: "The approach a car makes to the door, and the first room a guest stands in.",
-    body:
-      "The arrival court: a marble wall, a water court and a canopy proportioned for stepping out of a car rather than walking up to a door. Arrival is the part of a branded residence hardest to correct later and easiest to judge early — where the car stops, where it goes afterwards, and how much building you pass through before the lift. This is the render that shows it.",
-    alt: "Official M3M Brabus render — the porte-cochère arrival court with marble wall and water court, Sector 58, Gurgaon",
+    nameKey: "gallery.plate2Name",
+    subjectKey: "gallery.plate2Subject",
+    ledeKey: "gallery.plate2Lede",
+    bodyKey: "gallery.plate2Body",
+    altKey: "gallery.plate2Alt",
   },
   {
     no: "III",
     id: IMG.lobby,
-    name: "The Lobby",
-    subject: "Interior · double height",
-    lede: "Marble, brass light and the marque, stated once at the door.",
-    body:
-      "The double-height lobby and its lounge — stone underfoot, brass in the light fittings, and the marque set once at the entrance rather than repeated down the room. This is the only interior M3M has released. The residences, the club, the spa and the pool have no published photography at all, which is why you will not find them hung further down this page.",
-    alt: "Official M3M Brabus render — the double-height marble lobby and lounge, Sector 58, Gurgaon",
+    nameKey: "gallery.plate3Name",
+    subjectKey: "gallery.plate3Subject",
+    ledeKey: "gallery.plate3Lede",
+    bodyKey: "gallery.plate3Body",
+    altKey: "gallery.plate3Alt",
   },
 ];
 
@@ -74,32 +72,36 @@ const PLATES = [
    page that already handles each subject properly without imagery. */
 const ABSENT = [
   {
-    t: "Residence interiors",
-    s: "No render released",
-    d: "No published view of a living room, a bedroom or a kitchen exists. The layouts themselves are drawn as indicative zone plans on the floor plans page; the dimensioned sheets come from the client team.",
+    id: "interiors",
+    tKey: "gallery.absentInteriorsT",
+    sKey: "gallery.absentInteriorsS",
+    dKey: "gallery.absentInteriorsD",
     to: "/floor-plan",
-    toLabel: "Floor plans",
+    labelKey: "gallery.labelFloorPlans",
   },
   {
-    t: "Club, spa, pool & gym",
-    s: "No photography released",
-    d: "Every facility named across the official listing is set out in full on the amenities page, in type rather than in borrowed pictures of somebody else's clubhouse.",
+    id: "club",
+    tKey: "gallery.absentClubT",
+    sKey: "gallery.absentClubS",
+    dKey: "gallery.absentClubD",
     to: "/amenities",
-    toLabel: "Amenities",
+    labelKey: "gallery.labelAmenities",
   },
   {
-    t: "The master plan",
-    s: "Not published",
-    d: "No site layout has been released, so none is reproduced. The master plan page teaches you to read the real drawing and requests it on your behalf.",
+    id: "master",
+    tKey: "gallery.absentMasterT",
+    sKey: "gallery.absentMasterS",
+    dKey: "gallery.absentMasterD",
     to: "/master-plan",
-    toLabel: "Master plan",
+    labelKey: "gallery.labelMasterPlan",
   },
   {
-    t: "Site progress photography",
-    s: "None held",
-    d: "We hold no dated site photography and no verified progress figure. The construction status page states the position as it stands and shows you how to check it yourself.",
+    id: "site",
+    tKey: "gallery.absentSiteT",
+    sKey: "gallery.absentSiteS",
+    dKey: "gallery.absentSiteD",
     to: "/construction-status",
-    toLabel: "Construction status",
+    labelKey: "gallery.labelConstruction",
   },
 ];
 
@@ -107,6 +109,7 @@ export default function Gallery() {
   const root = useRef(null);
   const [openAt, setOpenAt] = useState(null);
   const { openEnquiry } = useEnquiry();
+  const { t } = useI18n();
 
   /* The panel settles as the backdrop lifts; usePresence holds the node in the
      document until the tween reports back, and skips the whole thing under
@@ -174,52 +177,52 @@ export default function Gallery() {
         path="/gallery"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Gallery", path: "/gallery" }])}
       />
-      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Gallery", path: "/gallery" }]} />
+      <Breadcrumbs trail={[{ name: t("breadcrumb.home"), path: "/" }, { name: t("breadcrumb.gallery"), path: "/gallery" }]} />
       <PageHeader
         compact
-        eyebrow="M3M Brabus Gallery"
-        title="The published set,"
-        accent="in full."
-        lede={`Three official renders exist for ${PROJECT.name} — the towers at dusk, the arrival court and the marble lobby. All three are hung here, at size and under accurate captions. Nothing else has been released, and nothing else is invented to fill the wall.`}
+        eyebrow={t("gallery.eyebrow")}
+        title={t("gallery.title")}
+        accent={t("gallery.accent")}
+        lede={`${t("gallery.ledeA")} ${PROJECT.name} ${t("gallery.ledeB")}`}
       />
 
       {/* ── 01 · the three plates ─────────────────────────────────── */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex flex-wrap items-baseline gap-5 border-b border-line pb-6">
           <span className="idx">01</span>
-          <span className="kicker">The official renders</span>
+          <span className="kicker">{t("gallery.rendersKicker")}</span>
           <span className="mono ml-auto text-[0.6rem] tracking-[0.2em] text-ink-faint">
-            03 plates · the complete set
+            03 {t("gallery.platesComplete")}
           </span>
         </div>
 
         <div className="flex flex-col gap-[clamp(4rem,11vh,8rem)]">
           {PLATES.map((p, i) => (
-            <figure key={p.name} className="plate">
+            <figure key={p.no} className="plate">
               {/* The whole plate is the control — a discreet corner affordance
                   looks tidier but is a smaller target and a worse tab stop. */}
               <button
                 type="button"
                 onClick={() => setOpenAt(i)}
                 data-cursor="VIEW"
-                aria-label={`Enlarge ${p.name}`}
+                aria-label={`${t("gallery.enlarge")} ${t(p.nameKey)}`}
                 className="pl-frame group relative block aspect-[16/11] w-full overflow-hidden rounded-[1.5rem] border border-line transition-colors duration-500 hover:border-brass/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass md:aspect-[16/9]"
               >
                 <span className="pl-inner ed-breath absolute inset-0 block scale-[1.05]">
                   <Media
                     src={px(p.id, 2200)}
-                    alt={p.alt}
+                    alt={t(p.altKey)}
                     sizes="(max-width:1280px) 100vw, 1200px"
                   />
                 </span>
                 <span className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,rgba(8,6,5,0.28)_0%,transparent_34%,transparent_58%,rgba(8,6,5,0.6))]" />
                 <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
                 <span className="mono absolute left-6 top-5 text-[0.58rem] tracking-[0.22em] text-brass-soft">
-                  Plate {p.no}
+                  {t("gallery.plate")} {p.no}
                 </span>
                 <span className="absolute bottom-5 right-6 inline-flex items-center gap-2 rounded-full border border-bone/25 bg-obsidian/35 px-4 py-2 font-sans text-[0.62rem] font-medium uppercase tracking-[0.16em] text-bone backdrop-blur-sm transition-colors duration-500 group-hover:border-brass/60 group-hover:text-brass-soft">
                   <Expand size={12} aria-hidden="true" />
-                  Enlarge
+                  {t("gallery.enlarge")}
                 </span>
               </button>
 
@@ -227,20 +230,19 @@ export default function Gallery() {
                 <div>
                   <span className="rise idx block">{p.no}</span>
                   <h2 className="rise mt-4 font-display text-[clamp(1.9rem,3.6vw,3rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-                    {p.name}
+                    {t(p.nameKey)}
                   </h2>
                   <p className="rise mono mt-4 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-                    {p.subject}
+                    {t(p.subjectKey)}
                   </p>
                 </div>
                 <div>
                   <p className="rise max-w-[44ch] font-serif text-lg italic leading-snug text-brass">
-                    {p.lede}
+                    {t(p.ledeKey)}
                   </p>
-                  <p className="rise mt-5 max-w-[64ch] leading-relaxed text-ink-soft">{p.body}</p>
+                  <p className="rise mt-5 max-w-[64ch] leading-relaxed text-ink-soft">{t(p.bodyKey)}</p>
                   <p className="rise mono mt-6 border-t border-line pt-5 text-[0.56rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-                    Official {PROJECT.developer} render · {PROJECT.location} · Artist&rsquo;s
-                    impression, indicative of design intent and subject to the approved plan
+                    {t("gallery.creditRender")} {PROJECT.developer} · {PROJECT.location} · {t("gallery.creditArtist")}
                   </p>
                 </div>
               </figcaption>
@@ -253,36 +255,33 @@ export default function Gallery() {
       <section className="absent container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5 border-t border-line pt-[clamp(3rem,8vh,5rem)]">
           <span className="idx">02</span>
-          <span className="kicker">What is not here, and why</span>
+          <span className="kicker">{t("gallery.absentKicker")}</span>
         </div>
 
         <p className="ab-row mb-10 max-w-[62ch] leading-relaxed text-ink-soft">
-          A gallery is only worth reading if every caption is true. Where {PROJECT.developer} has
-          released no image, this page shows none — rather than repeating one of the three above
-          under the name of a room it does not depict. Here is the rest of the material, the status
-          it is genuinely at, and the page that already handles it properly without a picture.
+          {t("gallery.absentIntroA")} {PROJECT.developer} {t("gallery.absentIntroB")}
         </p>
 
         <dl className="border-t border-line">
           {ABSENT.map((a) => (
             <div
-              key={a.t}
+              key={a.id}
               className="ab-row grid grid-cols-1 gap-2 border-b border-line py-6 lg:grid-cols-[minmax(0,3rem)_minmax(0,16rem)_1fr_auto] lg:items-baseline lg:gap-8"
             >
               <span className="mono text-[0.56rem] tracking-[0.2em] text-brass">—</span>
-              <dt className="font-display text-xl leading-snug text-ink">{a.t}</dt>
+              <dt className="font-display text-xl leading-snug text-ink">{t(a.tKey)}</dt>
               <dd className="max-w-[58ch] text-sm leading-relaxed text-ink-soft">
                 <span className="mono mb-2 block text-[0.54rem] tracking-[0.2em] text-ink-faint">
-                  {a.s}
+                  {t(a.sKey)}
                 </span>
-                {a.d}
+                {t(a.dKey)}
               </dd>
               <Link
                 to={a.to}
                 data-cursor="ENTER"
                 className="group/l mono inline-flex shrink-0 items-center gap-1.5 text-[0.58rem] tracking-[0.18em] text-brass transition-colors hover:text-brass-soft focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
               >
-                {a.toLabel}
+                {t(a.labelKey)}
                 <ArrowUpRight
                   size={13}
                   aria-hidden="true"
@@ -300,16 +299,13 @@ export default function Gallery() {
           <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_82%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
           <div className="relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
             <div>
-              <p className="req-rise kicker">Imagery on request</p>
+              <p className="req-rise kicker">{t("gallery.imageryOnRequest")}</p>
               <h2 className="req-rise mt-4 max-w-[17ch] font-display text-[clamp(1.9rem,3.8vw,2.9rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-                The rest is shared{" "}
-                <span className="font-serif italic text-brass">privately, as it lands.</span>
+                {t("gallery.restSharedA")}{" "}
+                <span className="font-serif italic text-brass">{t("gallery.restSharedB")}</span>
               </h2>
               <p className="req-rise mt-6 max-w-[50ch] leading-relaxed text-ink-soft">
-                Interior renders, amenity visuals, the dimensioned floor-plan sheets and the master
-                plan are released to the private client team ahead of the public site. Register once
-                and you receive each of them as it is authorised — dated, attributed, and with its
-                approval status stated plainly rather than smoothed over.
+                {t("gallery.requestBody")}
               </p>
 
               <div className="req-rise mt-9 flex flex-wrap items-center gap-6">
@@ -317,12 +313,12 @@ export default function Gallery() {
                   type="button"
                   onClick={() => openEnquiry("Gallery")}
                   data-cursor="OPEN"
-                  aria-label={`Request the full imagery set of ${PROJECT.name}`}
+                  aria-label={`${t("gallery.requestAria")} ${PROJECT.name}`}
                   className="group/cta relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-7 py-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
                 >
                   <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
                   <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-                    Request the full imagery set
+                    {t("gallery.requestCta")}
                   </span>
                   <ArrowUpRight
                     size={15}
@@ -344,18 +340,18 @@ export default function Gallery() {
                 which is also the argument for registering. */}
             <div className="req-rise self-center">
               <p className="mono text-[0.56rem] tracking-[0.2em] text-ink-faint">
-                The collection, stated
+                {t("gallery.collectionStated")}
               </p>
               <dl className="mt-5 border-t border-line">
                 {[
-                  ["Published renders", "03"],
-                  ["Shown on this page", "03"],
-                  ["Interior renders released", "01 — the lobby"],
-                  ["Amenity photography", "None"],
-                  ["Stock photography used", "None"],
-                ].map(([k, v]) => (
+                  ["renders", t("gallery.ledgerRenders"), "03"],
+                  ["shown", t("gallery.ledgerShown"), "03"],
+                  ["interior", t("gallery.ledgerInterior"), t("gallery.ledgerLobbyVal")],
+                  ["amenity", t("gallery.ledgerAmenity"), t("gallery.ledgerNone")],
+                  ["stock", t("gallery.ledgerStock"), t("gallery.ledgerNone")],
+                ].map(([id, k, v]) => (
                   <div
-                    key={k}
+                    key={id}
                     className="flex items-baseline justify-between gap-6 border-b border-line-soft py-3.5"
                   >
                     <dt className="text-sm text-ink-soft">{k}</dt>
@@ -364,7 +360,7 @@ export default function Gallery() {
                 ))}
               </dl>
               <p className="mono mt-5 text-[0.54rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-                No third-party or stock imagery appears anywhere on this site
+                {t("gallery.noStock")}
               </p>
             </div>
           </div>
@@ -381,7 +377,7 @@ export default function Gallery() {
       )}
 
       <RelatedPages links={["/overview", "/residences", "/amenities", "/floor-plan"]} />
-      <CtaBand title="Ask for the" accent="full set." subject="Gallery" />
+      <CtaBand title={t("gallery.ctaTitle")} accent={t("gallery.ctaAccent")} subject="Gallery" />
     </div>
   );
 }
@@ -397,6 +393,7 @@ function PlateLightbox({ rootRef, index, onIndex, onClose }) {
   const dialogRef = useRef(null);
   const closeRef = useRef(null);
   const titleId = useId();
+  const { t } = useI18n();
   const plate = PLATES[index];
 
   /* The listener effect must run exactly once per open, or it would yank focus
@@ -473,17 +470,17 @@ function PlateLightbox({ rootRef, index, onIndex, onClose }) {
         <div className="flex items-start justify-between gap-6">
           <div>
             <p className="mono text-[0.56rem] tracking-[0.22em] text-brass-soft">
-              Plate {plate.no} of III
+              {t("gallery.plate")} {plate.no} {t("gallery.of")} III
             </p>
             <h3 id={titleId} className="mt-2 font-display text-[clamp(1.5rem,3.6vw,2.4rem)] font-light text-bone">
-              {plate.name}
+              {t(plate.nameKey)}
             </h3>
           </div>
           <button
             ref={closeRef}
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("gallery.close")}
             data-cursor="CLOSE"
             className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-bone/25 text-bone transition-colors hover:border-brass hover:text-brass focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
           >
@@ -498,16 +495,16 @@ function PlateLightbox({ rootRef, index, onIndex, onClose }) {
             the later class in the attribute, so `object-contain` alongside
             `object-cover` would be a coin toss. */}
         <div className="mt-5 flex items-center justify-center overflow-hidden rounded-[1.25rem] border border-bone/10 bg-obsidian [&_img]:h-auto [&_img]:max-h-[62vh] [&_img]:w-auto [&_img]:max-w-full [&_img]:object-contain">
-          <Media src={px(plate.id, 2200)} alt={plate.alt} priority sizes="(max-width:1280px) 100vw, 1200px" />
+          <Media src={px(plate.id, 2200)} alt={t(plate.altKey)} priority sizes="(max-width:1280px) 100vw, 1200px" />
         </div>
 
         <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="max-w-[46ch] font-serif text-base italic leading-snug text-brass">
-              {plate.lede}
+              {t(plate.ledeKey)}
             </p>
             <p className="mono mt-3 text-[0.54rem] leading-relaxed tracking-[0.16em] text-bone/45">
-              Official {PROJECT.developer} render · Artist&rsquo;s impression · {PROJECT.location}
+              {t("gallery.creditRender")} {PROJECT.developer} · {t("gallery.creditArtistShort")} · {PROJECT.location}
             </p>
           </div>
 
@@ -515,7 +512,7 @@ function PlateLightbox({ rootRef, index, onIndex, onClose }) {
             <button
               type="button"
               onClick={() => step(-1)}
-              aria-label="Previous plate"
+              aria-label={t("gallery.prevPlate")}
               className="grid h-10 w-10 place-items-center rounded-full border border-bone/25 text-bone transition-colors hover:border-brass hover:text-brass focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
             >
               <ChevronLeft size={16} aria-hidden="true" />
@@ -523,7 +520,7 @@ function PlateLightbox({ rootRef, index, onIndex, onClose }) {
             <button
               type="button"
               onClick={() => step(1)}
-              aria-label="Next plate"
+              aria-label={t("gallery.nextPlate")}
               className="grid h-10 w-10 place-items-center rounded-full border border-bone/25 text-bone transition-colors hover:border-brass hover:text-brass focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
             >
               <ChevronRight size={16} aria-hidden="true" />
@@ -532,7 +529,7 @@ function PlateLightbox({ rootRef, index, onIndex, onClose }) {
         </div>
 
         <p className="mono mt-5 text-center text-[0.54rem] tracking-[0.2em] text-bone/35">
-          ← → to change plate · Esc to close
+          {t("gallery.arrowsHint")}
         </p>
       </div>
     </div>

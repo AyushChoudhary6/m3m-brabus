@@ -8,6 +8,7 @@ import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
 import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Media from "../components/ui/Media.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT } from "../lib/site.js";
 import { IMG, px } from "../lib/images.js";
 
@@ -17,64 +18,27 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    price are not stated there yet — so this page explains the mechanics of a
    handover instead of inventing a date. */
 
-const STATUS = [
-  { k: "Possession", v: PROJECT.possession, n: "No handover date is stated on the official listing" },
-  { k: "RERA registration", v: PROJECT.rera, n: "The declared completion date lives in the RERA filing" },
-  { k: "Price", v: PROJECT.price, n: "Payment plan follows the pricing announcement" },
-  { k: "Configurations", v: PROJECT.configs, n: PROJECT.sizes },
-  { k: "Address", v: PROJECT.address, n: "Golf Course Extension Road" },
-  { k: "Developer", v: `${PROJECT.developer} · inspired by ${PROJECT.partner}`, n: "Branded residences" },
-];
-
 const MEANING = [
-  {
-    k: "01",
-    t: "Possession is the handover, not the booking",
-    d: "It is the point at which the developer hands you the keys to a completed residence and you take physical charge of the home — distinct from allotment, from the agreement to sell, and from registry.",
-  },
-  {
-    k: "02",
-    t: "The offer of possession starts the clock",
-    d: "A written offer of possession follows completion approvals. From that notice, the remaining consideration, statutory dues and maintenance arrangements typically fall due within a stated window.",
-  },
-  {
-    k: "03",
-    t: "Snagging comes before you sign",
-    d: "A joint inspection of finishes, fittings and services is the buyer's opportunity to list defects. Anything unrecorded at handover is far harder to pursue afterwards.",
-  },
-  {
-    k: "04",
-    t: "Handover is when ownership costs begin",
-    d: "Maintenance charges, utility connections and the association's terms usually commence from the offer of possession — read them alongside the date, never after it.",
-  },
+  { k: "01", tKey: "possession.meaning1Title", dKey: "possession.meaning1Body" },
+  { k: "02", tKey: "possession.meaning2Title", dKey: "possession.meaning2Body" },
+  { k: "03", tKey: "possession.meaning3Title", dKey: "possession.meaning3Body" },
+  { k: "04", tKey: "possession.meaning4Title", dKey: "possession.meaning4Body" },
 ];
 
 const GOVERNS = [
-  {
-    t: "The RERA-declared date",
-    d: "Under the Real Estate (Regulation and Development) Act, a registered project carries a completion date declared to the authority. That filing — not marketing material — is the reference a buyer should rely on.",
-  },
-  {
-    t: "Approvals and sanctions",
-    d: "Building-plan sanction, environmental clearance and the occupation certificate each sit on the critical path. A handover cannot precede the occupation certificate.",
-  },
-  {
-    t: "Scale and specification",
-    d: "Large-format branded residences of ≈ 5,000 – 7,000 sq.ft with Italian marble, VRV climate control and smart-home integration carry longer fit-out cycles than standard apartments.",
-  },
-  {
-    t: "Construction stage",
-    d: "Structure, façade, MEP services and finishing progress at different rates. A current site-status report tells you more about timing than any single quoted quarter.",
-  },
+  { tKey: "possession.governs1Title", dKey: "possession.governs1Body" },
+  { tKey: "possession.governs2Title", dKey: "possession.governs2Body" },
+  { tKey: "possession.governs3Title", dKey: "possession.governs3Body" },
+  { tKey: "possession.governs4Title", dKey: "possession.governs4Body" },
 ];
 
 const ASK = [
-  { q: "The RERA-declared completion date", a: "Ask for the registration number and read the declared date in the authority's own record." },
-  { q: "The current construction status", a: "Request the latest site-progress report — structure, façade, services and finishing, stage by stage." },
-  { q: "The written handover terms", a: "Offer-of-possession procedure, the payment window it triggers, and the delay clause in the agreement." },
-  { q: "What is included at handover", a: "The final specification schedule, so what is fitted on day one is unambiguous." },
-  { q: "Maintenance and charges", a: "When maintenance begins, how it is billed, and which statutory dues sit outside the headline consideration." },
-  { q: "Approval milestones", a: "Which sanctions are in hand and which remain pending, including the occupation certificate." },
+  { qKey: "possession.ask1Q", aKey: "possession.ask1A" },
+  { qKey: "possession.ask2Q", aKey: "possession.ask2A" },
+  { qKey: "possession.ask3Q", aKey: "possession.ask3A" },
+  { qKey: "possession.ask4Q", aKey: "possession.ask4A" },
+  { qKey: "possession.ask5Q", aKey: "possession.ask5A" },
+  { qKey: "possession.ask6Q", aKey: "possession.ask6A" },
 ];
 
 const PAGE_FAQS = [
@@ -94,6 +58,24 @@ const PAGE_FAQS = [
 
 export default function PossessionPage() {
   const root = useRef(null);
+  const { t } = useI18n();
+
+  const STATUS = [
+    { k: t("possession.statPossession"), v: PROJECT.possession, n: t("possession.statPossessionNote") },
+    { k: t("possession.statRera"), v: PROJECT.rera, n: t("possession.statReraNote") },
+    { k: t("possession.statPrice"), v: PROJECT.price, n: t("possession.statPriceNote") },
+    { k: t("possession.statConfig"), v: PROJECT.configs, n: PROJECT.sizes },
+    { k: t("possession.statAddress"), v: PROJECT.address, n: t("possession.statAddressNote") },
+    { k: t("possession.statDeveloper"), v: `${PROJECT.developer} · ${t("possession.inspiredBy")} ${PROJECT.partner}`, n: t("possession.statDeveloperNote") },
+  ];
+
+  /* Visible FAQ rows — translated for readers. PAGE_FAQS above stays English and
+     feeds the JSON-LD untouched. */
+  const FAQ_ROWS = [
+    { qKey: "possession.faq1Q", a: <>{t("possession.faq1APre")}&ldquo;{PROJECT.possession}&rdquo;{t("possession.faq1APost")}</> },
+    { qKey: "possession.faq2Q", a: <>{t("possession.faq2APre")}&ldquo;{PROJECT.rera}&rdquo;{t("possession.faq2APost")}</> },
+    { qKey: "possession.faq3Q", a: t("possession.faq3A") },
+  ];
 
   useGSAP(
     () => {
@@ -161,17 +143,17 @@ export default function PossessionPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Possession", path: "/possession" }]} />
       <PageHeader
-        eyebrow="M3M Brabus Possession"
-        title="The date is not"
-        accent="published yet."
-        lede={`The official ${PROJECT.name} listing does not state a possession timeline — it reads "${PROJECT.possession}". Rather than quote a quarter we cannot source, here is what possession means, what governs it, and what to ask for.`}
+        eyebrow={t("possession.eyebrow")}
+        title={t("possession.headerTitle")}
+        accent={t("possession.headerAccent")}
+        lede={`${t("possession.ledePre")}${PROJECT.name}${t("possession.ledeMid")}"${PROJECT.possession}"${t("possession.ledePost")}`}
       />
 
       {/* current status */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">Current status</span>
+          <span className="kicker">{t("possession.currentStatusKicker")}</span>
         </div>
         <dl className="border-t border-line">
           {STATUS.map((s) => (
@@ -186,7 +168,7 @@ export default function PossessionPage() {
           ))}
         </dl>
         <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          Only figures published by the developer are shown — unpublished details are marked as such
+          {t("possession.statusNote")}
         </p>
       </section>
 
@@ -194,16 +176,16 @@ export default function PossessionPage() {
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">What possession means for a buyer</span>
+          <span className="kicker">{t("possession.meaningKicker")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {MEANING.map((m) => (
-            <article key={m.t} className="mn group border-b border-line py-7">
+            <article key={m.k} className="mn group border-b border-line py-7">
               <span className="idx">{m.k}</span>
               <h2 className="mt-3 font-display text-2xl font-light text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-[1.75rem]">
-                {m.t}
+                {t(m.tKey)}
               </h2>
-              <p className="mt-2 max-w-[46ch] leading-relaxed text-ink-soft">{m.d}</p>
+              <p className="mt-2 max-w-[46ch] leading-relaxed text-ink-soft">{t(m.dKey)}</p>
             </article>
           ))}
         </div>
@@ -218,7 +200,7 @@ export default function PossessionPage() {
           <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_55%,rgba(8,6,5,0.65))]" />
           <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
           <span className="mono absolute bottom-5 left-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">
-            Construction status shared on request · {PROJECT.location}
+            {t("possession.imgCaption")} · {PROJECT.location}
           </span>
         </div>
       </section>
@@ -227,13 +209,13 @@ export default function PossessionPage() {
       <section className="gv-grid container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">03</span>
-          <span className="kicker">What governs a handover timeline</span>
+          <span className="kicker">{t("possession.governsKicker")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {GOVERNS.map((g) => (
-            <div key={g.t} className="gv group border-b border-line py-6">
-              <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">{g.t}</h3>
-              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{g.d}</p>
+            <div key={g.tKey} className="gv group border-b border-line py-6">
+              <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">{t(g.tKey)}</h3>
+              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{t(g.dKey)}</p>
             </div>
           ))}
         </div>
@@ -243,16 +225,16 @@ export default function PossessionPage() {
       <section className="ask container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">04</span>
-          <span className="kicker">What to ask for before you commit</span>
+          <span className="kicker">{t("possession.askKicker")}</span>
         </div>
         <ul className="border-t border-line">
           {ASK.map((a) => (
             <li
-              key={a.q}
+              key={a.qKey}
               className="ask-row group grid grid-cols-1 gap-2 border-b border-line py-5 transition-colors duration-500 hover:bg-brass/[0.035] sm:grid-cols-[minmax(0,22rem)_1fr] sm:items-baseline sm:gap-8"
             >
-              <span className="font-display text-lg text-ink transition-colors duration-300 group-hover:text-brass-soft">{a.q}</span>
-              <span className="max-w-[52ch] text-sm leading-relaxed text-ink-soft">{a.a}</span>
+              <span className="font-display text-lg text-ink transition-colors duration-300 group-hover:text-brass-soft">{t(a.qKey)}</span>
+              <span className="max-w-[52ch] text-sm leading-relaxed text-ink-soft">{t(a.aKey)}</span>
             </li>
           ))}
         </ul>
@@ -262,12 +244,12 @@ export default function PossessionPage() {
       <section className="fq-list container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">05</span>
-          <span className="kicker">Possession — answers</span>
+          <span className="kicker">{t("possession.faqKicker")}</span>
         </div>
         <div className="border-t border-line">
-          {PAGE_FAQS.map((f) => (
-            <article key={f.q} className="fq grid grid-cols-1 gap-2 border-b border-line py-7 md:grid-cols-[0.9fr_1.1fr] md:gap-12">
-              <h3 className="font-display text-xl font-light leading-snug text-ink md:text-2xl">{f.q}</h3>
+          {FAQ_ROWS.map((f) => (
+            <article key={f.qKey} className="fq grid grid-cols-1 gap-2 border-b border-line py-7 md:grid-cols-[0.9fr_1.1fr] md:gap-12">
+              <h3 className="font-display text-xl font-light leading-snug text-ink md:text-2xl">{t(f.qKey)}</h3>
               <p className="max-w-[58ch] leading-relaxed text-ink-soft">{f.a}</p>
             </article>
           ))}
@@ -276,7 +258,7 @@ export default function PossessionPage() {
 
       <RelatedPages links={["/overview", "/residences", "/contact"]} />
 
-      <CtaBand title="Ask for the" accent="current status." subject="Possession" />
+      <CtaBand title={t("possession.ctaTitle")} accent={t("possession.ctaAccent")} subject="Possession" />
     </div>
   );
 }

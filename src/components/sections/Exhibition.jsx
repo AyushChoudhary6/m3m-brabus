@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import Media from "../ui/Media.jsx";
+import { useI18n } from "../../lib/i18n.jsx";
 import { IMG, px } from "../../lib/images.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -12,13 +13,14 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    that alternate side to side, each with a clip reveal and a caption
    ledger. Distinct from the amenity gallery — this is the building itself. */
 const PIECES = [
-  { no: "I", label: "The Towers", id: IMG.tower, note: "The silhouette on the Golf Course Extension skyline." },
-  { no: "II", label: "The Arrival", id: IMG.arrival, note: "A porte-cochère scaled for occasion, lit for the evening." },
-  { no: "III", label: "The Lobby", id: IMG.lobby, note: "Marble, brass light and the marque, stated once at the door." },
+  { no: "I", labelKey: "sexhibition.towersLabel", id: IMG.tower, noteKey: "sexhibition.towersNote" },
+  { no: "II", labelKey: "sexhibition.arrivalLabel", id: IMG.arrival, noteKey: "sexhibition.arrivalNote" },
+  { no: "III", labelKey: "sexhibition.lobbyLabel", id: IMG.lobby, noteKey: "sexhibition.lobbyNote" },
 ];
 
 export default function Exhibition() {
   const root = useRef(null);
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -51,31 +53,31 @@ export default function Exhibition() {
       <div className="mb-[clamp(2.5rem,7vh,5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
         <div className="flex items-baseline gap-5">
           <span className="idx">07</span>
-          <span className="kicker">The Exhibition</span>
+          <span className="kicker">{t("sexhibition.theExhibition")}</span>
         </div>
         <h2 className="max-w-[16ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-          A first look, <span className="font-serif italic text-brass">framed.</span>
+          {t("sexhibition.headingLead")} <span className="font-serif italic text-brass">{t("sexhibition.headingAccent")}</span>
         </h2>
       </div>
 
       <div className="flex flex-col gap-[clamp(3.5rem,9vh,7rem)]">
         {PIECES.map((p, i) => (
           <figure
-            key={p.label}
+            key={p.no}
             className={`piece grid items-center gap-8 lg:grid-cols-2 lg:gap-16 ${i % 2 ? "lg:[&>figcaption]:order-first" : ""}`}
             data-cursor="VIEW"
           >
             <div className="pc-img relative aspect-[4/3] overflow-hidden rounded-[1.5rem] border border-line">
               <div className="pc-img-inner ed-breath absolute inset-0 scale-[1.05]">
-                <Media src={px(p.id, 1600)} alt={`${p.label} — M3M Brabus, Sector 58 Gurgaon`} sizes="(max-width:1024px) 100vw, 48vw" />
+                <Media src={px(p.id, 1600)} alt={`${t(p.labelKey)} — M3M Brabus, ${t("sexhibition.locSuffix")}`} sizes="(max-width:1024px) 100vw, 48vw" />
               </div>
               <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_60%,rgba(8,6,5,0.45))]" />
               <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
             </div>
             <figcaption>
               <span className="rise idx block">{p.no}</span>
-              <h3 className="rise mt-4 font-display text-[clamp(1.8rem,3.4vw,2.8rem)] font-light tracking-[-0.01em] text-ink">{p.label}</h3>
-              <p className="rise mt-4 max-w-[38ch] text-lg leading-relaxed text-ink-soft">{p.note}</p>
+              <h3 className="rise mt-4 font-display text-[clamp(1.8rem,3.4vw,2.8rem)] font-light tracking-[-0.01em] text-ink">{t(p.labelKey)}</h3>
+              <p className="rise mt-4 max-w-[38ch] text-lg leading-relaxed text-ink-soft">{t(p.noteKey)}</p>
             </figcaption>
           </figure>
         ))}

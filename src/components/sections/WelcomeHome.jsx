@@ -80,14 +80,13 @@ export default function WelcomeHome() {
       <div className="container-lux py-[clamp(5rem,14vh,10rem)]">
         {sent ? (
           <div className="flex min-h-[46vh] flex-col items-center justify-center text-center">
-            <p className="kicker mb-8">Your enquiry is received</p>
+            <p className="kicker mb-8">{t("swelcome.enquiryReceived")}</p>
             <h2 className="font-display text-[clamp(3rem,11vw,9rem)] font-light leading-[0.92] text-ink">
-              <span className="block overflow-hidden"><span className="welcome-word block">Welcome</span></span>
-              <span className="block overflow-hidden"><span className="welcome-word block font-serif italic text-brass">Home.</span></span>
+              <span className="block overflow-hidden"><span className="welcome-word block">{t("swelcome.welcome")}</span></span>
+              <span className="block overflow-hidden"><span className="welcome-word block font-serif italic text-brass">{t("swelcome.home")}</span></span>
             </h2>
             <p className="mt-8 max-w-md text-ink-soft">
-              Our team will reach {form.name.split(" ")[0]} shortly with the brochure,
-              price sheet and a private viewing invitation.
+              {t("swelcome.teamReachPre")} {form.name.split(" ")[0]} {t("swelcome.teamReachPost")}
             </p>
           </div>
         ) : (
@@ -95,14 +94,13 @@ export default function WelcomeHome() {
             <div>
               <div className="flex items-baseline gap-5">
                 <span className="idx">08</span>
-                <span className="kicker">Welcome Home</span>
+                <span className="kicker">{t("swelcome.welcomeHome")}</span>
               </div>
               <h2 className="mt-7 max-w-[14ch] font-display text-[clamp(2.6rem,8vw,6.5rem)] font-light leading-[0.98] tracking-[-0.02em] text-ink">
-                Your residence <span className="font-serif italic text-brass">awaits.</span>
+                {t("swelcome.residenceLead")} <span className="font-serif italic text-brass">{t("swelcome.awaits")}</span>
               </h2>
               <p className="mt-8 max-w-md text-lg leading-relaxed text-ink-soft">
-                A limited collection at Sector 58, Gurgaon. Register your interest to
-                receive the brochure, pricing and a private viewing — before anyone else.
+                {t("swelcome.intro")}
               </p>
             </div>
 

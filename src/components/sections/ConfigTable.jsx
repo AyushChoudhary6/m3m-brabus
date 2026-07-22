@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import { ArrowUpRight } from "lucide-react";
 import Magnetic from "../ui/Magnetic.jsx";
 import { useEnquiry } from "../ui/Enquiry.jsx";
+import { useI18n } from "../../lib/i18n.jsx";
 import { CONFIGURATIONS } from "../../lib/facts.js";
 import { PROJECT } from "../../lib/site.js";
 import { track } from "../../lib/analytics.js";
@@ -31,7 +32,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    duplicated as a second markup tree, which would make screen readers read the
    whole collection twice. */
 
-const HEADS = ["Configuration", "Size", "Carpet area", "Availability"];
+const HEAD_KEYS = ["sconfig.configuration", "sconfig.size", "sconfig.carpetArea", "sconfig.availability"];
 
 /* Shared cell rhythm: generous vertical padding, hairline rule, and on mobile
    the label the hidden <thead> would otherwise have supplied. */
@@ -45,6 +46,7 @@ const CELL =
 export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
   const root = useRef(null);
   const { openEnquiry } = useEnquiry();
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -80,10 +82,10 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
       <div className="mb-[clamp(2rem,5vh,3.5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
         <div className="cfg-rise flex items-baseline gap-5">
           <span className="idx">{index}</span>
-          <span className="kicker">{kicker}</span>
+          <span className="kicker">{kicker === "Side by side" ? t("sconfig.sideBySide") : kicker}</span>
         </div>
         <h2 className="cfg-rise max-w-[24ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-          Two residences. <span className="font-serif italic text-brass">Nothing in between.</span>
+          {t("sconfig.headingLead")} <span className="font-serif italic text-brass">{t("sconfig.headingAccent")}</span>
         </h2>
       </div>
 
@@ -93,20 +95,18 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
       <div className="cfg-table overflow-x-auto">
         <table className="w-full border-collapse text-left max-md:block md:min-w-[42rem]">
           <caption className="mono mb-7 text-left text-[0.58rem] leading-relaxed tracking-[0.18em] text-ink-faint max-md:block">
-            {PROJECT.name} — configurations and sizes as published by {PROJECT.developer}. Sizes are
-            total area. Carpet areas and the current availability position are not published, and
-            are shared on request.
+            {PROJECT.name} {t("sconfig.captionMid")} {PROJECT.developer}. {t("sconfig.captionEnd")}
           </caption>
 
           <thead className="max-md:sr-only">
             <tr>
-              {HEADS.map((h) => (
+              {HEAD_KEYS.map((h) => (
                 <th
                   key={h}
                   scope="col"
                   className="mono border-b border-brass/30 pb-4 pr-8 text-[0.58rem] font-medium tracking-[0.2em] text-ink-faint last:pr-0"
                 >
-                  {h}
+                  {t(h)}
                 </th>
               ))}
             </tr>
@@ -120,7 +120,7 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
               >
                 <th
                   scope="row"
-                  data-label="Configuration"
+                  data-label={t("sconfig.configuration")}
                   className={`${CELL} font-normal`}
                 >
                   <span className="idx block">{String(i + 1).padStart(2, "0")}</span>
@@ -129,17 +129,17 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
                   </span>
                 </th>
 
-                <td data-label="Size" className={CELL}>
+                <td data-label={t("sconfig.size")} className={CELL}>
                   <span className="whitespace-nowrap font-display text-lg font-light text-ink">
                     {c.size}
                   </span>
                   <span className="mt-1.5 block text-xs leading-relaxed text-ink-faint">
-                    Total area
+                    {t("sconfig.totalArea")}
                   </span>
                 </td>
 
                 {/* not published — an unknown is offered, never invented */}
-                <td data-label="Carpet area" className={CELL}>
+                <td data-label={t("sconfig.carpetArea")} className={CELL}>
                   {c.carpet ? (
                     <span className="font-display text-lg font-light text-ink">{c.carpet}</span>
                   ) : (
@@ -147,21 +147,21 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
                       <button
                         type="button"
                         onClick={() => request(`Carpet area — ${c.config}`)}
-                        aria-label={`On request — the carpet area for the ${c.config} residence`}
+                        aria-label={`${t("sconfig.carpetAriaPre")} ${c.config}`}
                         data-cursor="REQUEST"
                         className="inline-flex items-center gap-1.5 font-display text-lg font-light text-brass transition-colors duration-500 hover:text-brass-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
                       >
-                        On request
+                        {t("sconfig.onRequest")}
                         <ArrowUpRight size={15} className="transition-transform duration-500 group-hover:translate-x-0.5" />
                       </button>
                       <span className="mt-1.5 block text-xs leading-relaxed text-ink-faint">
-                        Not published
+                        {t("sconfig.notPublished")}
                       </span>
                     </>
                   )}
                 </td>
 
-                <td data-label="Availability" className={CELL}>
+                <td data-label={t("sconfig.availability")} className={CELL}>
                   {/* No inventory position is published, so we ask rather than
                       assert one — an unknown becomes an enquiry. */}
                   {c.status ? (
@@ -175,7 +175,7 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
                       onClick={() => request(`Availability · ${c.config}`)}
                       className="mono inline-flex items-center gap-2 rounded-full border border-brass/30 px-3.5 py-1.5 text-[0.56rem] tracking-[0.18em] text-brass transition-colors hover:border-brass hover:bg-brass/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
                     >
-                      Ask availability
+                      {t("sconfig.askAvailability")}
                     </button>
                   )}
                 </td>
@@ -187,9 +187,7 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
 
       <div className="mt-10 flex flex-col gap-7 md:flex-row md:items-center md:justify-between">
         <p className="cfg-rise max-w-[52ch] text-sm leading-relaxed text-ink-soft">
-          These are the only configurations {PROJECT.developer} has released for {PROJECT.name}.
-          Availability moves with each release — ask for the current position before you plan a
-          visit.
+          {t("sconfig.onlyConfigsPre")} {PROJECT.developer} {t("sconfig.onlyConfigsMid")} {PROJECT.name}. {t("sconfig.onlyConfigsEnd")}
         </p>
 
         <div className="cfg-rise shrink-0">
@@ -202,7 +200,7 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
             >
               <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
               <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-                Get latest availability
+                {t("sconfig.getLatest")}
               </span>
               <ArrowUpRight size={15} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
             </button>

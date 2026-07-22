@@ -11,11 +11,13 @@ import ProjectHighlights from "../components/sections/ProjectHighlights.jsx";
 import Media from "../components/ui/Media.jsx";
 import { HIGHLIGHTS, PROJECT } from "../lib/site.js";
 import { IMG, px } from "../lib/images.js";
+import { useI18n } from "../lib/i18n.jsx";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 export default function Overview() {
   const root = useRef(null);
+  const { t } = useI18n();
 
   useGSAP(
     () => {
@@ -55,13 +57,13 @@ export default function Overview() {
         path="/overview"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Overview", path: "/overview" }])}
       />
-      <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Overview", path: "/overview" }]} />
+      <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: t("overview.crumb"), path: "/overview" }]} />
       <PageHeader
         compact
-        eyebrow="M3M Brabus Overview"
-        title="A limited collection,"
-        accent="engineered with BRABUS."
-        lede={`${PROJECT.configs} of ${PROJECT.sizes} at ${PROJECT.location}, on Golf Course Extension Road. What follows is the case for the project — and the record of what ${PROJECT.developer} has published about it, and what it has not.`}
+        eyebrow={t("overview.eyebrow")}
+        title={t("overview.title")}
+        accent={t("overview.accent")}
+        lede={`${PROJECT.configs} ${t("overview.ledeOf")} ${PROJECT.sizes} ${t("overview.ledeAt")} ${PROJECT.location}${t("overview.ledeOnRoad")} ${PROJECT.developer} ${t("overview.ledeTail")}`}
       />
 
       {/* The count-up stats band that stood here restated the sector, the largest
@@ -73,12 +75,12 @@ export default function Overview() {
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="ov-img-wrap relative aspect-[16/9] overflow-hidden rounded-[1.5rem] border border-line">
           <div className="ov-img-inner ed-breath absolute inset-0 scale-[1.06]">
-            <Media src={px(IMG.heroExterior, 2000)} alt="M3M Brabus — the tower" priority sizes="100vw" />
+            <Media src={px(IMG.heroExterior, 2000)} alt={t("overview.imgAlt")} priority sizes="100vw" />
           </div>
           <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_55%,rgba(8,6,5,0.65))]" />
           <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
           <span className="mono absolute bottom-5 left-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">
-            The Tower
+            {t("overview.towerCaption")}
           </span>
         </div>
       </section>
@@ -91,26 +93,20 @@ export default function Overview() {
       <section className="brief container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="br-rise mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">The project, in brief</span>
+          <span className="kicker">{t("overview.briefKicker")}</span>
         </div>
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
           <h2 className="br-rise max-w-[14ch] font-display text-[clamp(1.9rem,4.4vw,3.2rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
-            A branded residence, <span className="font-serif italic text-brass">in the truest sense.</span>
+            {t("overview.briefTitle1")} <span className="font-serif italic text-brass">{t("overview.briefTitle2")}</span>
           </h2>
           <div>
             <p className="br-rise max-w-[54ch] leading-relaxed text-ink-soft">
-              {PROJECT.name} is developed by {PROJECT.developer} and shaped by the ethos of
-              {" "}{PROJECT.partner} — the German marque that built its name rebuilding finished motor
-              cars to a specification the factory never offered. The influence is meant to be felt in
-              the specification rather than read off a badge: bespoke, obsessive, made once.
+              {PROJECT.name} {t("overview.briefP1a")} {PROJECT.developer} {t("overview.briefP1b")}
+              {" "}{PROJECT.partner} {t("overview.briefP1c")}
             </p>
             <p className="br-rise mt-5 max-w-[54ch] leading-relaxed text-ink-soft">
-              It is written for a narrow readership — families who already own well and are buying a
-              last address rather than a next one, and principals who want the home to read the way
-              the car in the porch does. Consider it if you value provenance over frontage: an
-              {" "}{PROJECT.developer} address, a global marque's discipline carried into the
-              interiors, a floor plate large enough to live at villa scale without leaving the
-              skyline, and security and concierge that keep no office hours.
+              {t("overview.briefP2a")}
+              {" "}{PROJECT.developer} {t("overview.briefP2b")}
             </p>
           </div>
         </div>
@@ -120,7 +116,7 @@ export default function Overview() {
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">What sets it apart</span>
+          <span className="kicker">{t("overview.apartKicker")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-10 md:grid-cols-2">
           {HIGHLIGHTS.map((h, i) => (
@@ -141,7 +137,7 @@ export default function Overview() {
       <ProjectHighlights />
 
       <RelatedPages links={["/residences", "/price", "/amenities", "/location"]} />
-      <CtaBand title="See it" accent="in person." subject="Overview" />
+      <CtaBand title={t("overview.ctaTitle")} accent={t("overview.ctaAccent")} subject="Overview" />
     </div>
   );
 }

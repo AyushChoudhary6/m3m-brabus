@@ -5,6 +5,7 @@ import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo from "../components/ui/Seo.jsx";
 import { Reveal } from "../components/ui/Reveal.jsx";
 import { useEnquiry } from "../components/ui/Enquiry.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT } from "../lib/site.js";
 import { track, trackCall, trackWhatsApp } from "../lib/analytics.js";
 
@@ -29,35 +30,36 @@ import { track, trackCall, trackWhatsApp } from "../lib/analytics.js";
  * 404 status is ever required, it must be configured at the host.
  */
 
-/* The pages worth landing on when the intended one doesn't exist. */
-const DESTINATIONS = [
-  { to: "/", name: "Home", d: "The residences, the marque and the address in brief." },
-  { to: "/overview", name: "Project overview", d: `What ${PROJECT.name} is, and what has actually been published about it.` },
-  { to: "/price", name: "Price", d: "Where pricing stands, and what the official sheet will carry." },
-  { to: "/floor-plan", name: "Floor plans", d: `Layouts for the ${PROJECT.configs.toLowerCase()}.` },
-  { to: "/location", name: "Location", d: `${PROJECT.location} — connectivity and the neighbourhood.` },
-  { to: "/contact", name: "Contact", d: "Speak to the private client team directly." },
-];
-
-/* Most mistyped URLs are an intent, not an address. Name the intents. */
-const INTENTS = [
-  { to: "/price", label: "I want the price list" },
-  { to: "/brochure", label: "I want the brochure" },
-  { to: "/floor-plan", label: "I want the floor plans" },
-  { to: "/payment-plan", label: "I want the payment plan" },
-  { to: "/amenities", label: "I want the amenity list" },
-  { to: "/rera", label: "I want the RERA position" },
-  { to: "/possession", label: "I want the possession position" },
-  { to: "/faqs", label: "I have a question" },
-];
-
-const WA_TEXT = encodeURIComponent(
-  `Hello — I was looking for something on the ${PROJECT.name} site and couldn't find it. Could you help?`,
-);
-
 export default function NotFound() {
   const { pathname } = useLocation();
   const { openEnquiry } = useEnquiry();
+  const { t } = useI18n();
+
+  /* The pages worth landing on when the intended one doesn't exist. */
+  const DESTINATIONS = [
+    { to: "/", name: t("notfound.destHomeName"), d: t("notfound.destHomeDesc") },
+    { to: "/overview", name: t("notfound.destOverviewName"), d: `${t("notfound.destOverviewDescPre")}${PROJECT.name}${t("notfound.destOverviewDescPost")}` },
+    { to: "/price", name: t("notfound.destPriceName"), d: t("notfound.destPriceDesc") },
+    { to: "/floor-plan", name: t("notfound.destFloorName"), d: `${t("notfound.destFloorDescPre")}${PROJECT.configs.toLowerCase()}.` },
+    { to: "/location", name: t("notfound.destLocationName"), d: `${PROJECT.location}${t("notfound.destLocationDescSuffix")}` },
+    { to: "/contact", name: t("notfound.destContactName"), d: t("notfound.destContactDesc") },
+  ];
+
+  /* Most mistyped URLs are an intent, not an address. Name the intents. */
+  const INTENTS = [
+    { to: "/price", label: t("notfound.intentPrice") },
+    { to: "/brochure", label: t("notfound.intentBrochure") },
+    { to: "/floor-plan", label: t("notfound.intentFloor") },
+    { to: "/payment-plan", label: t("notfound.intentPayment") },
+    { to: "/amenities", label: t("notfound.intentAmenities") },
+    { to: "/rera", label: t("notfound.intentRera") },
+    { to: "/possession", label: t("notfound.intentPossession") },
+    { to: "/faqs", label: t("notfound.intentQuestion") },
+  ];
+
+  const WA_TEXT = encodeURIComponent(
+    `${t("notfound.waTextPre")}${PROJECT.name}${t("notfound.waTextPost")}`,
+  );
 
   // Broken links are worth knowing about; GA4 is a no-op when unconfigured.
   useEffect(() => {
@@ -74,24 +76,22 @@ export default function NotFound() {
       />
 
       <PageHeader
-        eyebrow="Error 404"
-        title="This page"
-        accent="isn't here."
-        lede="The address may have changed, or it may never have existed. Nothing is lost — everything on this site is a click or two away below."
+        eyebrow={t("notfound.eyebrow")}
+        title={t("notfound.headerTitle")}
+        accent={t("notfound.headerAccent")}
+        lede={t("notfound.headerLede")}
       />
 
       {/* what happened, stated plainly */}
       <section className="container-lux pb-[clamp(3rem,9vh,5rem)]">
         <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
           <div>
-            <p className="mono text-[0.6rem] tracking-[0.24em] text-ink-faint">The address requested</p>
+            <p className="mono text-[0.6rem] tracking-[0.24em] text-ink-faint">{t("notfound.addressRequested")}</p>
             <p className="mono mt-3 max-w-full overflow-x-auto whitespace-nowrap pb-1 text-[0.78rem] tracking-[0.08em] text-brass">
               {pathname}
             </p>
             <p className="mt-6 max-w-[48ch] leading-relaxed text-ink-soft">
-              If you followed a link from elsewhere, it has probably gone stale — pages on this
-              site are occasionally renamed as more is published officially. If you typed the
-              address, a character may simply have slipped.
+              {t("notfound.staleLink")}
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-6">
               {/* A retry is genuinely useful here: a mid-deploy visit can 404 a
@@ -102,13 +102,13 @@ export default function NotFound() {
                 className="mono inline-flex items-center gap-2 border-b border-brass/40 pb-1 text-[0.66rem] tracking-[0.18em] text-brass transition-colors hover:border-brass hover:text-brass-soft"
               >
                 <RotateCw size={13} />
-                Try this address again
+                {t("notfound.tryAgain")}
               </button>
               <Link
                 to="/"
                 className="mono inline-flex items-center gap-2 text-[0.66rem] tracking-[0.18em] text-ink-soft transition-colors hover:text-ink"
               >
-                Back to home
+                {t("notfound.backHome")}
                 <ArrowUpRight size={13} className="text-brass" />
               </Link>
             </div>
@@ -118,11 +118,9 @@ export default function NotFound() {
             <div className="relative overflow-hidden rounded-[1.5rem] border border-brass/25 bg-paper p-8 md:p-10">
               <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
               <div className="relative">
-                <p className="kicker">Rather just ask?</p>
+                <p className="kicker">{t("notfound.askKicker")}</p>
                 <p className="mt-4 max-w-[38ch] leading-relaxed text-ink-soft">
-                  Tell us what you were looking for and the private client team will send it to
-                  you — the brochure, the plans, or the current position on anything not yet
-                  published.
+                  {t("notfound.askBody")}
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-4">
                   <button
@@ -133,7 +131,7 @@ export default function NotFound() {
                   >
                     <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
                     <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-                      Ask the team
+                      {t("notfound.askTeam")}
                     </span>
                     <ArrowUpRight size={15} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
                   </button>
@@ -169,7 +167,7 @@ export default function NotFound() {
       <section className="container-lux pb-[clamp(3.5rem,10vh,6rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">Where you may have been going</span>
+          <span className="kicker">{t("notfound.destinationsKicker")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {DESTINATIONS.map((p, i) => (
@@ -197,7 +195,7 @@ export default function NotFound() {
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">Or find it by what you came for</span>
+          <span className="kicker">{t("notfound.intentsKicker")}</span>
         </div>
         <div className="flex flex-wrap gap-3">
           {INTENTS.map((s) => (

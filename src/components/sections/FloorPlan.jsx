@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Magnetic from "../ui/Magnetic.jsx";
 import { useEnquiry } from "../ui/Enquiry.jsx";
+import { useI18n } from "../../lib/i18n.jsx";
 import usePresence from "../../lib/usePresence.js";
 import { CONFIGURATIONS } from "../../lib/facts.js";
 
@@ -29,12 +30,12 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 /* Zones read as a legend and set each room's gold weight. Purely descriptive
    of the layout — no measurement is implied by any of them. */
 const ZONES = {
-  arrival: { label: "Arrival", fill: 0.05 },
-  reception: { label: "Reception", fill: 0.115 },
-  private: { label: "Private", fill: 0.07 },
-  wellness: { label: "Wellness", fill: 0.09 },
-  service: { label: "Service", fill: 0.04 },
-  outdoor: { label: "Outdoor", fill: 0.02 },
+  arrival: { label: "Arrival", tKey: "sfloorplan.zoneArrival", fill: 0.05 },
+  reception: { label: "Reception", tKey: "sfloorplan.zoneReception", fill: 0.115 },
+  private: { label: "Private", tKey: "sfloorplan.zonePrivate", fill: 0.07 },
+  wellness: { label: "Wellness", tKey: "sfloorplan.zoneWellness", fill: 0.09 },
+  service: { label: "Service", tKey: "sfloorplan.zoneService", fill: 0.04 },
+  outdoor: { label: "Outdoor", tKey: "sfloorplan.zoneOutdoor", fill: 0.02 },
 };
 
 const PLANS = [
@@ -42,36 +43,40 @@ const PLANS = [
     id: "4bhk",
     label: "4 BHK",
     tag: "The Signature",
+    tagKey: "sfloorplan.tagSignature",
     composition: "Four bedrooms · living & dining · kitchen · foyer · balcony",
+    compKey: "sfloorplan.comp4bhk",
     rooms: [
-      { n: "Living & Dining", z: "reception", x: 10, y: 10, w: 370, h: 230 },
-      { n: "Kitchen", z: "service", x: 10, y: 250, w: 175, h: 120 },
-      { n: "Foyer", z: "arrival", x: 195, y: 250, w: 185, h: 120 },
-      { n: "Balcony", z: "outdoor", x: 10, y: 380, w: 370, h: 150 },
-      { n: "Master Suite", z: "private", x: 390, y: 10, w: 400, h: 170 },
-      { n: "Bedroom 2", z: "private", x: 390, y: 190, w: 195, h: 150 },
-      { n: "Bedroom 3", z: "private", x: 595, y: 190, w: 195, h: 150 },
-      { n: "Bedroom 4", z: "private", x: 390, y: 350, w: 195, h: 180 },
-      { n: "Wellness Bath", z: "wellness", x: 595, y: 350, w: 195, h: 180 },
+      { n: "Living & Dining", tKey: "sfloorplan.roomLivingDining", z: "reception", x: 10, y: 10, w: 370, h: 230 },
+      { n: "Kitchen", tKey: "sfloorplan.roomKitchen", z: "service", x: 10, y: 250, w: 175, h: 120 },
+      { n: "Foyer", tKey: "sfloorplan.roomFoyer", z: "arrival", x: 195, y: 250, w: 185, h: 120 },
+      { n: "Balcony", tKey: "sfloorplan.roomBalcony", z: "outdoor", x: 10, y: 380, w: 370, h: 150 },
+      { n: "Master Suite", tKey: "sfloorplan.roomMasterSuite", z: "private", x: 390, y: 10, w: 400, h: 170 },
+      { n: "Bedroom 2", tKey: "sfloorplan.roomBed2", z: "private", x: 390, y: 190, w: 195, h: 150 },
+      { n: "Bedroom 3", tKey: "sfloorplan.roomBed3", z: "private", x: 595, y: 190, w: 195, h: 150 },
+      { n: "Bedroom 4", tKey: "sfloorplan.roomBed4", z: "private", x: 390, y: 350, w: 195, h: 180 },
+      { n: "Wellness Bath", tKey: "sfloorplan.roomWellnessBath", z: "wellness", x: 595, y: 350, w: 195, h: 180 },
     ],
   },
   {
     id: "5bhk",
     label: "5 BHK",
     tag: "The Grand",
+    tagKey: "sfloorplan.tagGrand",
     composition: "Five bedrooms · living & dining · family lounge · study · sky lounge",
+    compKey: "sfloorplan.comp5bhk",
     rooms: [
-      { n: "Living & Dining", z: "reception", x: 10, y: 10, w: 370, h: 220 },
-      { n: "Family Lounge", z: "reception", x: 10, y: 240, w: 175, h: 130 },
-      { n: "Kitchen", z: "service", x: 195, y: 240, w: 185, h: 130 },
-      { n: "Balcony", z: "outdoor", x: 10, y: 380, w: 370, h: 150 },
-      { n: "Master Suite", z: "private", x: 390, y: 10, w: 400, h: 150 },
-      { n: "Bedroom 2", z: "private", x: 390, y: 170, w: 195, h: 130 },
-      { n: "Bedroom 3", z: "private", x: 595, y: 170, w: 195, h: 130 },
-      { n: "Bedroom 4", z: "private", x: 390, y: 310, w: 195, h: 110 },
-      { n: "Bedroom 5", z: "private", x: 595, y: 310, w: 195, h: 110 },
-      { n: "Study", z: "private", x: 390, y: 430, w: 195, h: 100 },
-      { n: "Sky Lounge", z: "outdoor", x: 595, y: 430, w: 195, h: 100 },
+      { n: "Living & Dining", tKey: "sfloorplan.roomLivingDining", z: "reception", x: 10, y: 10, w: 370, h: 220 },
+      { n: "Family Lounge", tKey: "sfloorplan.roomFamilyLounge", z: "reception", x: 10, y: 240, w: 175, h: 130 },
+      { n: "Kitchen", tKey: "sfloorplan.roomKitchen", z: "service", x: 195, y: 240, w: 185, h: 130 },
+      { n: "Balcony", tKey: "sfloorplan.roomBalcony", z: "outdoor", x: 10, y: 380, w: 370, h: 150 },
+      { n: "Master Suite", tKey: "sfloorplan.roomMasterSuite", z: "private", x: 390, y: 10, w: 400, h: 150 },
+      { n: "Bedroom 2", tKey: "sfloorplan.roomBed2", z: "private", x: 390, y: 170, w: 195, h: 130 },
+      { n: "Bedroom 3", tKey: "sfloorplan.roomBed3", z: "private", x: 595, y: 170, w: 195, h: 130 },
+      { n: "Bedroom 4", tKey: "sfloorplan.roomBed4", z: "private", x: 390, y: 310, w: 195, h: 110 },
+      { n: "Bedroom 5", tKey: "sfloorplan.roomBed5", z: "private", x: 595, y: 310, w: 195, h: 110 },
+      { n: "Study", tKey: "sfloorplan.roomStudy", z: "private", x: 390, y: 430, w: 195, h: 100 },
+      { n: "Sky Lounge", tKey: "sfloorplan.roomSkyLounge", z: "outdoor", x: 595, y: 430, w: 195, h: 100 },
     ],
   },
 ];
@@ -90,12 +95,13 @@ const MAX_Z = 4;
    draw it in, the lightbox renders the identical geometry without the
    animation classes so the entry timeline never touches it. */
 function PlanSvg({ plan, active, onRoom, animated = false, className = "" }) {
+  const { t } = useI18n();
   return (
     <svg
       viewBox="0 0 800 540"
       className={className}
       role="img"
-      aria-label={`${plan.label} indicative room layout, ${plan.composition}`}
+      aria-label={`${plan.label} ${t("sfloorplan.roomLayoutAria")}، ${t(plan.compKey)}`}
     >
       <rect
         className={animated ? "plan-frame" : undefined}
@@ -128,7 +134,7 @@ function PlanSvg({ plan, active, onRoom, animated = false, className = "" }) {
               className={on ? "fill-bone" : "fill-ink-soft"}
               style={{ fontFamily: "var(--font-display)", fontSize: r.w < 190 ? 15 : 18, transition: "fill .35s" }}
             >
-              {r.n}
+              {t(r.tKey)}
             </text>
             <text
               x={r.x + r.w / 2} y={r.y + r.h / 2 + 17}
@@ -136,7 +142,7 @@ function PlanSvg({ plan, active, onRoom, animated = false, className = "" }) {
               className={on ? "fill-brass-soft" : "fill-ink-faint"}
               style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", transition: "fill .35s" }}
             >
-              {zone.label}
+              {t(zone.tKey)}
             </text>
           </g>
         );
@@ -150,6 +156,7 @@ function PlanSvg({ plan, active, onRoom, animated = false, className = "" }) {
    print a guess or leave a blank, each becomes a one-tap request. */
 function OnRequest({ label, subject, note }) {
   const { openEnquiry } = useEnquiry();
+  const { t } = useI18n();
   return (
     <div className="min-w-0">
       <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{label}</p>
@@ -157,10 +164,10 @@ function OnRequest({ label, subject, note }) {
         type="button"
         onClick={() => openEnquiry(subject)}
         data-cursor="REQUEST"
-        aria-label={`On request — ${label} from the private client team`}
+        aria-label={`${t("sfloorplan.onRequest")} — ${label} ${t("sfloorplan.privateClientTeam")}`}
         className="group/or mt-1 inline-flex items-center gap-1.5 rounded-sm font-serif text-sm italic text-brass transition-colors hover:text-brass-soft focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-4 focus-visible:ring-offset-canvas md:text-base"
       >
-        On request
+        {t("sfloorplan.onRequest")}
         <ArrowUpRight size={13} className="transition-transform duration-500 group-hover/or:translate-x-0.5" />
       </button>
       {note && <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-faint">{note}</p>}
@@ -177,6 +184,7 @@ function OnRequest({ label, subject, note }) {
    so it owns the node the leaving tween runs on. */
 function PlanLightbox({ rootRef, index, onIndex, onClose }) {
   const { openEnquiry } = useEnquiry();
+  const { t } = useI18n();
   const dialogRef = useRef(null);
   const stageRef = useRef(null);
   const closeRef = useRef(null);
@@ -369,18 +377,18 @@ function PlanLightbox({ rootRef, index, onIndex, onClose }) {
           <div className="min-w-0">
             <p className="kicker">{plan.tag}</p>
             <h2 id={titleId} className="mt-1 font-display text-2xl font-light tracking-[-0.01em] text-ink md:text-3xl">
-              {plan.label} <span className="font-serif italic text-brass">floor plan</span>
+              {plan.label} <span className="font-serif italic text-brass">{t("sfloorplan.floorPlan")}</span>
             </h2>
           </div>
 
           <div className="flex items-center gap-2">
-            <div aria-label="Choose a configuration" className="flex items-center gap-1 rounded-full border border-line p-1">
+            <div aria-label={t("sfloorplan.chooseConfig")} className="flex items-center gap-1 rounded-full border border-line p-1">
               {PLANS.map((p, i) => (
                 <button
                   key={p.id}
                   type="button"
                   aria-pressed={i === index}
-                  aria-label={`Show the ${p.label} floor plan`}
+                  aria-label={`${t("sfloorplan.showThePlan")} ${p.label}`}
                   onClick={() => { if (i !== index) { reset(); setHover(null); onIndex(i); } }}
                   className={`mono rounded-full px-3.5 py-1.5 text-[0.6rem] tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass ${
                     i === index ? "bg-brass text-obsidian" : "text-ink-soft hover:text-brass"
@@ -390,7 +398,7 @@ function PlanLightbox({ rootRef, index, onIndex, onClose }) {
                 </button>
               ))}
             </div>
-            <button ref={closeRef} type="button" onClick={onClose} aria-label="Close the enlarged floor plan" data-cursor="CLOSE" className={ctl}>
+            <button ref={closeRef} type="button" onClick={onClose} aria-label={t("sfloorplan.closeEnlarged")} data-cursor="CLOSE" className={ctl}>
               <X size={16} />
             </button>
           </div>
@@ -429,31 +437,31 @@ function PlanLightbox({ rootRef, index, onIndex, onClose }) {
 
           {/* controls — zoom, full screen, and the two homes on either side */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 px-4 pb-4 md:px-8">
-            <button type="button" onClick={() => go(-1)} aria-label="Previous configuration" className={`pointer-events-auto bg-paper/80 backdrop-blur ${ctl}`}>
+            <button type="button" onClick={() => go(-1)} aria-label={t("sfloorplan.prevConfig")} className={`pointer-events-auto bg-paper/80 backdrop-blur ${ctl}`}>
               <ChevronLeft size={16} />
             </button>
 
             <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-line bg-paper/85 px-2 py-1.5 backdrop-blur">
-              <button type="button" onClick={() => setZoomTo(zoom - 0.5)} disabled={zoom <= MIN_Z} aria-label="Zoom out" className={ctl}>
+              <button type="button" onClick={() => setZoomTo(zoom - 0.5)} disabled={zoom <= MIN_Z} aria-label={t("sfloorplan.zoomOut")} className={ctl}>
                 <Minus size={15} />
               </button>
               <span aria-live="polite" className="mono w-12 text-center text-[0.58rem] tracking-[0.14em] text-ink-soft">
                 {Math.round(zoom * 100)}%
               </span>
-              <button type="button" onClick={() => setZoomTo(zoom + 0.5)} disabled={zoom >= MAX_Z} aria-label="Zoom in" className={ctl}>
+              <button type="button" onClick={() => setZoomTo(zoom + 0.5)} disabled={zoom >= MAX_Z} aria-label={t("sfloorplan.zoomIn")} className={ctl}>
                 <Plus size={15} />
               </button>
-              <button type="button" onClick={reset} disabled={zoom === 1 && pan.x === 0 && pan.y === 0} aria-label="Reset the zoom" className={ctl}>
+              <button type="button" onClick={reset} disabled={zoom === 1 && pan.x === 0 && pan.y === 0} aria-label={t("sfloorplan.resetZoom")} className={ctl}>
                 <RotateCcw size={14} />
               </button>
               {canFs && (
-                <button type="button" onClick={toggleFs} aria-label={isFs ? "Exit full screen" : "View full screen"} className={ctl}>
+                <button type="button" onClick={toggleFs} aria-label={isFs ? t("sfloorplan.exitFullscreen") : t("sfloorplan.viewFullscreen")} className={ctl}>
                   {isFs ? <Shrink size={15} /> : <Expand size={15} />}
                 </button>
               )}
             </div>
 
-            <button type="button" onClick={() => go(1)} aria-label="Next configuration" className={`pointer-events-auto bg-paper/80 backdrop-blur ${ctl}`}>
+            <button type="button" onClick={() => go(1)} aria-label={t("sfloorplan.nextConfig")} className={`pointer-events-auto bg-paper/80 backdrop-blur ${ctl}`}>
               <ChevronRight size={16} />
             </button>
           </div>
@@ -464,21 +472,21 @@ function PlanLightbox({ rootRef, index, onIndex, onClose }) {
           <div>
             <div className="grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-4">
               <div className="min-w-0">
-                <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">Super area</p>
+                <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{t("sfloorplan.superArea")}</p>
                 <p className="mt-1 font-serif text-sm italic text-brass md:text-base">{cfg.size}</p>
-                <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-faint">Total area, as published.</p>
+                <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-faint">{t("sfloorplan.totalPublished")}</p>
               </div>
-              <OnRequest label="Carpet area" subject={`Carpet area · ${plan.label}`} note="Not published by the developer." />
-              <OnRequest label="Orientation" subject={`Orientation · ${plan.label}`} note="Aspect and orientation are confirmed against the sanctioned plan." />
+              <OnRequest label={t("sfloorplan.carpetArea")} subject={`Carpet area · ${plan.label}`} note={t("sfloorplan.notPublishedDev")} />
+              <OnRequest label={t("sfloorplan.orientation")} subject={`Orientation · ${plan.label}`} note={t("sfloorplan.orientationNote")} />
               <div className="min-w-0">
-                <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{room ? "Room" : "Room layout"}</p>
+                <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{room ? t("sfloorplan.room") : t("sfloorplan.roomLayout")}</p>
                 <p className="mt-1 text-sm leading-relaxed text-ink">
-                  {room ? `${room.n} · ${ZONES[room.z].label}` : plan.composition}
+                  {room ? `${t(room.tKey)} · ${t(ZONES[room.z].tKey)}` : t(plan.compKey)}
                 </p>
               </div>
             </div>
             <p className="mono mt-6 text-[0.55rem] leading-relaxed tracking-[0.18em] text-ink-faint">
-              Indicative layout · not to scale · dimensioned drawings on request
+              {t("sfloorplan.indicativeFull")}
             </p>
           </div>
 
@@ -490,14 +498,14 @@ function PlanLightbox({ rootRef, index, onIndex, onClose }) {
           >
             <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
             <span className="relative z-10 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-              Request HD floor plan
+              {t("sfloorplan.requestHd")}
             </span>
             <ArrowUpRight size={14} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
           </button>
         </div>
 
         <p className="mono border-t border-line px-5 py-3 text-center text-[0.54rem] tracking-[0.18em] text-ink-faint md:px-8">
-          Pinch or scroll to zoom · drag to pan · swipe or ← → to change home · Esc to close
+          {t("sfloorplan.lightboxHint")}
         </p>
       </div>
     </div>
@@ -509,6 +517,7 @@ export default function FloorPlan() {
   const [hover, setHover] = useState(null); // { id, i }
   const [openAt, setOpenAt] = useState(null); // index of the enlarged plan
   const { openEnquiry } = useEnquiry();
+  const { t } = useI18n();
 
   /* Leaving: the panel settles back down as the backdrop lifts. The lightbox
      stays mounted for the duration, which is also what keeps its scroll lock,
@@ -561,10 +570,10 @@ export default function FloorPlan() {
       <div className="mb-[clamp(2.5rem,6vh,4.5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
         <div className="flex items-baseline gap-5">
           <span className="idx">04</span>
-          <span className="kicker">The Floor Plan</span>
+          <span className="kicker">{t("sfloorplan.kicker")}</span>
         </div>
         <h2 className="max-w-[20ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
-          Two homes, drawn to <span className="font-serif italic text-brass">the last inch.</span>
+          {t("sfloorplan.headingLead")} <span className="font-serif italic text-brass">{t("sfloorplan.headingAccent")}</span>
         </h2>
       </div>
 
@@ -582,13 +591,13 @@ export default function FloorPlan() {
               {/* plan header + live readout */}
               <div className="relative mb-5 flex items-end justify-between gap-4 border-b border-line pb-4">
                 <div>
-                  <p className="kicker">{plan.tag}</p>
+                  <p className="kicker">{t(plan.tagKey)}</p>
                   <h3 className="mt-1.5 font-display text-2xl font-light tracking-[-0.01em] text-ink md:text-3xl">{plan.label}</h3>
                 </div>
                 <div className="text-right">
-                  <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{room ? "Room" : "Super area"}</p>
+                  <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{room ? t("sfloorplan.room") : t("sfloorplan.superArea")}</p>
                   <p className="mt-1 font-serif text-base italic text-brass md:text-lg">
-                    {room ? `${room.n} · ${ZONES[room.z].label}` : cfg.size}
+                    {room ? `${t(room.tKey)} · ${t(ZONES[room.z].tKey)}` : cfg.size}
                   </p>
                 </div>
               </div>
@@ -597,7 +606,7 @@ export default function FloorPlan() {
               <div
                 role="button"
                 tabIndex={0}
-                aria-label={`Enlarge the ${plan.label} floor plan`}
+                aria-label={`${t("sfloorplan.enlargeThe")} ${plan.label}`}
                 data-cursor="ENLARGE"
                 onClick={enlarge}
                 onKeyDown={(e) => {
@@ -608,7 +617,7 @@ export default function FloorPlan() {
                 <PlanSvg plan={plan} active={active} onRoom={(i) => setHover(i == null ? null : { id: plan.id, i })} animated className="relative w-full" />
                 <span className="mono pointer-events-none absolute right-2 top-2 inline-flex items-center gap-1.5 rounded-full border border-line bg-paper/80 px-3 py-1.5 text-[0.55rem] tracking-[0.18em] text-ink-soft opacity-0 backdrop-blur transition-opacity duration-500 group-hover/plan:opacity-100 group-focus-visible/plan:opacity-100">
                   <Maximize2 size={12} className="text-brass" />
-                  Enlarge
+                  {t("sfloorplan.enlarge")}
                 </span>
               </div>
 
@@ -621,7 +630,7 @@ export default function FloorPlan() {
                       className="h-2.5 w-2.5 rounded-[2px] border border-brass/30"
                       style={{ background: brass(ZONES[k].fill + 0.03) }}
                     />
-                    {ZONES[k].label}
+                    {t(ZONES[k].tKey)}
                   </li>
                 ))}
               </ul>
@@ -629,27 +638,27 @@ export default function FloorPlan() {
               {/* the published figure, and the two that are not */}
               <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-5 sm:grid-cols-3">
                 <div className="min-w-0">
-                  <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">Super area</p>
+                  <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{t("sfloorplan.superArea")}</p>
                   <p className="mt-1 font-serif text-sm italic text-brass md:text-base">{cfg.size}</p>
-                  <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-faint">Total area, as published.</p>
+                  <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-faint">{t("sfloorplan.totalPublished")}</p>
                 </div>
-                <OnRequest label="Carpet area" subject={`Carpet area · ${plan.label}`} note="Not published by the developer." />
-                <OnRequest label="Orientation" subject={`Orientation · ${plan.label}`} note="Aspect and orientation are confirmed against the sanctioned plan." />
+                <OnRequest label={t("sfloorplan.carpetArea")} subject={`Carpet area · ${plan.label}`} note={t("sfloorplan.notPublishedDev")} />
+                <OnRequest label={t("sfloorplan.orientation")} subject={`Orientation · ${plan.label}`} note={t("sfloorplan.orientationNote")} />
               </div>
 
-              <p className="mt-5 text-sm leading-relaxed text-ink-soft">{plan.composition}</p>
+              <p className="mt-5 text-sm leading-relaxed text-ink-soft">{t(plan.compKey)}</p>
 
               <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
                 <button
                   type="button"
                   onClick={enlarge}
-                  aria-label={`Enlarged view — open the ${plan.label} floor plan`}
+                  aria-label={`${t("sfloorplan.enlargedView")} — ${t("sfloorplan.openThe")} ${plan.label}`}
                   className="mono inline-flex items-center gap-2 text-[0.6rem] tracking-[0.18em] text-brass transition-colors hover:text-brass-soft focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-4 focus-visible:ring-offset-canvas"
                 >
                   <Maximize2 size={13} />
-                  Enlarged view
+                  {t("sfloorplan.enlargedView")}
                 </button>
-                <p className="mono text-[0.54rem] tracking-[0.18em] text-ink-faint">Indicative layout · not to scale</p>
+                <p className="mono text-[0.54rem] tracking-[0.18em] text-ink-faint">{t("sfloorplan.indicativeShort")}</p>
               </div>
             </div>
           );
@@ -659,8 +668,7 @@ export default function FloorPlan() {
       {/* shared CTA */}
       <div className="mt-10 flex flex-wrap items-center justify-between gap-6 border-t border-line pt-8">
         <p className="max-w-md text-sm leading-relaxed text-ink-soft">
-          Dimensioned drawings, carpet areas, unit orientation and the master site plan are shared
-          privately, in high resolution, on request.
+          {t("sfloorplan.sharedPrivately")}
         </p>
         <Magnetic>
           <button
@@ -671,7 +679,7 @@ export default function FloorPlan() {
           >
             <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
             <span className="relative z-10 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-              Request HD floor plan
+              {t("sfloorplan.requestHd")}
             </span>
             <ArrowUpRight size={14} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
           </button>

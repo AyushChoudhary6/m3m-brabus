@@ -11,6 +11,7 @@ import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Magnetic from "../components/ui/Magnetic.jsx";
 import { useEnquiry } from "../components/ui/Enquiry.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT } from "../lib/site.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -24,78 +25,92 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 ------------------------------------------------------------------ */
 
 const STATUS = [
-  { k: "Price", v: PROJECT.price, n: "The official price sheet has not been released publicly." },
-  { k: "Payment plan", v: "Not yet published", n: "No payment schedule, milestone breakdown or percentage split has been announced." },
-  { k: "Booking amount", v: "Not yet published", n: "Shared by the developer's team at the time of allotment." },
-  { k: "Possession", v: PROJECT.possession, n: "No possession date is stated on the official listing." },
-  { k: "RERA", v: PROJECT.rera, n: "Registration details are confirmed on enquiry." },
-  { k: "Configurations", v: PROJECT.configs, n: PROJECT.sizes },
+  { tKeyK: "price.labelPrice", v: PROJECT.price, tKeyN: "payment.statusPriceN" },
+  { tKeyK: "price.labelPaymentPlan", tKeyV: "payment.valNotPublished", tKeyN: "payment.statusPlanN" },
+  { tKeyK: "payment.labelBookingAmount", tKeyV: "payment.valNotPublished", tKeyN: "payment.statusBookingN" },
+  { tKeyK: "price.labelPossession", v: PROJECT.possession, tKeyN: "payment.statusPossessionN" },
+  { tKeyK: "price.labelRera", v: PROJECT.rera, tKeyN: "payment.statusReraN" },
+  { tKeyK: "price.labelConfigurations", v: PROJECT.configs, n: PROJECT.sizes },
 ];
 
 /* Generic, educational descriptions of the plan structures commonly used
    across Indian luxury residential projects. Not this project's terms. */
 const PLAN_TYPES = [
   {
+    id: "clp",
     k: "01",
-    t: "Construction-Linked Plan",
-    tag: "Most common",
-    d: "Payment is released in stages tied to verified construction milestones — excavation, structure, finishing and handover. The buyer pays as the building rises, which spreads the outflow across the build period and keeps each instalment linked to visible progress on site.",
-    pts: ["Instalments follow build milestones", "Outflow spread over the construction period", "Each demand backed by site progress"],
+    tKeyT: "payment.plan1T",
+    tKeyTag: "payment.plan1Tag",
+    tKeyD: "payment.plan1D",
+    pts: ["payment.plan1Pt1", "payment.plan1Pt2", "payment.plan1Pt3"],
   },
   {
+    id: "plp",
     k: "02",
-    t: "Possession-Linked Plan",
-    tag: "Deferred weighting",
-    d: "A smaller share is paid up front and the larger balance falls due at or close to possession. Buyers who are still paying rent, or who prefer to hold capital deployed elsewhere until handover, tend to favour this structure.",
-    pts: ["Lower initial commitment", "Bulk of the consideration at handover", "Often carries a different headline rate"],
+    tKeyT: "payment.plan2T",
+    tKeyTag: "payment.plan2Tag",
+    tKeyD: "payment.plan2D",
+    pts: ["payment.plan2Pt1", "payment.plan2Pt2", "payment.plan2Pt3"],
   },
   {
+    id: "dpp",
     k: "03",
-    t: "Down-Payment Plan",
-    tag: "Front-loaded",
-    d: "A large proportion of the consideration is paid soon after booking. Because the developer receives funds early, this structure is usually the one that carries the most favourable pricing, at the cost of committing capital well ahead of handover.",
-    pts: ["Highest up-front commitment", "Typically the keenest pricing", "Capital committed before handover"],
+    tKeyT: "payment.plan3T",
+    tKeyTag: "payment.plan3Tag",
+    tKeyD: "payment.plan3D",
+    pts: ["payment.plan3Pt1", "payment.plan3Pt2", "payment.plan3Pt3"],
   },
   {
+    id: "sub",
     k: "04",
-    t: "Subvention & Flexi Structures",
-    tag: "Availability varies",
-    d: "Some developers offer hybrid or interest-subvention arrangements in partnership with lenders. Availability depends on the project, the lender and prevailing regulation, so these should always be confirmed in writing rather than assumed.",
-    pts: ["Lender-dependent and project-dependent", "Terms change with regulation", "Confirm in writing before booking"],
+    tKeyT: "payment.plan4T",
+    tKeyTag: "payment.plan4Tag",
+    tKeyD: "payment.plan4D",
+    pts: ["payment.plan4Pt1", "payment.plan4Pt2", "payment.plan4Pt3"],
   },
 ];
 
 /* What sits alongside the headline price on any Indian residential purchase. */
 const COST_HEADS = [
-  { t: "Basic sale consideration", d: "The headline price for the residence itself, usually quoted per square foot of saleable area." },
-  { t: "Preferential location charges", d: "Applied by some developers for floor rise, orientation or a particular view. Whether they apply here is confirmed on the official price sheet." },
-  { t: "Club, parking & infrastructure", d: "One-time charges toward the clubhouse, dedicated parking and site infrastructure, quoted separately by most developers." },
-  { t: "Statutory levies", d: "GST, stamp duty and registration are set by government and change from time to time — they are never part of a developer's quoted rate." },
-  { t: "Maintenance & sinking fund", d: "Advance maintenance and a corpus for the common areas, typically collected before handover." },
+  { tKeyT: "payment.cost1T", tKeyD: "payment.cost1D" },
+  { tKeyT: "payment.cost2T", tKeyD: "payment.cost2D" },
+  { tKeyT: "payment.cost3T", tKeyD: "payment.cost3D" },
+  { tKeyT: "payment.cost4T", tKeyD: "payment.cost4D" },
+  { tKeyT: "payment.cost5T", tKeyD: "payment.cost5D" },
 ];
 
 const PAY_FAQS = [
   {
     q: "What is the payment plan for M3M Brabus?",
     a: "No payment plan has been published for M3M Brabus at this stage — pricing itself is still marked as coming soon on the official listing. We publish only what the developer has released, so we will not quote a schedule or percentage split until the official plan is out. Register your interest and the private client team will share the plan the moment it is announced.",
+    tKeyQ: "payment.faq1Q",
+    tKeyA: "payment.faq1A",
   },
   {
     q: "How do construction-linked and possession-linked plans differ?",
     a: "In general industry terms, a construction-linked plan releases payment in stages tied to verified construction milestones, spreading the outflow across the build period. A possession-linked plan takes a smaller amount up front and defers the larger balance to handover, which usually carries different pricing. These are descriptions of how such plans work across the Indian market and not a statement of this project's terms.",
+    tKeyQ: "payment.faq2Q",
+    tKeyA: "payment.faq2A",
   },
   {
     q: "Can a home loan be arranged for a purchase of this kind?",
     a: "Home loans for under-construction luxury residences are generally available from banks and housing finance companies, and lenders typically disburse in tranches that follow the developer's demand schedule. Eligibility, loan-to-value and interest rate are decided by the lender on your profile — not by the developer or by us. Once the official price and payment plan are released, the client team can point you to lenders empanelled for the project.",
+    tKeyQ: "payment.faq3Q",
+    tKeyA: "payment.faq3A",
   },
   {
     q: "What costs sit outside the headline price?",
     a: "Across the Indian market a residential purchase usually carries statutory levies such as GST, stamp duty and registration, along with club, parking, infrastructure and advance maintenance charges. Which of these apply, and at what rate, is set out on the official price sheet — please ask for it rather than work from an estimate.",
+    tKeyQ: "payment.faq4Q",
+    tKeyA: "payment.faq4A",
   },
 ];
 
 export default function PaymentPlanPage() {
   const root = useRef(null);
   const { openEnquiry } = useEnquiry();
+  const { t } = useI18n();
+  const payFaqsLocalized = PAY_FAQS.map((f) => ({ q: t(f.tKeyQ), a: t(f.tKeyA) }));
 
   useGSAP(
     () => {
@@ -151,32 +166,32 @@ export default function PaymentPlanPage() {
         trail={[{ name: "Home", path: "/" }, { name: "Payment Plan", path: "/payment-plan" }]}
       />
       <PageHeader
-        eyebrow="M3M Brabus Payment Plan"
-        title="The plan is not"
-        accent="published yet."
-        lede={`${PROJECT.name} has not released a payment schedule, and pricing is still marked ${PROJECT.price.toLowerCase()}. Rather than guess, here is how such plans are usually structured — and how to receive the official one the day it is issued.`}
+        eyebrow={t("payment.eyebrow")}
+        title={t("payment.title")}
+        accent={t("payment.accent")}
+        lede={t("payment.lede").replace("{name}", PROJECT.name).replace("{price}", PROJECT.price.toLowerCase())}
       />
 
       {/* published status */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">01</span>
-          <span className="kicker">What is published today</span>
+          <span className="kicker">{t("payment.kickerPublished")}</span>
         </div>
         <dl className="border-t border-line">
           {STATUS.map((s) => (
             <div
-              key={s.k}
+              key={s.tKeyK}
               className="rise grid grid-cols-1 gap-1 border-b border-line py-5 sm:grid-cols-[minmax(0,12rem)_minmax(0,14rem)_1fr] sm:items-baseline sm:gap-8"
             >
-              <dt className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{s.k}</dt>
-              <dd className="font-display text-lg text-ink">{s.v}</dd>
-              <dd className="max-w-[52ch] text-sm leading-relaxed text-ink-soft">{s.n}</dd>
+              <dt className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{t(s.tKeyK)}</dt>
+              <dd className="font-display text-lg text-ink">{s.tKeyV ? t(s.tKeyV) : s.v}</dd>
+              <dd className="max-w-[52ch] text-sm leading-relaxed text-ink-soft">{s.tKeyN ? t(s.tKeyN) : s.n}</dd>
             </div>
           ))}
         </dl>
         <p className="mono mt-6 text-[0.58rem] leading-relaxed tracking-[0.2em] text-ink-faint">
-          We publish only what the developer has released — no schedule, percentage or date is quoted until it is official
+          {t("payment.footPublishOnly")}
         </p>
       </section>
 
@@ -184,44 +199,41 @@ export default function PaymentPlanPage() {
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">02</span>
-          <span className="kicker">General industry context</span>
+          <span className="kicker">{t("payment.kickerIndustry")}</span>
         </div>
 
         <div className="mb-[clamp(2.5rem,6vh,4rem)] max-w-3xl border-l border-brass/40 py-1 pl-6">
           <p className="font-serif text-lg italic leading-relaxed text-brass">
-            The four structures below describe how payment plans are commonly written across the
-            Indian luxury residential market.
+            {t("payment.introQuote")}
           </p>
           <p className="mt-3 max-w-[62ch] text-sm leading-relaxed text-ink-soft">
-            They are offered as background for a first-time reader. None of them is a statement of
-            the terms for {PROJECT.name}, and no structure below has been confirmed for this project.
-            The only terms that count are the ones on the developer's official plan.
+            {t("payment.introBody").replace("{name}", PROJECT.name)}
           </p>
         </div>
 
         <div className="border-t border-line">
           {PLAN_TYPES.map((p) => (
             <article
-              key={p.t}
+              key={p.id}
               className="pt group grid gap-6 border-b border-line py-[clamp(2rem,5vh,3rem)] md:grid-cols-[minmax(0,20rem)_1fr] md:gap-14"
             >
               <div>
                 <span className="idx">{p.k}</span>
                 <h2 className="mt-3 font-display text-2xl font-light leading-tight text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-3xl">
-                  {p.t}
+                  {t(p.tKeyT)}
                 </h2>
-                <p className="mono mt-3 text-[0.58rem] tracking-[0.2em] text-ink-faint">{p.tag}</p>
+                <p className="mono mt-3 text-[0.58rem] tracking-[0.2em] text-ink-faint">{t(p.tKeyTag)}</p>
               </div>
               <div>
-                <p className="max-w-[58ch] leading-relaxed text-ink-soft">{p.d}</p>
+                <p className="max-w-[58ch] leading-relaxed text-ink-soft">{t(p.tKeyD)}</p>
                 <ul className="mt-5 border-t border-line-soft">
                   {p.pts.map((x) => (
                     <li
                       key={x}
                       className="flex items-baseline justify-between gap-6 border-b border-line-soft py-2.5 text-sm text-ink-soft"
                     >
-                      <span>{x}</span>
-                      <span className="mono shrink-0 text-[0.55rem] tracking-[0.2em] text-brass/70">General</span>
+                      <span>{t(x)}</span>
+                      <span className="mono shrink-0 text-[0.55rem] tracking-[0.2em] text-brass/70">{t("payment.tagGeneral")}</span>
                     </li>
                   ))}
                 </ul>
@@ -235,20 +247,20 @@ export default function PaymentPlanPage() {
       <section className="ch-grid container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">03</span>
-          <span className="kicker">What a price sheet usually itemises</span>
+          <span className="kicker">{t("payment.kickerItemises")}</span>
         </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {COST_HEADS.map((c) => (
-            <div key={c.t} className="ch group border-b border-line py-6">
+            <div key={c.tKeyT} className="ch group border-b border-line py-6">
               <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
-                {c.t}
+                {t(c.tKeyT)}
               </h3>
-              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{c.d}</p>
+              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{t(c.tKeyD)}</p>
             </div>
           ))}
         </div>
         <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          Heads listed are general to Indian residential purchases · applicability and rates are confirmed on the official sheet
+          {t("payment.footHeads")}
         </p>
       </section>
 
@@ -258,16 +270,18 @@ export default function PaymentPlanPage() {
           <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(32%_32%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
           <div className="relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
             <div>
-              <p className="req kicker">Request the official plan</p>
+              <p className="req kicker">{t("payment.requestOfficial")}</p>
               <h2 className="req mt-4 max-w-[16ch] font-display text-[clamp(1.9rem,4vw,3rem)] font-light leading-[1.03] tracking-[-0.02em] text-ink">
-                Be first to receive{" "}
-                <span className="font-serif italic text-brass">the payment plan.</span>
+                {t("payment.beFirst")}{" "}
+                <span className="font-serif italic text-brass">{t("payment.thePaymentPlan")}</span>
               </h2>
               <p className="req mt-5 max-w-[46ch] leading-relaxed text-ink-soft">
-                The price sheet and payment schedule for {PROJECT.name} will be issued by
-                {" "}{PROJECT.developer}. Leave your details and the private client team will send the
-                official documents, unedited, as soon as they are released — along with the
-                {" "}{PROJECT.configs.toLowerCase()} of {PROJECT.sizes} at {PROJECT.location}.
+                {t("payment.requestBody")
+                  .replace("{name}", PROJECT.name)
+                  .replace("{developer}", PROJECT.developer)
+                  .replace("{configs}", PROJECT.configs.toLowerCase())
+                  .replace("{sizes}", PROJECT.sizes)
+                  .replace("{location}", PROJECT.location)}
               </p>
               <div className="req mt-9 flex flex-wrap items-center gap-5">
                 <Magnetic>
@@ -279,7 +293,7 @@ export default function PaymentPlanPage() {
                   >
                     <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
                     <span className="relative z-10 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-                      Request the payment plan
+                      {t("payment.requestBtn")}
                     </span>
                     <ArrowUpRight size={15} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
                   </button>
@@ -288,19 +302,19 @@ export default function PaymentPlanPage() {
                   href={`tel:${PROJECT.phone}`}
                   className="mono text-[0.68rem] tracking-[0.18em] text-ink-soft transition-colors hover:text-ink"
                 >
-                  Or call {PROJECT.phone}
+                  {t("cta.orCall")} {PROJECT.phone}
                 </a>
               </div>
             </div>
 
             <dl className="req self-center border-t border-line">
               {[
-                { k: "You will receive", v: "Official price sheet & payment plan" },
-                { k: "Also shared", v: "Floor plans, brochure & RERA status" },
-                { k: "Sent by", v: `${PROJECT.developer} · private client team` },
-                { k: "Email", v: PROJECT.email },
+                { id: "receive", k: t("payment.labelYouReceive"), v: t("payment.valReceiveDocs") },
+                { id: "also", k: t("payment.labelAlsoShared"), v: t("payment.valAlsoShared") },
+                { id: "sentby", k: t("payment.labelSentBy"), v: t("payment.valSentBy").replace("{developer}", PROJECT.developer) },
+                { id: "email", k: t("payment.labelEmail"), v: PROJECT.email },
               ].map((r) => (
-                <div key={r.k} className="grid gap-1 border-b border-line py-4 sm:grid-cols-[minmax(0,9rem)_1fr] sm:items-baseline sm:gap-6">
+                <div key={r.id} className="grid gap-1 border-b border-line py-4 sm:grid-cols-[minmax(0,9rem)_1fr] sm:items-baseline sm:gap-6">
                   <dt className="mono text-[0.58rem] tracking-[0.2em] text-ink-faint">{r.k}</dt>
                   <dd className="text-sm text-ink">{r.v}</dd>
                 </div>
@@ -314,16 +328,16 @@ export default function PaymentPlanPage() {
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
           <span className="idx">04</span>
-          <span className="kicker">Payment & home loan questions</span>
+          <span className="kicker">{t("payment.kickerFaq")}</span>
         </div>
         {/* Same rule as the homepage FAQ: the answers back the FAQPage JSON-LD
             above, so they are collapsed by height and never unmounted. */}
-        <Accordion items={PAY_FAQS} />
+        <Accordion items={payFaqsLocalized} />
       </section>
 
       <RelatedPages links={["/overview", "/residences", "/contact"]} />
 
-      <CtaBand title="Ask for the" accent="official plan." subject="Payment Plan" />
+      <CtaBand title={t("price.ctaTitle")} accent={t("payment.ctaAccent")} subject="Payment Plan" />
     </div>
   );
 }
