@@ -37,8 +37,13 @@ export default function SmoothScroll({ children }) {
         lerp: 0.08,
         smoothWheel: true,
         wheelMultiplier: 1,
-        touchMultiplier: 1.6,
-        syncTouch: true,
+        // Do NOT smooth touch: on phones, syncTouch hijacks the finger drag and
+        // runs it through Lenis' lerp loop, which fights the browser's native
+        // momentum scrolling and feels laggy/sticky. Leaving it off lets mobile
+        // scroll natively (still smooth) while the wheel stays smoothed on desktop.
+        // Lenis keeps reading the native scroll position, so ScrollTrigger-driven
+        // sections (Lifestyle horizontal scroll) stay in sync.
+        syncTouch: false,
       }}
     >
       {children}
