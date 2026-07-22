@@ -72,7 +72,7 @@ export default function App() {
         <ScrollProgress />
         <CustomCursor />
         <Navbar />
-        <main className="noise">
+        <main className="noise overflow-x-clip">
           {/* A render error in one page must not blank the whole site.
               resetKey={pathname} clears the crash screen on navigation (BUG-014). */}
           <ErrorBoundary resetKey={pathname}>

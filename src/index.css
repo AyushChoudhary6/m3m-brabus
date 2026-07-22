@@ -119,7 +119,7 @@
 /* ---- Base ---- */
 * { -webkit-tap-highlight-color: transparent; }
 
-html { scroll-behavior: auto; overflow-x: clip; } /* BUG-015: contain decorative -inset glows */
+html { scroll-behavior: auto; } /* NOTE: no overflow-x here — it breaks position:sticky (Lifestyle) */
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
