@@ -19,7 +19,7 @@ export default function Navbar() {
   const { pathname } = useLocation();
   const navRef = useRef(null);
   const { openEnquiry, openBrochure } = useEnquiry();
-  const { t, lang, toggle } = useI18n();
+  const { t } = useI18n();
 
   /* The overlay has to survive its own dismissal long enough to animate out:
      the links lift away, then the sheet fades. usePresence holds the node
@@ -157,19 +157,6 @@ export default function Navbar() {
           </ul>
 
           <div className="nav-cta flex shrink-0 items-center gap-4 xl:gap-5">
-            {/* language switch */}
-            <button
-              type="button"
-              onClick={toggle}
-              aria-label={lang === "ar" ? "EN / ع — التبديل إلى الإنجليزية" : "EN / ع — switch to Arabic"}
-              className="mono flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[0.68rem] tracking-[0.14em] text-ink-soft transition-colors hover:border-brass hover:text-brass"
-            >
-              {/* aria-label contains this visible "EN / ع" so a voice-control
-                  user can say what they see (WCAG 2.5.3). */}
-              <span className={lang === "en" ? "text-brass" : ""}>EN</span>
-              <span className="text-ink-faint">/</span>
-              <span className={lang === "ar" ? "text-brass" : ""} style={{ fontFamily: "system-ui" }}>ع</span>
-            </button>
             <button
               type="button"
               onClick={() => openEnquiry()}

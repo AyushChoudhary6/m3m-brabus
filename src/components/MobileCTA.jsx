@@ -1,11 +1,11 @@
 import { useLocation } from "react-router-dom";
-import { Phone, CalendarCheck, Download } from "lucide-react";
+import { Phone, Download } from "lucide-react";
 import WhatsAppIcon from "./ui/WhatsAppIcon.jsx";
 import { useEnquiry } from "./ui/Enquiry.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT } from "../lib/site.js";
 import { whatsappUrl } from "../lib/whatsapp.js";
-import { trackCall, trackWhatsApp, trackSiteVisit, trackBrochure } from "../lib/analytics.js";
+import { trackCall, trackWhatsApp, trackBrochure } from "../lib/analytics.js";
 
 /**
  * Sticky bottom action bar — mobile only (PRD Ch.21 — utility navigation:
@@ -22,7 +22,7 @@ import { trackCall, trackWhatsApp, trackSiteVisit, trackBrochure } from "../lib/
  */
 
 export default function MobileCTA() {
-  const { openVisit, openBrochure } = useEnquiry();
+  const { openBrochure } = useEnquiry();
   const { t, lang } = useI18n();
   const { pathname } = useLocation();
 
@@ -41,7 +41,7 @@ export default function MobileCTA() {
   return (
     <nav
       aria-label={t("nav.salesEnquiries")}
-      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-line bg-canvas/95 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-canvas/95 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden"
     >
       <a
         href={`tel:${PROJECT.phone}`}
@@ -64,16 +64,6 @@ export default function MobileCTA() {
         <WhatsAppIcon size={17} className="text-[#25D366]" aria-hidden="true" />
         <span>{t("m.whatsapp")}</span>
       </a>
-
-      <button
-        type="button"
-        onClick={() => { trackSiteVisit("mobile_bar"); openVisit("Mobile bar"); }}
-        aria-label={t("cta.scheduleVisit")}
-        className={`${cell} border-s border-line text-ink`}
-      >
-        <CalendarCheck size={17} className="text-brass" aria-hidden="true" />
-        <span>{label("m.visit", { en: "Visit", ar: "زيارة" })}</span>
-      </button>
 
       <button
         type="button"

@@ -1,36 +1,31 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
+import { createContext, useContext, useEffect, useCallback, useMemo } from "react";
 import { TRANSLATIONS } from "./translations.js";
 
 const I18nCtx = createContext(null);
 const KEY = "mb-lang";
 
-/** Language + direction for the whole app. Arabic switches the page to RTL. */
+/**
+ * English-only. The language switcher was removed and the language is locked to
+ * "en", so any previously-stored "ar" preference is ignored (and cleared). The
+ * Arabic strings stay in the dictionary, just unused. `setLang`/`toggle` remain
+ * as no-ops so existing consumers keep working.
+ */
 export function LanguageProvider({ children }) {
-  const [lang, setLangState] = useState(() => {
-    try {
-      const saved = localStorage.getItem(KEY);
-      if (saved === "en" || saved === "ar") return saved;
-    } catch { /* private mode */ }
-    return "en";
-  });
-
-  const dir = lang === "ar" ? "rtl" : "ltr";
+  const lang = "en";
+  const dir = "ltr";
 
   useEffect(() => {
     const el = document.documentElement;
-    el.lang = lang;
-    el.dir = dir;
-    try { localStorage.setItem(KEY, lang); } catch { /* private mode */ }
-  }, [lang, dir]);
+    el.lang = "en";
+    el.dir = "ltr";
+    try { localStorage.removeItem(KEY); } catch { /* private mode */ }
+  }, []);
 
-  const setLang = useCallback((next) => setLangState(next === "ar" ? "ar" : "en"), []);
-  const toggle = useCallback(() => setLangState((l) => (l === "ar" ? "en" : "ar")), []);
+  const setLang = useCallback(() => {}, []);
+  const toggle = useCallback(() => {}, []);
 
-  /** Translate a key; falls back to English, then to the key itself. */
-  const t = useCallback(
-    (key) => TRANSLATIONS[lang]?.[key] ?? TRANSLATIONS.en[key] ?? key,
-    [lang],
-  );
+  /** Translate a key (English), falling back to the key itself. */
+  const t = useCallback((key) => TRANSLATIONS.en[key] ?? key, []);
 
   const value = useMemo(() => ({ lang, dir, setLang, toggle, t }), [lang, dir, setLang, toggle, t]);
   return <I18nCtx.Provider value={value}>{children}</I18nCtx.Provider>;
