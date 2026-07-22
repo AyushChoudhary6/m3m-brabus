@@ -54,14 +54,43 @@ permissions:
   deployments: write
 
 jobs:
+  # Deployment needs three repo secrets that only the owner can create
+  # (Settings → Secrets and variables → Actions). Until they exist, the deploy
+  # job below is SKIPPED rather than failed — an unconfigured deploy is not a
+  # broken build, and a red X on every commit is noise. A job-level `if:` cannot
+  # read `secrets.*`, so this tiny gate reads them and publishes a boolean the
+  # deploy job keys off.
+  gate:
+    name: Deploy config check
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          TOK: ${{ secrets.VERCEL_TOKEN }}
+          ORG: ${{ secrets.VERCEL_ORG_ID }}
+          PROJ: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -n "$TOK" ] && [ -n "$ORG" ] && [ -n "$PROJ" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "Vercel secrets present — deploy will run."
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Deploy skipped::Set VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID in repo secrets to enable deployment. CI (build + prerender + lint) still runs and gates every commit."
+          fi
+
   deploy:
     name: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    needs: gate
 
-    # Secrets are not exposed to workflows triggered by forked PRs, so the
-    # Vercel CLI would fail with an unhelpful auth error. Skip instead.
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    # Run only when (a) the Vercel secrets are configured, and (b) this is not a
+    # forked PR (secrets are withheld from those, so the CLI would error).
+    if: >-
+      needs.gate.outputs.ready == 'true' &&
+      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
 
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
