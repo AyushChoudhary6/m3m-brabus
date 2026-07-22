@@ -3,7 +3,6 @@ import Seo from "../components/ui/Seo.jsx";
 import Hero from "../components/sections/Hero.jsx";
 import Manifesto from "../components/sections/Manifesto.jsx";
 import Ticker from "../components/sections/Ticker.jsx";
-import Residences from "../components/sections/Residences.jsx";
 import FloorPlan from "../components/sections/FloorPlan.jsx";
 import Lifestyle from "../components/sections/Lifestyle.jsx";
 import Exhibition from "../components/sections/Exhibition.jsx";
@@ -53,7 +52,6 @@ export default function Home() {
       <Hero />               {/* 01 · Arrival */}
       <Manifesto />          {/* 01–02 · Philosophy & Engineering */}
       <Ticker />             {/* kinetic marquee */}
-      <Residences />         {/* 03 · The Residences */}
       <FloorPlan />          {/* 04 · The Floor Plan (interactive) */}
       <Lifestyle />          {/* 05 · The Lifestyle */}
       <Suspense fallback={<div className="min-h-[60vh]" />}>
