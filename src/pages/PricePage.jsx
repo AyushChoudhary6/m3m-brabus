@@ -260,9 +260,9 @@ export default function PricePage() {
           {DRIVERS.map((d, i) => (
             <div key={d.k} className="drv group border-b border-line py-6">
               <span className="idx">{String(i + 1).padStart(2, "0")}</span>
-              <h3 className="mt-3 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
+              <h2 className="mt-3 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
                 {d.k}
-              </h3>
+              </h2>
               <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{d.d}</p>
             </div>
           ))}

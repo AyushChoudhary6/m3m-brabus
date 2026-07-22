@@ -30,7 +30,7 @@ export default function Manifesto() {
 
         // read-along: words brighten one by one as you scroll through them
         gsap.fromTo(q(".stmt-word"),
-          { opacity: 0.14 },
+          { opacity: 0.55 },
           {
             opacity: 1, ease: "none", stagger: 0.4,
             scrollTrigger: { trigger: q(".stmt")[0], start: "top 72%", end: "top 24%", scrub: true },
@@ -104,7 +104,7 @@ export default function Manifesto() {
               <li key={c.k} className="rise group flex gap-6 border-b border-line py-6 transition-colors duration-500 hover:bg-brass/[0.035]">
                 <span className="idx pt-1.5 text-brass">{c.k}</span>
                 <div>
-                  <h4 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">{c.t}</h4>
+                  <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">{c.t}</h3>
                   <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{c.d}</p>
                 </div>
               </li>

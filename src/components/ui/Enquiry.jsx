@@ -100,7 +100,11 @@ export function EnquiryProvider({ children }) {
   useEffect(() => {
     if (ls.get("localStorage", KEY_LEAD)) return;
     const t = setTimeout(() => {
-      if (!openRef.current) openEnquiry("", true);
+      // Don't interrupt: skip if the modal is open OR the visitor is actively
+      // filling any other lead form (contact page, side panel, WelcomeHome). (BUG-013)
+      const el = typeof document !== "undefined" ? document.activeElement : null;
+      const busy = el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT");
+      if (!openRef.current && !busy) openEnquiry("", true);
     }, AUTO_DELAY);
     return () => clearTimeout(t);
   }, [openEnquiry]);
@@ -240,8 +244,11 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
         trackBrochure(subject || "modal");
         setGotFile(await downloadBrochure());
       }
-    } catch {
-      setError("err.send");
+    } catch (err) {
+      // Already queued for retry (leads.js LeadError{queued:true}) — reassure,
+      // don't show a failure that invites a give-up or double-submit.
+      if (err && err.queued) { markLeadCaptured(); setSent(true); }
+      else setError("err.send");
     } finally {
       setSending(false);
     }
@@ -341,18 +348,18 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
                 className="hidden"
               />
               <div>
-                <input className={fieldCls("name")} placeholder={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
+                <input className={fieldCls("name")} placeholder={t("form.name")} aria-label={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
                 {errors.name && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.name)}</p>}
               </div>
               <div>
-                <input className={fieldCls("phone")} placeholder={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
+                <input className={fieldCls("phone")} placeholder={t("form.phone")} aria-label={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
                 {errors.phone && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.phone)}</p>}
               </div>
               <div>
-                <input className={fieldCls("email")} placeholder={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
+                <input className={fieldCls("email")} placeholder={t("form.email")} aria-label={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
                 {errors.email && <p className="mt-1.5 text-[0.7rem] text-oxblood">{t(errors.email)}</p>}
               </div>
-              <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")}>
+              <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")} aria-label={t("form.config")}>
                 <option value="">{t("form.config")}</option>
                 {RESIDENCES.map((r) => (
                   <option key={r.id} value={r.name}>{r.name}</option>

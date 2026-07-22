@@ -1,0 +1,12 @@
+{
+  "name": "M3M Brabus — Sector 58, Gurgaon",
+  "short_name": "M3M Brabus",
+  "description": "4 & 5 BHK branded residences by M3M India, inspired by BRABUS, on Golf Course Extension Road, Gurugram.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0e0b08",
+  "theme_color": "#0e0b08",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

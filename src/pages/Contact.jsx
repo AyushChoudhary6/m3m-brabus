@@ -11,7 +11,7 @@ import { useEnquiry } from "../components/ui/Enquiry.jsx";
 import { submitLead, markLeadCaptured } from "../lib/leads.js";
 import { startTimer } from "../lib/spam.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../lib/validate.js";
-import { trackSiteVisit } from "../lib/analytics.js";
+import { trackSiteVisit, trackLead } from "../lib/analytics.js";
 import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT, RESIDENCES } from "../lib/site.js";
 
@@ -62,9 +62,14 @@ export default function Contact() {
       // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
       await submitLead({ ...form, source: "Contact page", formKey: FORM_KEY });
       markLeadCaptured();
+      trackLead("Contact page", form.config); // BUG-002: was untracked
       setSent(true);
-    } catch {
-      setError("err.send");
+    } catch (err) {
+      // A network/endpoint failure has already queued the lead for retry
+      // (leads.js throws LeadError{queued:true}); tell the visitor it is safe
+      // rather than inviting a give-up or a double-submit.
+      if (err && err.queued) { markLeadCaptured(); setSent(true); }
+      else setError("err.send");
     } finally {
       setSending(false);
     }
@@ -205,19 +210,19 @@ export default function Contact() {
                   />
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
-                      <input className={fieldCls("name")} placeholder={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
+                      <input className={fieldCls("name")} placeholder={t("form.name")} aria-label={t("form.name")} autoComplete="name" value={form.name} onChange={set("name")} onBlur={blur("name")} />
                       {errors.name && <p className="mt-1.5 text-[0.72rem] text-oxblood">{t(errors.name)}</p>}
                     </div>
                     <div>
-                      <input className={fieldCls("phone")} placeholder={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
+                      <input className={fieldCls("phone")} placeholder={t("form.phone")} aria-label={t("form.phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} onBlur={blur("phone")} />
                       {errors.phone && <p className="mt-1.5 text-[0.72rem] text-oxblood">{t(errors.phone)}</p>}
                     </div>
                   </div>
                   <div>
-                    <input className={fieldCls("email")} placeholder={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
+                    <input className={fieldCls("email")} placeholder={t("form.email")} aria-label={t("form.email")} type="email" autoComplete="email" value={form.email} onChange={set("email")} onBlur={blur("email")} />
                     {errors.email && <p className="mt-1.5 text-[0.72rem] text-oxblood">{t(errors.email)}</p>}
                   </div>
-                  <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")}>
+                  <select className={`${FIELD} appearance-none`} value={form.config} onChange={set("config")} aria-label={t("form.config")}>
                     <option value="">{t("form.config")}</option>
                     {RESIDENCES.map((r) => (
                       <option key={r.id} value={r.name}>{r.name}</option>
@@ -226,7 +231,7 @@ export default function Contact() {
                   <textarea
                     className={`${FIELD} resize-none`}
                     rows={3}
-                    placeholder={t("form.message")}
+                    placeholder={t("form.message")} aria-label={t("form.message")}
                     value={form.message}
                     onChange={set("message")}
                   />

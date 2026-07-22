@@ -37,7 +37,7 @@ export default function Ticker() {
   );
 
   return (
-    <div ref={root} className="border-y border-line py-[clamp(1.6rem,4vh,3rem)]">
+    <div ref={root} aria-hidden="true" className="border-y border-line py-[clamp(1.6rem,4vh,3rem)]">
       <div className="ticker-inner">
         <Marquee items={WORDS} speed={30} />
       </div>

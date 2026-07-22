@@ -102,7 +102,7 @@ export default function Brabus() {
           {ETHOS.map((m) => (
             <div key={m.t} className="mq group grid gap-4 border-b border-line py-8 md:grid-cols-[5rem_1fr_1.3fr] md:gap-10">
               <span className="idx pt-2">{m.k}</span>
-              <h3 className="font-display text-2xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-3xl">{m.t}</h3>
+              <h2 className="font-display text-2xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-3xl">{m.t}</h2>
               <p className="max-w-[46ch] leading-relaxed text-ink-soft">{m.d}</p>
             </div>
           ))}
@@ -130,7 +130,7 @@ export default function Brabus() {
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {MEANING.map((m) => (
             <article key={m.t} className="mn group border-b border-line py-7">
-              <h3 className="font-display text-2xl text-ink transition-colors duration-300 group-hover:text-brass-soft">{m.t}</h3>
+              <h2 className="font-display text-2xl text-ink transition-colors duration-300 group-hover:text-brass-soft">{m.t}</h2>
               <p className="mt-2.5 max-w-[46ch] leading-relaxed text-ink-soft">{m.d}</p>
             </article>
           ))}

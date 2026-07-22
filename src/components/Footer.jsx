@@ -33,7 +33,7 @@ export default function Footer() {
           <nav className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4" aria-label="Footer">
             {FOOTER_NAV.map((col) => (
               <div key={col.heading}>
-                <h4 className="kicker mb-5">{col.heading}</h4>
+                <h2 className="kicker mb-5">{col.heading}</h2>
                 <ul className="space-y-3">
                   {col.links.map((l) => (
                     <li key={l.to}>

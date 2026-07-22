@@ -156,9 +156,11 @@ export default function Navbar() {
             <button
               type="button"
               onClick={toggle}
-              aria-label={lang === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+              aria-label={lang === "ar" ? "EN / ع — التبديل إلى الإنجليزية" : "EN / ع — switch to Arabic"}
               className="mono flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[0.68rem] tracking-[0.14em] text-ink-soft transition-colors hover:border-brass hover:text-brass"
             >
+              {/* aria-label contains this visible "EN / ع" so a voice-control
+                  user can say what they see (WCAG 2.5.3). */}
               <span className={lang === "en" ? "text-brass" : ""}>EN</span>
               <span className="text-ink-faint">/</span>
               <span className={lang === "ar" ? "text-brass" : ""} style={{ fontFamily: "system-ui" }}>ع</span>

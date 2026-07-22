@@ -1,5 +1,6 @@
 import Accordion from "../ui/Accordion.jsx";
 import { Reveal } from "../ui/Reveal.jsx";
+import { ldJson } from "../ui/Seo.jsx";
 import { FAQS } from "../../lib/site.js";
 
 export default function Faq() {
@@ -9,7 +10,7 @@ export default function Faq() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: ldJson({
             "@context": "https://schema.org",
             "@type": "FAQPage",
             mainEntity: FAQS.map((f) => ({

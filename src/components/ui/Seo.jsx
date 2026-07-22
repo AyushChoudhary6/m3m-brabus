@@ -7,7 +7,27 @@
  * canonical, Open Graph tags and JSON-LD — readable by Google *and* by AI
  * crawlers that don't execute JavaScript.
  */
-export const SITE_URL = "https://m3m-brabus.com"; // TODO: set the live domain
+// BUG-006: prefer the build-time domain so canonicals/OG match the live host.
+// scripts/prerender.mjs is passed VITE_SITE_URL; set it in the Vercel env.
+// The literal is the fallback — update it if the live domain is not this.
+export const SITE_URL =
+  (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_SITE_URL) ||
+  "https://m3m-brabus.com";
+
+/**
+ * Serialise data for a <script type="application/ld+json"> block.
+ * JSON.stringify does NOT escape `<`, `>`, `&` or the JSON-unsafe line
+ * separators, so a value containing `</script>` (e.g. from CMS-authored blog
+ * frontmatter) could break out of the block. Escaping to \uXXXX keeps the
+ * JSON valid and inert. (BUG-010)
+ */
+export function ldJson(data) {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/[\u2028\u2029]/g, (c) => "\\u" + c.charCodeAt(0).toString(16));
+}
 
 export default function Seo({
   title,
@@ -46,7 +66,7 @@ export default function Seo({
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: ldJson(jsonLd) }}
         />
       )}
     </>

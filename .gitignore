@@ -40,3 +40,6 @@ public/BrabusIslandVilla_H264_WEB.mp4
 # a browser picks a <source> a 404 renders a BROKEN image — it does not fall
 # back to the <img> JPEG. Ignoring them would blank every render on the live
 # site the moment a deploy did not run the (cwebp/avifenc-dependent) generator.
+
+# Generated QA deliverable
+Website_QA_Report.xlsx

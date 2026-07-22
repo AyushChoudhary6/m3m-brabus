@@ -147,7 +147,7 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
                       <button
                         type="button"
                         onClick={() => request(`Carpet area — ${c.config}`)}
-                        aria-label={`Request the carpet area for the ${c.config} residence`}
+                        aria-label={`On request — the carpet area for the ${c.config} residence`}
                         data-cursor="REQUEST"
                         className="inline-flex items-center gap-1.5 font-display text-lg font-light text-brass transition-colors duration-500 hover:text-brass-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
                       >

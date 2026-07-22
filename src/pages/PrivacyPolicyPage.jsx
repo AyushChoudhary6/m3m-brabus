@@ -245,7 +245,7 @@ export default function PrivacyPolicyPage() {
           Fields are checked in your browser as you type · Nothing is transmitted until you submit
         </p>
 
-        <h3 className="rise font-display text-xl text-ink">Recorded automatically with a submission</h3>
+        <h2 className="rise font-display text-xl text-ink">Recorded automatically with a submission</h2>
         <dl className="rise mt-5 max-w-[70ch] border-t border-line">
           {AUTOMATIC.map((a) => (
             <div key={a.k} className="grid grid-cols-1 gap-1 border-b border-line py-4 sm:grid-cols-[minmax(0,10rem)_1fr] sm:gap-8">
@@ -255,7 +255,7 @@ export default function PrivacyPolicyPage() {
           ))}
         </dl>
 
-        <h3 className="rise mt-12 font-display text-xl text-ink">What is never collected</h3>
+        <h2 className="rise mt-12 font-display text-xl text-ink">What is never collected</h2>
         <ul className="rise mt-5 max-w-[70ch] space-y-3">
           {NOT_COLLECTED.map((n) => (
             <li key={n} className="flex gap-4 text-sm leading-relaxed text-ink-soft">

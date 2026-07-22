@@ -120,7 +120,13 @@ async function main() {
 
   for (const route of ROUTES) {
     try {
-      const html = await dumpDom(`http://localhost:${PORT}${route}`);
+      let html = await dumpDom(`http://localhost:${PORT}${route}`);
+      // When a lazy route/section (e.g. the Leaflet map) mounts during
+      // prerender, the browser injects <link rel="modulepreload"> hints whose
+      // href Chrome resolves to the ABSOLUTE serving origin. Left as-is they
+      // ship http://localhost:PORT/assets/... into the static HTML and 404 on
+      // every page in production. Rewrite the dev origin back to root-relative.
+      html = html.replaceAll(`http://localhost:${PORT}/`, "/");
       // sanity: the shell alone is ~2kB; a rendered page is far larger
       if (html.length < 6000) {
         console.warn(`  ! ${route.padEnd(12)} looks unrendered (${html.length}b)`);

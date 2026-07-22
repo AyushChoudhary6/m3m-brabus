@@ -7,6 +7,7 @@ import Footer from "./components/Footer.jsx";
 import MobileCTA from "./components/MobileCTA.jsx";
 import Home from "./pages/Home.jsx"; // eager: the LCP route must not flash a fallback
 import NotFound from "./pages/NotFound.jsx";
+const ThankYou = lazy(() => import("./pages/ThankYou.jsx"));
 import ErrorBoundary from "./components/ui/ErrorBoundary.jsx";
 
 /* Ch. 80 — route-level code splitting. Every page below is its own chunk, so a
@@ -60,6 +61,7 @@ function ScrollToTop() {
 }
 
 export default function App() {
+  const { pathname } = useLocation();
   useEffect(() => { initAnalytics(); }, []);
 
   return (
@@ -71,8 +73,9 @@ export default function App() {
         <CustomCursor />
         <Navbar />
         <main className="noise">
-          {/* A render error in one page must not blank the whole site. */}
-          <ErrorBoundary>
+          {/* A render error in one page must not blank the whole site.
+              resetKey={pathname} clears the crash screen on navigation (BUG-014). */}
+          <ErrorBoundary resetKey={pathname}>
             {/* No spinner: the fallback is deliberately an empty, correctly-sized
                 shell so a fast chunk load never flashes a loading state. */}
             <Suspense fallback={<div className="min-h-svh" />}>
@@ -104,6 +107,8 @@ export default function App() {
             <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="/blogs" element={<BlogIndex />} />
             <Route path="/blogs/:slug" element={<BlogPost />} />
+            {/* noindex; direct visits/bookmarks render the page, not a 404 (BUG-008) */}
+            <Route path="/thank-you" element={<ThankYou />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
             </Suspense>

@@ -517,7 +517,7 @@ export default function SpecificationsPage() {
                           type="button"
                           onClick={() => openEnquiry("Specifications")}
                           data-cursor="ASK"
-                          aria-label={`Request the published detail for ${r.item.toLowerCase()} — ${s.name}`}
+                          aria-label={`On request — the published detail for ${r.item.toLowerCase()}, ${s.name}`}
                           className="mono group/req inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[0.56rem] tracking-[0.18em] text-ink-soft transition-colors duration-300 hover:border-brass/50 hover:text-brass focus-visible:border-brass focus-visible:text-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass/60"
                         >
                           On request

@@ -157,7 +157,7 @@ function OnRequest({ label, subject, note }) {
         type="button"
         onClick={() => openEnquiry(subject)}
         data-cursor="REQUEST"
-        aria-label={`${label} — request from the private client team`}
+        aria-label={`On request — ${label} from the private client team`}
         className="group/or mt-1 inline-flex items-center gap-1.5 rounded-sm font-serif text-sm italic text-brass transition-colors hover:text-brass-soft focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-4 focus-visible:ring-offset-canvas md:text-base"
       >
         On request
@@ -643,7 +643,7 @@ export default function FloorPlan() {
                 <button
                   type="button"
                   onClick={enlarge}
-                  aria-label={`Open the enlarged ${plan.label} floor plan`}
+                  aria-label={`Enlarged view — open the ${plan.label} floor plan`}
                   className="mono inline-flex items-center gap-2 text-[0.6rem] tracking-[0.18em] text-brass transition-colors hover:text-brass-soft focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-4 focus-visible:ring-offset-canvas"
                 >
                   <Maximize2 size={13} />

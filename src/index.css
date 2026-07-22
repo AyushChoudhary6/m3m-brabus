@@ -85,7 +85,7 @@
   /* Ink — warm bone */
   --color-ink: #f1ead9;
   --color-ink-soft: #a99d86;
-  --color-ink-faint: #6f6551;
+  --color-ink-faint: #8a8069; /* BUG-016: was #6f6551 (3.4:1); now 5.0:1 AA on dark */
 
   /* Lines — warm gold-tinted hairlines */
   --color-line: #2c2418;
@@ -119,7 +119,7 @@
 /* ---- Base ---- */
 * { -webkit-tap-highlight-color: transparent; }
 
-html { scroll-behavior: auto; }
+html { scroll-behavior: auto; overflow-x: clip; } /* BUG-015: contain decorative -inset glows */
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }

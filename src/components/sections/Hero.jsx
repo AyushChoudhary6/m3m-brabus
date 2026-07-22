@@ -37,12 +37,12 @@ const srcSetOf = (variants) => variants.map(([w, url]) => `${url} ${w}w`).join("
 const LEDGER = [
   { key: "configs", text: PROJECT.configs },
   { key: "location", text: PROJECT.location },
-  { key: PRICE.key, fact: PRICE, idle: "Price on request", aria: "Request the price of M3M Brabus — pricing is not yet published" },
+  { key: PRICE.key, fact: PRICE, idle: "Price on request", aria: "Price on request — pricing is not yet published; tap to request it" },
   {
     key: PROJECT_FACT.rera.key,
     fact: PROJECT_FACT.rera,
     idle: "RERA status on request",
-    aria: "Ask for the RERA status of M3M Brabus — no registration number is published yet",
+    aria: "RERA status on request — no registration number is published yet",
   },
 ];
 

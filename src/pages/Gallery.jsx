@@ -317,7 +317,7 @@ export default function Gallery() {
                   type="button"
                   onClick={() => openEnquiry("Gallery")}
                   data-cursor="OPEN"
-                  aria-label={`Request further ${PROJECT.name} imagery`}
+                  aria-label={`Request the full imagery set of ${PROJECT.name}`}
                   className="group/cta relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-7 py-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
                 >
                   <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />

@@ -215,9 +215,9 @@ export default function LocationPage() {
                   <span className="text-brass" aria-hidden="true">
                     <Icon size={18} strokeWidth={1.4} />
                   </span>
-                  <h4 className="mt-3 font-display text-lg text-ink transition-colors duration-500 group-hover:text-brass-soft">
+                  <h3 className="mt-3 font-display text-lg text-ink transition-colors duration-500 group-hover:text-brass-soft">
                     {e.title}
-                  </h4>
+                  </h3>
                   <p className="mt-3 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{e.body}</p>
                   <p className="mt-4 max-w-[46ch] border-l border-brass/40 pl-4 text-sm leading-relaxed text-ink-faint">
                     {e.check}
