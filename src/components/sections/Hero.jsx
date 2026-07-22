@@ -86,17 +86,16 @@ export default function Hero() {
     if (!el || prefersReduced) return undefined;
     if (navigator.connection?.saveData) return undefined;
 
-    /* Measured, not assumed: with the film attached at all, Lighthouse mobile
-       scores 61 and LCP is 7.9s — the 3.3 MB download saturates a simulated
-       mobile link no matter how late or how low-priority it is scheduled.
-       Poster-only on mobile scores far better, and it is the right call for the
-       visitor too: a decorative loop is not worth 3.3 MB of someone's data plan
-       on a phone. Desktop, where bandwidth is cheap and the card is the whole
-       composition, still gets the film. */
-    const wideEnough = window.matchMedia("(min-width: 1024px)").matches;
-    if (!wideEnough) return undefined;
+    /* Product decision: the hero film should play on phones too, so it now
+       attaches on mobile as well as desktop. The download still never fights
+       first paint — it is scheduled after `load` at idle priority, the poster
+       carries LCP, and the genuinely constrained cases are still refused:
+       prefers-reduced-motion and Save-Data (above), and 2g connections (below).
+       The honest tradeoff: mobile pays some extra data/LCP for the film versus
+       poster-only. If that ever needs walking back, a lighter mobile-specific
+       encode (or restoring a width gate here) is the lever. */
 
-    // Honour an explicitly slow connection even on a wide screen.
+    // Refuse only on an explicitly slow (2g) connection; everyone else gets the film.
     const slow = /(^|-)2g$/.test(navigator.connection?.effectiveType || "");
     if (slow) return undefined;
 
