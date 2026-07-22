@@ -1,0 +1,262 @@
+# External cron runner for endpoints we can't keep in vercel.json.
+#
+# Why: Vercel Hobby plan caps at 2 crons per project AND requires a
+# daily-or-less-frequent schedule. Our app has 5 crons total, and 2 of
+# them must run sub-daily (workflows every few min, pre-meeting every
+# 5 min). When vercel.json violates these limits, Vercel SILENTLY drops
+# the entire deployment — no row appears in the dashboard at all. That
+# bug bit us for 18+ hours.
+#
+# Fix: keep the 2 daily reminders in vercel.json, run the other 3 here
+# on GitHub Actions (free, 2000 min/month on free tier, plenty).
+#
+# Caveats:
+#   - GitHub Actions scheduled minimum is 5 min (we wanted 1 min for
+#     workflows — accepting up to 5-min lag on drip campaign dispatch).
+#   - Scheduled workflows can be delayed under GitHub load (rarely
+#     >15 min). Vercel crons were more punctual but the trade is worth
+#     it to unblock all deployments permanently.
+#
+# One-time setup (do once, then forget):
+#   1. In Vercel dashboard → Project → Settings → Environment Variables,
+#      add CRON_SECRET (any long random string, e.g. `openssl rand -hex 32`)
+#      for Production environment.
+#   2. In GitHub repo → Settings → Secrets and variables → Actions → New
+#      repository secret, add the SAME CRON_SECRET value.
+#   3. That's it. Re-deploy once so Vercel picks up the env var.
+
+name: External crons
+
+on:
+  schedule:
+    # Workflows dispatcher — every 5 min (was every minute on Vercel)
+    - cron: "*/5 * * * *"
+    # Pre-meeting & follow-up reminders — every 5 min
+    # (same schedule as above; we filter which job runs by the cron string)
+    # Nightly rescore — daily at 03:00 UTC = 08:30 IST
+    - cron: "0 3 * * *"
+    # Daily revival sweep — daily at 04:00 UTC = 09:30 IST
+    # (runs AFTER nightly rescore so leads that decayed to COLD overnight are
+    # eligible for revival in the same morning cycle).
+    - cron: "0 4 * * *"
+    # Daily DB backup — daily at 22:00 UTC = 03:30 IST (off-hours for both teams)
+    - cron: "0 22 * * *"
+    # Weekly leaderboard digest — Sunday 14:00 UTC = Sunday 19:30 IST / 18:00 GST
+    - cron: "0 14 * * 0"
+    # Unassigned-lead end-of-day summary — daily 14:30 UTC = 20:00 IST
+    - cron: "30 14 * * *"
+    # Daily DB housekeeping — 21:30 UTC = 03:00 IST, AFTER the 21:00 backup so
+    # every trimmed row is already archived in that day's Drive backup.
+    - cron: "30 21 * * *"
+    # Sales follow-up auto-rollover — daily 18:00 UTC = 23:30 IST (11:30 PM IST, end of
+    # working day). PRIMARY trigger is the /api/cron/warm heartbeat (~23:00 IST); this GH
+    # schedule is a backup for when GitHub Actions is firing. Idempotent (cronRanTodayIST).
+    - cron: "0 18 * * *"
+    # Lunch-break reminders — soft, informational. 08:30 UTC = 2:00 PM IST (start)
+    # and 08:55 UTC = 2:25 PM IST (5-min warning). May lag a few min under GitHub
+    # scheduler load — acceptable for a gentle break nudge.
+    - cron: "30 8 * * *"
+    - cron: "55 8 * * *"
+    # Daily buyer auto-distribution — 06:30 UTC = 12:00 noon IST. Round-robins the
+    # Admin Buyer Pool across the active team ONLY when the admin toggle is ON
+    # (idempotent: only ADMIN_POOL buyers move). Off by default → a no-op until enabled.
+    - cron: "30 6 * * *"
+  # Allow manual trigger from the Actions tab for debugging
+  workflow_dispatch:
+
+# Don't pile up runs if a previous one is still going
+concurrency:
+  group: external-crons
+  cancel-in-progress: false
+
+jobs:
+  workflows-and-meetings:
+    # Run on the 5-min schedule (and on manual dispatch)
+    if: github.event.schedule == '*/5 * * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch due workflow actions
+        run: |
+          curl -sf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/workflows \
+            || echo "::warning::workflows cron failed"
+      - name: Pre-meeting & follow-up reminders
+        run: |
+          curl -sf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/pre-meeting-reminder \
+            || echo "::warning::pre-meeting-reminder cron failed"
+      - name: Unassigned-lead escalation (15/30/60 min)
+        run: |
+          curl -sf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/unassigned-reminders \
+            || echo "::warning::unassigned-reminders cron failed"
+
+  nightly-rescore:
+    # Run on the daily 03:00 UTC schedule (and on manual dispatch)
+    if: github.event.schedule == '0 3 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Behavioural rescore — all open leads
+        run: |
+          curl -sf --max-time 300 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/rescore-all \
+            || echo "::warning::rescore-all cron failed"
+
+  revival-sweep:
+    # Daily 04:00 UTC — runs the revival engine. See src/lib/revivalEngine.ts.
+    if: github.event.schedule == '0 4 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Revive cold-but-re-engaged leads
+        run: |
+          curl -sf --max-time 120 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/revival-sweep \
+            || echo "::warning::revival-sweep cron failed"
+      - name: HR auto-join — flip EXPECTED_JOINING → JOINED on joining date
+        run: |
+          curl -sf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/hr-auto-join \
+            || echo "::warning::hr-auto-join cron failed"
+      - name: HR PII purge — strip raw submission payloads past retention (180d)
+        run: |
+          curl -sf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/hr-pii-purge \
+            || echo "::warning::hr-pii-purge cron failed"
+      - name: HR follow-up rollover — move overdue HR follow-ups to today
+        run: |
+          curl -sf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/hr-followup-rollover \
+            || echo "::warning::hr-followup-rollover cron failed"
+      - name: HR data-health scan — overdue-per-owner + anomalies
+        run: |
+          curl -sf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/hr-health \
+            || echo "::warning::hr-health cron failed"
+
+  weekly_digest:
+    # Sunday-night leaderboard email to admins + managers.
+    if: github.event.schedule == '0 14 * * 0' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send weekly leaderboard digest
+        run: |
+          curl -sf --max-time 120 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/weekly-digest \
+            || echo "::warning::weekly-digest cron failed"
+
+  unassigned_summary:
+    # End-of-day "still unassigned" digest to admins — 14:30 UTC = 20:00 IST.
+    if: github.event.schedule == '30 14 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Unassigned-lead end-of-day summary
+        run: |
+          curl -sf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://crm.whitecollarrealty.com/api/cron/unassigned-reminders?summary=1" \
+            || echo "::warning::unassigned-summary cron failed"
+
+  cleanup:
+    # Daily DB housekeeping — 21:30 UTC = 03:00 IST (after the 21:00 backup).
+    # Trims Notification + CronRun only; reminders/leads/activities/audit untouched.
+    if: github.event.schedule == '30 21 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trim old notifications + cron logs
+        run: |
+          curl -sf --max-time 90 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/cleanup \
+            || echo "::warning::cleanup cron failed"
+
+  followup_rollover:
+    # Sales follow-up auto-rollover — 18:00 UTC = 23:30 IST (11:30 PM IST, end of day).
+    # Moves every pending today-or-earlier follow-up to the next day so stale dates
+    # don't pile up. Closed/rejected/deleted/no-followup/HR excluded; remarks
+    # never touched; each move logged to LeadFieldHistory. See followupRollover.ts.
+    if: github.event.schedule == '0 18 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Roll pending overdue follow-ups to next day
+        run: |
+          curl -sf --max-time 120 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/followup-rollover \
+            || echo "::warning::followup-rollover cron failed"
+
+  db_backup:
+    # Daily JSON snapshot — uploads to Actions artifacts (free, 90d retention,
+    # downloadable from the Actions tab). Zero new vendor accounts.
+    # Runs on 22:00 UTC schedule + manual dispatch from the Actions tab.
+    if: github.event.schedule == '0 22 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    # Don't crash the other manually-dispatched jobs if the backup hiccups.
+    continue-on-error: true
+    steps:
+      - name: Compute backup filename
+        id: meta
+        run: echo "filename=backup-$(date -u +%Y-%m-%d).json" >> "$GITHUB_OUTPUT"
+      - name: Download DB backup
+        run: |
+          curl -sSf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -o "${{ steps.meta.outputs.filename }}" \
+            https://crm.whitecollarrealty.com/api/cron/db-backup
+          # Sanity check — fail fast if the file is empty or tiny (would mean
+          # the endpoint returned an auth error JSON instead of a real dump).
+          test "$(wc -c < "${{ steps.meta.outputs.filename }}")" -gt 1024
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcr-db-backup-${{ github.run_id }}
+          path: ${{ steps.meta.outputs.filename }}
+          retention-days: 90
+          if-no-files-found: error
+
+  lunch_start:
+    # Lunch Break Started — 08:30 UTC = 2:00 PM IST.
+    if: github.event.schedule == '30 8 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lunch break started (2:00 PM IST)
+        run: |
+          curl -sf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://crm.whitecollarrealty.com/api/cron/lunch-reminder?phase=start" \
+            || echo "::warning::lunch-start cron failed"
+
+  lunch_ending:
+    # Lunch Break Ending Soon — 08:55 UTC = 2:25 PM IST.
+    if: github.event.schedule == '55 8 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lunch break ending soon (2:25 PM IST)
+        run: |
+          curl -sf --max-time 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://crm.whitecollarrealty.com/api/cron/lunch-reminder?phase=ending" \
+            || echo "::warning::lunch-ending cron failed"
+
+  buyer_distribute:
+    # Daily buyer auto-distribution — 06:30 UTC = 12:00 noon IST. No-op unless the
+    # admin toggle is ON; then it round-robins the Admin Buyer Pool across the active
+    # team (idempotent — only ADMIN_POOL buyers move). See src/lib/buyerDistribution.ts.
+    if: github.event.schedule == '30 6 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Distribute Admin-Pool buyers to the active team
+        run: |
+          curl -sf --max-time 120 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://crm.whitecollarrealty.com/api/cron/buyer-distribute \
+            || echo "::warning::buyer-distribute cron failed"

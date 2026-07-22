@@ -1,0 +1,116 @@
+import { requireHrPage, hrScopeWhere } from "@/lib/hrAccess";
+import { prisma } from "@/lib/prisma";
+import HRResumeUploadWidget from "@/components/HRResumeUploadWidget";
+import HRResumeBankClient, { type CandidateResumes } from "@/components/HRResumeBankClient";
+import { CLOSED_STATUS_KEYS } from "@/lib/hrStatus";
+import { FolderArchive } from "lucide-react";
+
+export const dynamic = "force-dynamic";
+
+export default async function ResumeBankPage() {
+  const { me } = await requireHrPage();
+
+  // Candidate scope — in HR scope, not soft-deleted. Used both for the upload
+  // picker (open candidates only) and to bound the resume query.
+  const candidateScope = { AND: [hrScopeWhere(me), { deletedAt: null }] };
+
+  const RESUME_CAP = 200;
+  const [pickerCandidates, resumes, resumeTotal, dupPairs] = await Promise.all([
+    // Upload picker: open (non-closed) candidates in scope. Capped so it can't grow
+    // unbounded (audit #18 — a typeahead search endpoint is the longer-term fix).
+    prisma.hRCandidate.findMany({
+      where: { AND: [hrScopeWhere(me), { deletedAt: null }, { status: { notIn: CLOSED_STATUS_KEYS as never[] } }] },
+      select: { id: true, name: true, currentProfile: true },
+      orderBy: { name: "asc" },
+      take: 2000,
+    }),
+    // Displayed resumes — newest-first, PAGINATED (audit #18).
+    prisma.hRResume.findMany({
+      where: { candidate: candidateScope },
+      orderBy: [{ isActive: "desc" }, { createdAt: "desc" }],
+      take: RESUME_CAP,
+      select: {
+        id: true,
+        candidateId: true,
+        filename: true,
+        mimeType: true,
+        sizeBytes: true,
+        contentHash: true,
+        isActive: true,
+        createdAt: true,
+        candidate: { select: { id: true, name: true, currentProfile: true } },
+        uploadedBy: { select: { name: true } },
+      },
+    }),
+    prisma.hRResume.count({ where: { candidate: candidateScope } }),
+    // Light (contentHash, candidateId) scan for cross-candidate dup detection — so
+    // duplicates are still flagged even when the partner file isn't on this page.
+    prisma.hRResume.findMany({ where: { candidate: candidateScope, contentHash: { not: null } }, select: { contentHash: true, candidateId: true } }),
+  ]);
+
+  // Cross-candidate duplicate detection: a contentHash on 2+ DISTINCT candidates
+  // means the identical file is sitting on another profile.
+  const candidatesByHash = new Map<string, Set<string>>();
+  for (const r of dupPairs) {
+    if (!r.contentHash) continue;
+    let s = candidatesByHash.get(r.contentHash);
+    if (!s) { s = new Set(); candidatesByHash.set(r.contentHash, s); }
+    s.add(r.candidateId);
+  }
+  const duplicateHashes = Array.from(candidatesByHash.entries())
+    .filter(([, ids]) => ids.size >= 2)
+    .map(([hash]) => hash);
+
+  // Group resumes by candidate, preserving the active-first / newest-first order.
+  const byCandidate = new Map<string, CandidateResumes>();
+  for (const r of resumes) {
+    let g = byCandidate.get(r.candidateId);
+    if (!g) {
+      g = {
+        candidateId: r.candidateId,
+        candidateName: r.candidate.name,
+        currentProfile: r.candidate.currentProfile,
+        versions: [],
+      };
+      byCandidate.set(r.candidateId, g);
+    }
+    g.versions.push({
+      id: r.id,
+      filename: r.filename,
+      mimeType: r.mimeType,
+      sizeBytes: r.sizeBytes,
+      contentHash: r.contentHash,
+      isActive: r.isActive,
+      createdAt: r.createdAt.toISOString(),
+      uploadedByName: r.uploadedBy?.name ?? null,
+    });
+  }
+  const groups = Array.from(byCandidate.values());
+
+  return (
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-300">
+            <FolderArchive className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Resume Bank</h1>
+            <p className="text-sm text-gray-500 dark:text-slate-400">
+              Showing {resumes.length} of {resumeTotal} resume{resumeTotal !== 1 ? "s" : ""} across {groups.length} candidate{groups.length !== 1 ? "s" : ""}{resumeTotal > resumes.length ? ` · ${resumeTotal - resumes.length} older not shown` : ""}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick upload — attach to a candidate */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
+        <h2 className="font-semibold text-sm mb-3 text-gray-700 dark:text-slate-200">Upload Resume</h2>
+        <HRResumeUploadWidget candidates={pickerCandidates} />
+      </div>
+
+      {/* Searchable / sortable / paginated resume list with version history */}
+      <HRResumeBankClient groups={groups} duplicateHashes={duplicateHashes} />
+    </div>
+  );
+}

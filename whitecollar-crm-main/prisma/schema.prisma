@@ -1,0 +1,3070 @@
+// White Collar Realty CRM — Database schema
+// Dev: SQLite (file-based, no setup). Prod: switch provider to "postgresql".
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================
+// USERS, ROLES, TEAMS, AUTH
+// =====================================================
+
+enum Role {
+  ADMIN
+  MANAGER
+  AGENT
+}
+
+model User {
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  name                  String
+  passwordHash          String
+  role                  Role     @default(AGENT)
+  team                  String? // "Dubai" / "India" / "HQ"
+  phone                 String?
+  // Acefone agent ID — required for click-to-call (Acefone rings this number first,
+  // then dials the lead once the agent picks up). Configure in /team page.
+  acefoneAgentId        String?
+  // Company-assigned WhatsApp Business number for this agent (e.g. "+918XXXXXXX").
+  // Used for: (1) outbound WA links open with this number visible to client,
+  // (2) when Meta Cloud API is configured, the CRM can poll messages for this
+  // number's wa_id and auto-log conversations as Activity rows.
+  companyWhatsAppNumber String?
+  // Profile photo — stored as base64 dataURL (kept small, no S3 needed for ~10 users).
+  // Empty string ("" or null) → fall back to initials avatar.
+  photoUrl              String?
+  // Reporting line — Managers see leads owned by their direct reports.
+  // Self-ref FK. Set in /team page (admin only).
+  managerId             String?
+  manager               User?    @relation("Reports", fields: [managerId], references: [id])
+  reports               User[]   @relation("Reports")
+  // Day-of-week the agent is off, JS getDay() convention (0=Sunday … 6=Saturday); null = no fixed weekly off.
+  weeklyOff             Int?
+  avatarColor           String? // tailwind class e.g. "bg-indigo-500"
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // ── Gamification (Phase 2 of CRM master spec) ──
+  // Cumulative XP earned across all actions (calls, conversions, bookings).
+  // Level derived from XP via tiers in src/lib/gamification.ts. Streaks track
+  // consecutive days the agent met their minimum activity threshold.
+  xp             Int     @default(0)
+  dailyStreak    Int     @default(0)
+  followupStreak Int     @default(0)
+  coldCallStreak Int     @default(0)
+  // Last day (YYYY-MM-DD IST) the streak was incremented — used to detect
+  // gaps so the streak resets after a missed day.
+  lastStreakDay  String?
+  // Comma-separated badge IDs earned. Defined in src/lib/gamification.ts.
+  // Cheap-to-query string instead of a join table since badges are append-only.
+  badges         String  @default("")
+
+  // ── Agent profile (spec §9.13) ──
+  // Comma-separated specialization tags from a fixed vocab. Examples:
+  // "Dubai investor", "Gurgaon luxury", "Villa closer", "Commercial", "NRI",
+  // "First-time buyer", "Negotiation support". NULL = no specialization yet.
+  // Used by lead-routing hints + manager triage.
+  specializations    String?
+  // Per-agent daily call target. Surfaced in DailyMissionBoard so the agent
+  // knows their personal goal for the day. Editable by ADMIN/MANAGER on /team.
+  dailyCallTarget    Int     @default(30)
+  // Per-agent daily connect target. Surfaced in DailyMissionBoard (connecting calls mission).
+  dailyConnectTarget Int     @default(10)
+
+  // ── Per-user notification preferences ──
+  // JSON-stringified object of `{ kind: boolean }` toggles plus a "sound" key
+  // for in-app sound effects. Keys map to notification kinds shown in the
+  // /settings → "🔕 Notification preferences" card. Example:
+  //   {"hot_lead":true,"followup":true,"sla":true,"daily_report":false,"sound":true}
+  // NULL = defaults (everything on). Filtering at send-time is wired up later;
+  // for now this column only persists the user's choices.
+  notifPrefs  String?
+  // Chosen in-app alert sound id (bell|alert|chime|success|siren|premium) and
+  // volume level (low|medium|high|maximum). NULL = defaults (premium / high).
+  // Saved per user so the choice follows them across devices; the client also
+  // caches them in localStorage so the AudioContext can fire without a round-trip.
+  notifSound  String?
+  notifVolume String?
+
+  // ── HR-only access flag ──
+  // When true, this user can ONLY access the HR Recruitment module (/hr/*).
+  // The Sales CRM layout redirects them to /hr immediately. Use for dedicated
+  // HR staff (Nisha, HR Intern) who should never see sales leads/properties.
+  hrOnly                  Boolean @default(false)
+  // Admins who also work in HR — appear in HR pickers (owner/interviewer) without losing Sales access.
+  hrTeam                  Boolean @default(false)
+  // ── Conversation moderation (Lalit-only) ──
+  // When true, this user can hide / soft-delete / restore individual remarks in
+  // a lead's Conversation History, and hide them from specific or all agents.
+  // NOT granted by the ADMIN role — must be set explicitly (Lalit). Normal
+  // agents and even other admins never see these controls.
+  canControlConversations Boolean @default(false)
+  // ── Super Admin (Lalit) ──
+  // The ONLY tier allowed to permanently purge data (e.g. empty Import Trash).
+  // Regular admins can move imports to Trash and restore them, but can never
+  // physically delete. Set explicitly — not implied by the ADMIN role.
+  isSuperAdmin            Boolean @default(false)
+  // ── Lead-Ops / Support-Admin flag (Sameer) ──
+  // When true, this ADMIN is a lead-distribution manager, NOT a sales agent.
+  // The dashboard hides every personal-performance card (he owns no leads) and
+  // shows the management queue instead (unassigned / awaiting-team / workload).
+  // Set explicitly per user — NOT implied by the ADMIN role (Lalit is unaffected).
+  leadOpsOnly             Boolean @default(false)
+
+  // ── Device-security (trusted-device binding) ──
+  // sessionEpoch: bump to instantly revoke ALL of this user's sessions (kill switch).
+  // passwordChangedAt: forces re-login everywhere after a password reset.
+  // deviceLimitExtra: extra approved-device slots beyond the default (1 mobile +
+  // 1 desktop); e.g. an admin grants a tablet → set to 1.
+  sessionEpoch      Int       @default(0)
+  passwordChangedAt DateTime?
+  deviceLimitExtra  Int       @default(0)
+
+  ownedLeads      Lead[]             @relation("LeadOwner")
+  assignments     Assignment[]
+  activities      Activity[]
+  callLogs        CallLog[]
+  notes           Note[]
+  waMessagesSent  WhatsAppMessage[]  @relation("WAMessageActor")
+  auditLogs       AuditLog[]
+  fieldChanges    LeadFieldHistory[] @relation("FieldChangedBy")
+  activityEdits   ActivityEdit[]     @relation("ActivityEditedBy")
+  notifications   Notification[]
+  vaultEntries    VaultEntry[]
+  stickyNotes     StickyNote[]
+  devices         Device[]
+  approvedDevices Device[]           @relation("DeviceApprover")
+  loginSessions   UserSession[]
+
+  // ── HR Recruitment module relations ──
+  hrCandidatesPrimary   HRCandidate[] @relation("HRPrimary")
+  hrCandidatesSecondary HRCandidate[] @relation("HRSecondary")
+  hrActivities          HRActivity[]  @relation("HRActivities")
+  hrRemarks             HRRemark[]    @relation("HRRemarks")
+  hrInterviews          HRInterview[] @relation("HRInterviewer")
+  hrFollowUps           HRFollowUp[]  @relation("HRFollowUps")
+  hrResumeUploads       HRResume[]    @relation("HRResumeUploads")
+  hrImports             HRImport[]    @relation("HRImports")
+
+  // ── Import History (Sales) relations ──
+  importBatches        ImportBatch[] @relation("ImportBatchImporter")
+  deletedImportBatches ImportBatch[] @relation("ImportBatchDeleter")
+
+  // ── Buyer Data module relations ──
+  buyerImports      BuyerImportBatch[]  @relation("BuyerImports")
+  buyersOwned       BuyerRecord[]       @relation("BuyerOwner")
+  buyerAssignments  BuyerAssignment[]   @relation("BuyerAssignmentAgent")
+  buyerActivities   BuyerActivity[]     @relation("BuyerActivityUser")
+  buyerFieldChanges BuyerFieldHistory[] @relation("BuyerFieldChangedBy")
+  buyerStickyNotes  BuyerStickyNote[]   @relation("BuyerStickyNoteUser")
+
+  assistantRuns AssistantRun[] @relation("AssistantRunBy")
+  operationLogs OperationLog[] @relation("OperationLogBy")
+
+  agentStatusEvents AgentStatusEvent[]
+
+  // ── Gallery / Resource Library relations ──
+  uploadedResources Resource[] @relation("ResourceUploader")
+
+  // ── Lead Voice Communication relations ──
+  voiceMessages     LeadVoiceMessage[] @relation("VoiceMsgCreator")
+  raisedEscalations LeadEscalation[]   @relation("EscalationRaiser")
+  resourceShares    ResourceShare[]    @relation("ResourceSharedBy")
+
+  // ── Dashboard Voice Broadcast relations (admin → team/individual) ──
+  sentBroadcasts     VoiceBroadcast[]     @relation("BroadcastCreator")
+  targetedBroadcasts VoiceBroadcast[]     @relation("BroadcastTarget")
+  broadcastReads     VoiceBroadcastRead[]
+
+  // ── Customer layer (Step 1 foundation) relations ──
+  canonicalCustomers  Customer[]          @relation("CustomerCanonicalOwner")
+  customerLinkActions CustomerLinkAudit[] @relation("CustomerLinkAuditActor")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Admin AI Assistant — natural-language bulk-ops console (ADMIN-only).
+// Every command is PREVIEWED first (no silent writes). On approval it EXECUTES,
+// recording the exact before-values per lead so the whole run is REVERSIBLE.
+// The assistant may ONLY touch reversible operational fields (ownerId, tags,
+// forwardedTeam, followupDate). It can NEVER delete a lead, edit remarks /
+// conversation history, or alter historical audit data — those intents are
+// refused at parse time. Deleted / recycle-bin leads are always excluded.
+// ─────────────────────────────────────────────────────────────────────────────
+model AssistantRun {
+  id            String    @id @default(cuid())
+  command       String // raw natural-language text the admin typed
+  intent        String // QUERY | ASSIGN | TAG | SET_TEAM | SET_FOLLOWUP | UNSUPPORTED
+  field         String? // ownerId | tags | forwardedTeam | followupDate (mutations only)
+  parsed        Json // full ParsedCommand (filter + action + params + explanation)
+  status        String    @default("PREVIEW") // PREVIEW | EXECUTED | UNDONE | FAILED
+  affectedCount Int       @default(0)
+  affectedIds   Json? // string[] of lead ids in scope at preview time
+  beforeValues  Json? // [{ id, old }] captured at execute time → enables undo
+  newValue      String? // human label of the applied value (e.g. agent name, tag, team)
+  error         String?
+  createdById   String
+  createdBy     User      @relation("AssistantRunBy", fields: [createdById], references: [id])
+  createdAt     DateTime  @default(now())
+  executedAt    DateTime?
+  undoneAt      DateTime?
+
+  @@index([createdById, createdAt])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OPERATION LOG — reversible structural operations (Lalit 2026-07-08).
+// Captures the exact BEFORE + AFTER state of every structural admin action so any
+// of them can be reverted atomically by an admin — accidental transfer / convert /
+// bulk-edit no longer needs DB surgery. Covers single + bulk Transfer, single + bulk
+// Edit-Field, Convert-to-Lead (+ bulk), and assignment changes across all 5 modules.
+// Mirrors the AssistantRun preview→execute→undo pattern: execute snapshots beforeState,
+// revert replays it. PURELY ADDITIVE (new table; no existing row is ever touched).
+model OperationLog {
+  id            String    @id @default(cuid())
+  operation     String // "buyer.transfer" | "buyer.edit" | "buyer.convert" | "lead.transfer" | "lead.edit" | "lead.assign" (bulk variants share the name)
+  entityType    String // "BuyerRecord" | "Lead"
+  module        String // "Dubai Buyer Data" | "India Buyer Data" | "Revival Engine" | "Leads" | "Master Data"
+  field         String? // edit-field ops: which field was changed
+  summary       String? // human label: "Nationality → Singapore" · "Transfer → Mehak"
+  status        String    @default("EXECUTED") // EXECUTED | UNDONE | FAILED
+  affectedCount Int       @default(0)
+  affectedIds   Json // string[] of the record ids the op touched
+  beforeState   Json // [{ id, <captured fields> }] — the pre-op snapshot revert restores
+  afterState    Json? // [{ id, <written fields> }] — for audit / display
+  createdById   String
+  createdBy     User      @relation("OperationLogBy", fields: [createdById], references: [id])
+  createdAt     DateTime  @default(now())
+  undoneAt      DateTime?
+  undoneById    String?
+
+  @@index([createdById, createdAt])
+  @@index([status, operation])
+  @@index([entityType, createdAt])
+  @@index([createdAt])
+}
+
+// =====================================================
+// LEAD SOURCES, STATUSES
+// =====================================================
+
+enum LeadSource {
+  WEBSITE
+  WCR_WEBSITE
+  WCR_EVENT
+  LANDING_PAGE
+  WHATSAPP // ⚠️ DEPRECATED FOR LEADS — use WEBSITE + medium:"WhatsApp" instead. Kept for IntakeKey backward compat.
+  CSV_IMPORT
+  EVENT
+  REFERRAL
+  INBOUND_CALL // ⚠️ DEPRECATED FOR LEADS — use WEBSITE + medium:"Call" instead. Kept for IntakeKey backward compat.
+  FACEBOOK_ADS
+  GOOGLE_ADS
+  PORTAL_99ACRES
+  PORTAL_MAGICBRICKS
+  PORTAL_HOUSING
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  SITE_VISIT
+  NEGOTIATION
+  EOI
+  BOOKING_DONE
+  WON
+  LOST
+}
+
+enum AIScore {
+  HOT
+  WARM
+  COLD
+}
+
+// Qualification depth — matches Lalit's Dubai-sheet workflow
+enum Potential {
+  HIGH
+  MEDIUM
+  LOW
+  UNKNOWN
+}
+
+enum FundReadiness {
+  CASH_READY
+  BANK_APPROVED
+  FINANCING_NEEDED
+  NOT_DISCUSSED
+  // MIS-imported values — exact labels from the sheet
+  IMMEDIATE_BUYER // "Immediate Buyer" — funds available, can move quickly
+  SHORT_TERM_BUYER // "Short-Term Buyer" — likely to arrange funds soon
+  CONDITIONAL_BUYER // "Conditional Buyer" — depends on another event (property sale, etc.)
+  FINANCED_BUYER // "Financed Buyer" — requires home loan / financing
+  FUTURE_BUYER // "Future Buyer" — not ready currently
+}
+
+enum MoodStatus {
+  EXCITED
+  INTERESTED
+  NEUTRAL
+  HESITANT
+  COLD
+  CONFUSED
+  ANGRY
+}
+
+enum InvestTimeline {
+  IMMEDIATE // this week
+  THIRTY_DAYS
+  THREE_MONTHS
+  SIX_PLUS_MONTHS
+  WINDOW_SHOPPING
+  UNKNOWN
+}
+
+// BANT qualification verdict — applied AFTER discovery call.
+// Budget · Authority · Need · Timeline → Qualifies / Not qualified / Under review.
+enum BantStatus {
+  UNDER_REVIEW
+  QUALIFIES
+  NOT_QUALIFIED
+}
+
+// Client's earning source — drives messaging tone + EMI eligibility.
+enum Profession {
+  JOB
+  SELF_EMPLOYED
+  BUSINESS_OWNER
+  INVESTOR
+  RETIRED
+  STUDENT
+  OTHER
+}
+
+// Authority — the "A" in BANT. Captures the client's decision power.
+// Drives whether to push for site visit, or to involve spouse / family.
+enum AuthorityLevel {
+  DECISION_MAKER
+  INFLUENCER
+  GATEKEEPER
+  UNKNOWN
+}
+
+// Client classification (Lalit ask 2026-06-02) — replaces free-text
+// `whoIsClient` as the structured signal. Investor (buying for yield /
+// flip), End-user (will live in / use it), Both (mixed motive), Unclear
+// (agent hasn't established yet). The free-text `whoIsClient` field stays
+// on the Lead model and is repurposed as "client situation / context notes"
+// for the long story behind the classification.
+enum ClientType {
+  INVESTOR
+  END_USER
+  BOTH
+  UNCLEAR
+}
+
+// =====================================================
+// LEAD — the core entity
+// =====================================================
+
+model Lead {
+  id                  String          @id @default(cuid())
+  // contact info
+  name                String
+  // Second person on the same row — e.g. MIS cell "Soumya, Ayush Gupta" with two
+  // phone numbers means family/joint buyer. Both belong to ONE lead (joint inquiry),
+  // second name lives here, second phone in altPhone. Lead detail shows both.
+  altName             String?
+  phone               String?
+  // Second number. Many MIS sheets put "+919146449146, 7779990838" into one cell —
+  // the importer now splits on `,`/`;`/`/`/newline and stores the extra number here.
+  // Lead detail renders separate Call + WhatsApp buttons for it.
+  altPhone            String?
+  email               String?
+  altEmail            String? // Second email address
+  company             String? // where the client works — matters for HNI profiling
+  city                String?
+  state               String? // State / Province — auto-filled from city alongside country
+  country             String?
+  // true once a user manually edits Country/State → re-enrichment on a later City
+  // change must NOT overwrite their value (auto-filled values DO get refreshed).
+  locationManual      Boolean         @default(false)
+  address             String? // client's physical address (residence)
+  // funnel
+  source              LeadSource      @default(WEBSITE)
+  sourceDetail        String? // "marina-may-26" campaign code
+  // medium — the communication channel/method (how they came, e.g. "Call", "WhatsApp", "Email")
+  // Fixed standards: "Call", "WhatsApp", "Email". Custom mediums stored in mediumOther.
+  medium              String? // "Call" | "WhatsApp" | "Email" | "Other"
+  mediumOther         String? // When medium = "Other", stores the custom name
+  status              LeadStatus      @default(NEW) // = Stage (funnel position)
+  currentStatus       String? // = Status (current state: "Not reached", "Callback today", etc.)
+  originalSheetStatus String? // raw value from "Status" column during Excel/CSV import
+  // requirements
+  budgetMin           Float? // AED for Dubai team
+  budgetMax           Float?
+  budgetCurrency      String          @default("AED") // "AED" | "INR" | "UNKNOWN" (UNKNOWN = currency unresolved → show budgetRaw only, admin review)
+  budgetRaw           String? // verbatim imported budget text ("10 Cr", "AED 800K - AED 1M") — display source of truth; never auto-converted
+  configuration       String? // "2BHK" / "Penthouse" / "Plot"
+  propertyType        String? // "Residential" | "Commercial" — auto-filled from project category / configuration, agent+admin editable
+  notesShort          String? // one-liner requirement (legacy)
+  remarks             String? // long remarks (matches sheet's Remarks column) — "Display Remark" (currently == rawRemarks)
+  rawRemarks          String? // IMMUTABLE audit source of truth: exact imported remark text, never transformed, never overwritten after first write. Conversation History "Raw History (Audit Log)" renders this verbatim.
+  rawImport           Json? // IMMUTABLE audit source: the ENTIRE original import row, verbatim (every header→value, incl. mapped columns). Guarantees every imported value — name/phone/email/source/dates/etc. — is recoverable exactly as written, alongside the derived fields. Merged (never value-overwritten by blanks) on re-import.
+  sourceRaw           String? // VERBATIM source value exactly as written in the sheet ("Townscript", "Eventbrite", "Dubai Property Expo This Weekend", "WhatsApp Campaign June"). NEVER mapped/normalized/defaulted. Display + filters + reports use this. The `source` enum below is only a coarse best-effort bucket for legacy charts; sourceRaw is the source of truth.
+  tags                String? // comma-separated for SQLite ("NRI,Investor")
+  categorization      String? // NRI / Resident / Investor / End-user
+  language            String? // "English,Hindi"
+  // DEPTH FIELDS (from Dubai sheet — Lalit's priority)
+  // `clientType` is the structured "who is the client" signal (3 + 1 options:
+  // Investor / End-user / Both / Unclear). Drives messaging, routing, and the
+  // Quality Score. `whoIsClient` stays as the free-text "client situation /
+  // context notes" — long story behind the classification (e.g. "NRI in Dubai,
+  // husband already owns at Burj Vista, parents will relocate next year").
+  clientType          ClientType?
+  whoIsClient         String? // FULL client situation context, not keywords
+  whenCanInvest       InvestTimeline?
+  potential           Potential?
+  fundReadiness       FundReadiness?
+  moodStatus          MoodStatus?
+  // BANT verdict — set after qualification call. Drives the "Qualifies/Not qualified" chip.
+  bantStatus          BantStatus      @default(UNDER_REVIEW)
+  bantReason          String? // optional one-liner explaining the verdict
+  // BANT depth — real per-letter fields so the BANT card shows true B/A/N/T.
+  // B uses budgetMin/Max/Currency + fundReadiness; T uses whenCanInvest.
+  // A + N need dedicated columns:
+  //   authorityLevel — is the lead the decision-maker, an influencer, or a gatekeeper?
+  //   needSummary    — one-line summary of WHY they're buying (move-in, rental yield,
+  //                    family relocation, kid's education, etc.).
+  authorityLevel      AuthorityLevel?
+  authorityPerson     String? // WHO decides: "Self", "Wife", "Father + Son", "Parents", etc.
+  needSummary         String?
+  bantSuggestionsJson String? // JSON: BantSuggestions (auto-detected from history)
+  // Profile depth
+  // profession was widened enum Profession -> TEXT (migration 20260623170000)
+  // so Sales can type ANY profession. Legacy enum tokens (JOB, SELF_EMPLOYED…)
+  // are preserved verbatim as strings. The Profession enum below is kept only
+  // for backward reference; this column no longer uses it.
+  profession          String?
+  designation         String? // job title, distinct from profession (data-bank editable)
+  nationality         String? // country of citizenship, e.g. "Indian", "UAE National"
+  preferredLocation   String? // desired property location / area
+  linkedInUrl         String? // full https://linkedin.com/in/... URL
+  // Purchase history — captured at intake for cold data or filled after qualification
+  alreadyBought       String? // comma-separated project names client already owns
+  alreadyBoughtBy     String? // who they bought it through (broker name or "direct from Emaar")
+  detailShared        String? // what brochures / details we've sent
+  photoUrls           String? // JSON-stringified URLs of uploaded photos
+  // scheduling
+  meetingDate         DateTime? // upcoming/last meeting
+  siteVisitDate       DateTime? // upcoming/last site visit
+  followupDate        DateTime? // next follow-up commitment
+  todoNext            String? // free-text "To Do" — what's the next action
+  // AI
+  aiScore             AIScore?
+  aiScoreValue        Int? // 0-100
+  aiSummary           String? // long-form auto summary
+  aiNextAction        String? // recommended next step
+  aiUpdatedAt         DateTime?
+  // ownership
+  ownerId             String?
+  owner               User?           @relation("LeadOwner", fields: [ownerId], references: [id])
+  // ── Customer layer (Step 1 foundation) — optional link to the canonical Customer
+  // this enquiry belongs to. NULL = standalone (default for EVERY existing lead, so
+  // adding this column changes ZERO existing rows). Set/cleared ONLY via the audited
+  // link/unlink service (src/lib/customer/link.ts). Status/owner/phone are computed
+  // live from the linked enquiries — never stored on Customer.
+  customerId          String?
+  customer            Customer?       @relation("CustomerEnquiries", fields: [customerId], references: [id], onDelete: SetNull)
+  forwardedTeam       String? // TEAM marker "Dubai" / "India" — NULL = not yet
+  // classified → ALL automation is suppressed until a team is set
+  // (the mandatory pre-assignment routing gate; see src/lib/teamRouting.ts).
+  // MARKET (India / UAE) — DISTINCT from Team (Lalit's permanent segregation rule,
+  // 2026-07-02). Team = who works it (India Team / Dubai Team); Market = the
+  // property market (India / UAE). Backfilled from forwardedTeam (India→India,
+  // Dubai→UAE) + budgetCurrency for null-team. Additive; forwardedTeam unchanged.
+  market              String? // "India" | "UAE" — see src/lib/market.ts (resolveMarket)
+  assignedAt          DateTime? // when ownerId was last set — for 15-min SLA
+  // ── Routing provenance (Lead Routing Architecture) ──
+  // Captures HOW/WHY this lead landed on its team, for audit + the lead-detail
+  // "routing" display. Set alongside forwardedTeam at intake/assignment time.
+  routingMethod       String? // "manual" | "import" | "rule" | "round_robin_pool" | "admin_queue"
+  routingSource       String? // e.g. "website:dubai-property", "csv:forceTeam", "manual_form", "whatsapp"
+  routingReason       String? // human-readable, e.g. "Dubai property page" / "agent picked India"
+  leadOrigin          String          @default("ACTIVE_LEAD") // Phase D: ACTIVE_LEAD (Leads) | REVIVAL (Revival) | MASTER_DATA (repository). Legacy ACTIVE/COLD/PORTFOLIO/SYSTEM still honored during transition.
+  // SLA reconciler
+  slaFirstCallBy      DateTime? // ownerId-set + 15 min — escalate if no call by then
+  slaEscalated        Boolean         @default(false) // already notified admin
+  // Manager intervention
+  needsManagerReview  Boolean         @default(false) // auto-flagged when manager push could help
+  managerReviewReason String? // why flagged (e.g. "3 not-picked attempts")
+  flaggedAt           DateTime?
+  // Cold-call bucket — separates outbound cold prospects from real warm leads.
+  // Lead lands here when: BANT=NOT_QUALIFIED, OR no contact in 30+ days,
+  // OR manager toggles it explicitly. Hides from main /leads list by default.
+  isColdCall          Boolean         @default(false)
+  coldCallReason      String?
+  // dedupe — fingerprint is phone||email hash. Uniqueness is enforced by a
+  // PARTIAL unique index ("Lead_fingerprint_active_key") that only covers
+  // ACTIVE rows (WHERE "deletedAt" IS NULL), defined in migration
+  // 20260611_fingerprint_unique_active. A soft-deleted lead keeps its
+  // fingerprint (for audit) but does NOT block re-import of the same contact
+  // and does NOT count as a duplicate. The full @unique was intentionally
+  // dropped — do NOT re-add it (it would resurrect the deleted-lead dedupe bug).
+  fingerprint         String? // phone||email hash; unique among active leads only
+  duplicateCount      Int             @default(0) // times this client has re-contacted us
+  lastDuplicateAt     DateTime?
+
+  // ── Import provenance (Import History rollback/delete) ──
+  // Stamped on every NEW lead created by a bulk import so an admin can later
+  // soft-delete / roll back the entire batch, returning the CRM to its pre-
+  // import state. Updated/deduped leads are NOT stamped (they pre-existed) —
+  // only the batch's updatedCount records that they were touched.
+  importBatchId          String?
+  importBatch            ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  // Soft-delete (used by import rollback). NULL = live. When set, the lead is
+  // hidden from every list/count via leadScopeWhere. Reversible — restore
+  // clears it. Originals are never hard-deleted (Super-Admin only, future).
+  deletedAt              DateTime?
+  deletedById            String?
+  // Set when the per-lead callback reminder (~10 min before Lead.followupDate) has
+  // already fired — prevents the 5-min pre-meeting cron from re-notifying. Cleared
+  // when followupDate is edited (handled by the inline-update endpoint).
+  followupReminderSentAt DateTime?
+
+  // ── Rejection / Lost-lead capture ──
+  // When agent rejects a lead (status → LOST), capture the reason from a
+  // fixed dropdown plus optional free-text. Used in /reports/sla and the
+  // Pipeline funnel-leakage analysis to understand WHY deals die.
+  // rejectionReason one of: FUND_ISSUE / WAR_FEAR / LOW_BUDGET /
+  //   LOOK_AFTER_2_YEARS / WAITING_FOR_PROPERTY_SALE / OTHER
+  rejectionReason String?
+  rejectionNote   String? // free-text — required when rejectionReason = OTHER
+  rejectedAt      DateTime?
+  rejectedById    String?
+  // Rejected-Lead workflow (Lalit 2026-06-27): on reject the lead is UNASSIGNED
+  // (ownerId → null, freeing the agent + keeping reports correct) and the prior
+  // owner is preserved here for the "Previous Owner" display + permanent audit.
+  // Kept as a reference after reactivate (reactivate → re-assign is the path).
+  previousOwnerId String?
+  // Master-Data Assign/Transfer (Lalit 2026-07-10): assigning a Master-Data record
+  // reactivates it into a working state under a fresh status (default "Not Contacted").
+  // The status it carried BEFORE that reset — typically the Lost/Rejected one — is
+  // preserved here for the admin-only "Previous Status" audit line. Never shown to the
+  // assigned agent, who only ever sees the current working status.
+  previousStatus  String?
+
+  // Future Re-engage on Reject (Lalit 2026-07-02): when rejecting, the agent may
+  // opt to re-engage the client on a future date. On that date a cron reassigns the
+  // lead back to reEngageOwnerId (its owner at reject time; falls back to Lalit if
+  // that agent is inactive), reactivates it, and notifies agent + admin. Cleared once
+  // fired. Additive/nullable — no existing row changes.
+  reEngageAt      DateTime?
+  reEngageOwnerId String?
+
+  // ── EOI / Booking workflow (Phase 6 of CRM master spec §13) ──
+  // Stage in the booking funnel — populated once a Lead enters NEGOTIATION
+  // or beyond. Pipeline UI shows EOI sub-stages once eoiStage is set.
+  eoiStage                    String? // "EOI_DISCUSSED" / "EOI_COLLECTED" / "KYC_PENDING" / "BOOKING_FORM_SENT" / "BOOKING_FORM_SIGNED" / "PAYMENT_PROOF_RECEIVED" / "DEVELOPER_CONFIRMATION" / "BOOKING_DONE"
+  eoiAmount                   Int? // smallest currency unit (paisa / fils)
+  eoiCurrency                 String? // "AED" / "INR"
+  eoiPaymentMethod            String? // "BANK_TRANSFER" / "CARD" / "CHEQUE" / "CASH"
+  eoiCollectedAt              DateTime?
+  kycStatus                   String? // "PENDING" / "DOCS_RECEIVED" / "VERIFIED" / "REJECTED"
+  kycReceivedAt               DateTime?
+  bookingFormStatus           String? // "NOT_SENT" / "SENT" / "SIGNED" / "REJECTED"
+  bookingFormSentAt           DateTime?
+  bookingFormSignedAt         DateTime?
+  paymentProofStatus          String? // "PENDING" / "RECEIVED" / "VERIFIED"
+  paymentProofReceivedAt      DateTime?
+  developerConfirmationStatus String? // "PENDING" / "CONFIRMED"
+  developerConfirmedAt        DateTime?
+  bookingDoneAt               DateTime?
+  // Commission (post-booking).
+  commissionAmount            Int? // smallest currency unit
+  commissionCurrency          String?
+  commissionStatus            String? // "PENDING" / "INVOICED" / "RECEIVED"
+  commissionReceivedAt        DateTime?
+  // Free-text note about discounts / waivers discussed during EOI.
+  eoiNotes                    String?
+  // Requires manager / admin sign-off before moving forward.
+  eoiApprovalRequired         Boolean   @default(false)
+  eoiApprovedById             String?
+  eoiApprovedAt               DateTime?
+
+  // ── Conditional source fields ──
+  // WCR Event source details
+  eventName    String? // event name when source = WCR_EVENT
+  eventCountry String? // event country
+  eventState   String? // event state / province
+  eventCity    String? // event city
+  // Referral source details
+  referralName String? // referrer's name when source = REFERRAL
+
+  // timestamps
+  lastTouchedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Imported sheet columns with no matching CRM field (original header → value,
+  // verbatim). Preserves every Excel column for display + traceability.
+  customFields Json?
+
+  // relations
+  interestedUnits    LeadProperty[]
+  discussed          LeadProject[]
+  interestedProjects LeadInterestedProject[]
+  activities         Activity[]
+  callLogs           CallLog[]
+  notes              Note[]
+  assignments        Assignment[]
+  waMessages         WhatsAppMessage[]
+  stickyNotes        StickyNote[]
+  fieldHistory       LeadFieldHistory[]
+  // Buyer-data conversions that produced THIS lead (normally 0 or 1).
+  buyerConversions   BuyerRecord[]           @relation("BuyerConvertedLead")
+  // Gallery resources shared with this lead (tracking — which file → which client).
+  resourceShares     ResourceShare[]         @relation("ResourceShareLead")
+  // ── Lead Voice Communication ──
+  voiceMessages      LeadVoiceMessage[]
+  escalations        LeadEscalation[]
+
+  @@index([status])
+  @@index([source])
+  @@index([ownerId])
+  @@index([createdAt])
+  @@index([eoiStage])
+  @@index([forwardedTeam])
+  @@index([importBatchId])
+  @@index([deletedAt])
+  // Perf (2026-06-22): hot filter/sort/count columns on the Leads page — every
+  // follow-up chip count, the status groupBy, the ghosting/overdue filters, and
+  // the team/owner scopes. Created on prod via scripts/migrate-lead-indexes.ts
+  // (CREATE INDEX CONCURRENTLY — no table lock).
+  @@index([followupDate])
+  @@index([currentStatus])
+  @@index([lastTouchedAt])
+  @@index([leadOrigin])
+  @@index([ownerId, deletedAt])
+  @@index([forwardedTeam, deletedAt])
+  @@index([customerId]) // Customer layer — group an enquiry's siblings by canonical Customer
+}
+
+// =====================================================
+// LEAD FIELD HISTORY — financial-grade per-field audit trail. One append-only
+// row per change to a tracked field (status, budget, BANT, owner/assignment,
+// follow-up date, source, leadOrigin/section move, remarks): old→new + who +
+// when + where. Makes every change recoverable, "what did X change today" a
+// one-query report, and remark text impossible to lose. History accrues
+// FORWARD from deploy (past changes can't be reconstructed). Additive table —
+// no existing data is touched.
+// =====================================================
+model LeadFieldHistory {
+  id          String   @id @default(cuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  field       String // currentStatus | budgetMin | budgetMax | bantStatus | ownerId | followupDate | source | leadOrigin | remarks | …
+  oldValue    String?
+  newValue    String?
+  changedById String?
+  changedBy   User?    @relation("FieldChangedBy", fields: [changedById], references: [id], onDelete: SetNull)
+  changedAt   DateTime @default(now())
+  source      String? // inline-edit | bulk | import | eoi | reject | move | system
+
+  @@index([leadId, changedAt])
+  @@index([changedById, changedAt])
+  @@index([field, changedAt])
+}
+
+// =====================================================
+// IMPORT BATCH — one row per bulk CSV/Excel import. Drives the ADMIN-ONLY
+// Import History screen with per-batch rollback/delete. Stamped onto every NEW
+// lead it creates (Lead.importBatchId) so the whole batch can be soft-deleted,
+// returning the CRM to its pre-import state. SOFT-DELETE only — leads + the
+// batch are marked deleted (reversible), never hard-removed, so the original
+// data is always recoverable. Counts mirror the import response shape.
+// =====================================================
+model ImportBatch {
+  id           String    @id @default(cuid())
+  fileName     String
+  fileSize     Int?
+  sheetName    String?
+  importType   String? // leadOrigin written by the import (ACTIVE/COLD/PORTFOLIO)
+  team         String? // admin force-team (Dubai/India) or null
+  totalRows    Int       @default(0)
+  createdCount Int       @default(0) // brand-new leads stamped with this batch (deletable)
+  updatedCount Int       @default(0) // existing leads updated (deduped) — NOT deletable
+  skippedCount Int       @default(0)
+  errorCount   Int       @default(0)
+  errors       String? // JSON array of the first N error strings
+  importedById String?
+  importedBy   User?     @relation("ImportBatchImporter", fields: [importedById], references: [id], onDelete: SetNull)
+  // Soft-delete / rollback audit trail
+  status       String    @default("ACTIVE") // "ACTIVE" | "DELETED"
+  deletedAt    DateTime?
+  deletedById  String?
+  deletedBy    User?     @relation("ImportBatchDeleter", fields: [deletedById], references: [id], onDelete: SetNull)
+  deleteReason String?
+  createdAt    DateTime  @default(now())
+
+  leads Lead[]
+
+  @@index([importedById])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// =====================================================
+// CONVERSATION MODERATION (Lalit-only) — per-remark visibility overlay + audit.
+// Imported remarks live as text inside Lead.remarks (no per-row table), so each
+// parsed entry is addressed by a stable content hash (remarkParser.remarkKeyFor).
+// RemarkVisibility is an OVERLAY — it never edits the original text (the
+// Super-Admin backup always retains the full original); it only controls who
+// SEES an entry:
+//   • deletedFromView   — soft-deleted from the CRM view (restorable)
+//   • hiddenFromAll     — hidden from every agent (controllers still see it)
+//   • hiddenFromUserIds — CSV of user ids the entry is hidden from (per-agent)
+// =====================================================
+model RemarkVisibility {
+  id                String   @id @default(cuid())
+  leadId            String
+  remarkKey         String // stable hash of the parsed remark (date + text)
+  deletedFromView   Boolean  @default(false)
+  hiddenFromAll     Boolean  @default(false)
+  hiddenFromUserIds String? // CSV of user ids hidden from specific agents
+  hiddenFromTeams   String? // CSV of team names hidden from (e.g. "Dubai,India")
+  reason            String?
+  updatedById       String? // who last changed it (plain id — name looked up)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([leadId, remarkKey])
+  @@index([leadId])
+}
+
+// Append-only audit trail for every conversation-moderation action.
+model RemarkAuditLog {
+  id           String   @id @default(cuid())
+  leadId       String
+  remarkKey    String
+  action       String // HIDE_ALL | UNHIDE_ALL | HIDE_AGENT | UNHIDE_AGENT | DELETE | RESTORE
+  actorId      String? // who performed it
+  actorName    String? // denormalized so the log stays readable if the user is renamed
+  targetUserId String? // for HIDE_AGENT / UNHIDE_AGENT — whom it was hidden from
+  targetName   String?
+  oldState     String? // JSON snapshot of visibility before the action
+  newState     String? // JSON snapshot after
+  reason       String?
+  createdAt    DateTime @default(now())
+
+  @@index([leadId, remarkKey])
+  @@index([leadId])
+  @@index([createdAt])
+}
+
+// =====================================================
+// STICKY NOTES — Per-agent private scratchpad pinned to a lead.
+// One row per (leadId, userId). The body is the agent's private scratch
+// — NEVER expose to other users. Get-or-create on lead-detail render.
+// =====================================================
+model StickyNote {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String   @default("")
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@unique([leadId, userId])
+  @@index([userId])
+}
+
+// =====================================================
+// VAULT — Private agent journal + mood + wins (Phase 3 of CRM master spec §10)
+// PRIVACY: entries are visible ONLY to the owning user. Admin sees aggregate
+// mood/stress counts via a dedicated query that strips text. Never expose
+// `content` to non-owners in any API route or UI.
+// =====================================================
+model VaultEntry {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Type of entry — separate sections in the UI:
+  //   JOURNAL   — daily reflection / general thoughts
+  //   VENT      — frustration / blow-off (can auto-expire if expiresAt set)
+  //   WIN       — celebration / closing / good moment
+  //   LESSON    — insight from a deal / mistake
+  //   GRATITUDE — what they're grateful for today
+  kind         String
+  // Optional mood tag — one of:
+  //   "GREAT" | "OK" | "STRESSED" | "OVERWHELMED" | "ANGRY" | "SAD"
+  mood         String?
+  // Free text. NEVER expose to anyone but the owner.
+  content      String
+  // Optional comma-separated tags (e.g. "client,negotiation,Mehak")
+  tags         String?
+  // Optional self-destruct for vents (NULL = persists forever).
+  expiresAt    DateTime?
+  // AI reflection generated for this entry (cached so the UI doesn't re-prompt).
+  aiReflection String?
+  createdAt    DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId, kind])
+}
+
+// =====================================================
+// PROPERTIES — Project → Unit → Pricing
+// =====================================================
+
+enum ProjectStatus {
+  OFF_PLAN
+  UNDER_CONSTRUCTION
+  READY
+  SOLD_OUT
+}
+
+// Location enrichment cache — City → Country/State results from OpenStreetMap /
+// Nominatim (free, no API key). Curated cityCountry.ts is tried first; this caches
+// the long-tail API lookups so we never re-hit Nominatim for the same city.
+model LocationCache {
+  id        String   @id @default(cuid())
+  cityKey   String   @unique // normalized lowercase city ("greater noida")
+  city      String // verbatim-ish input for reference
+  state     String?
+  country   String // canonical CRM form (UAE / India / Turkey / UK …)
+  source    String   @default("nominatim") // "nominatim" | "manual"
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id           String        @id @default(cuid())
+  slug         String?       @unique // stable key for auto-sync from marketing site
+  name         String
+  developer    String?
+  city         String
+  area         String? // "Dubai Marina" / "Sector 42"
+  country      String        @default("UAE")
+  // Project Master "Status" (owner spec): only ACTIVE projects feed the lead
+  // auto-classifier. Set false to retire a project from routing without deleting
+  // it. Distinct from `status` below (construction stage OFF_PLAN/READY/…).
+  active       Boolean       @default(true)
+  status       ProjectStatus @default(OFF_PLAN)
+  handoverDate DateTime?
+  description  String?
+  brochureUrl  String?
+  imageUrl     String? // hero image scraped from marketing site
+  heroColor    String? // "from-[#0b1a33] to-[#c9a24b]" tailwind gradient
+  rera         String?
+  category     String? // "residential" | "commercial"
+  source       String? // "manual" | "wcr-website" — provenance
+  syncedAt     DateTime? // last time auto-sync touched this row
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  units          Unit[]
+  discussedBy    LeadProject[]
+  interestedInBy LeadInterestedProject[]
+
+  @@index([city])
+  @@index([status])
+}
+
+// Projects DISCUSSED with a lead (different from interestedUnits which pins specific units)
+enum LeadProjectStatus {
+  DISCUSSED // mentioned/sent brochure
+  SHORTLISTED // serious interest
+  SITE_VISITED
+  RULED_OUT
+}
+
+model LeadProject {
+  id           String            @id @default(cuid())
+  leadId       String
+  projectId    String
+  status       LeadProjectStatus @default(DISCUSSED)
+  notes        String?
+  discussedAt  DateTime          @default(now())
+  // Auto-detection source tracking
+  autoDetected Boolean           @default(false)
+  sourceType   String? // "REMARK" | "CALL_NOTE" | "WA_MESSAGE" | "NOTE" | "MANUAL"
+  sourceDate   DateTime?
+  sourceText   String? // ≤200-char excerpt from source text
+  suggestion   Boolean           @default(false) // true = auto-detected, pending accept/reject
+  lead         Lead              @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  project      Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, projectId])
+  @@index([leadId])
+  @@index([projectId])
+}
+
+// "Interested Properties" — a SEPARATE, independent store from LeadProject
+// ("Properties Discussed"). Same project-picker toolkit (search / scan / manual),
+// but its own table so the two lists never affect each other: a client may have
+// discussed 10 projects yet be interested in only 2. Purely additive — no existing
+// query reads or writes LeadProject because of this model.
+model LeadInterestedProject {
+  id           String    @id @default(cuid())
+  leadId       String
+  projectId    String
+  notes        String?
+  autoDetected Boolean   @default(false)
+  sourceType   String? // "REMARK" | "CALL_NOTE" | "WA_MESSAGE" | "NOTE" | "MANUAL"
+  sourceDate   DateTime?
+  sourceText   String? // ≤200-char excerpt from source text
+  suggestion   Boolean   @default(false) // true = auto-detected via Scan, pending accept/reject
+  interestedAt DateTime  @default(now())
+  lead         Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, projectId])
+  @@index([leadId])
+  @@index([projectId])
+}
+
+// Project mentions in lead text that didn't match any known project.
+// Admin/Manager can link to an existing project, create a new one, or ignore.
+model UnmatchedMention {
+  id                String    @id @default(cuid())
+  leadId            String
+  mentionText       String // the project-like phrase extracted from text
+  sourceType        String // "REMARK" | "CALL_NOTE" | "WA_MESSAGE" | "NOTE"
+  sourceDate        DateTime?
+  sourceText        String? // ~150-char excerpt for context
+  resolved          Boolean   @default(false)
+  resolvedProjectId String? // linked Project.id (if admin linked it)
+  resolvedIgnored   Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+
+  @@index([leadId])
+  @@index([resolved])
+}
+
+// Free-text property interest notes — auto-detected from lead text or manually added.
+// Separate from LeadProperty (which requires an actual Unit record).
+// Example: "Client interested in 2BR Business Bay under AED 2M"
+model LeadInterestNote {
+  id            String    @id @default(cuid())
+  leadId        String
+  noteText      String // human-readable interest summary
+  autoDetected  Boolean   @default(false)
+  sourceType    String?
+  sourceDate    DateTime?
+  matchedUnitId String? // set if a specific Unit was found for this interest
+  createdAt     DateTime  @default(now())
+
+  @@index([leadId])
+}
+
+enum UnitStatus {
+  AVAILABLE
+  HOLD
+  BOOKED
+  SOLD
+}
+
+model Unit {
+  id            String     @id @default(cuid())
+  projectId     String
+  project       Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  code          String // "T-B-1804" tower-block-flat
+  configuration String // "2BHK" / "Studio" / "PH"
+  carpetArea    Float? // sqft
+  builtUpArea   Float?
+  floor         Int?
+  view          String?
+  priceBase     Float
+  priceFinal    Float?
+  status        UnitStatus @default(AVAILABLE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  interestedBy LeadProperty[]
+
+  @@unique([projectId, code])
+  @@index([status])
+}
+
+enum LeadInterestType {
+  PRIMARY
+  COMPARE
+  RULED_OUT
+}
+
+model LeadProperty {
+  id        String           @id @default(cuid())
+  leadId    String
+  unitId    String
+  type      LeadInterestType @default(PRIMARY)
+  notes     String?
+  createdAt DateTime         @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, unitId])
+}
+
+// =====================================================
+// ACTIVITIES, CALLS, NOTES, WA MESSAGES
+// =====================================================
+
+enum ActivityType {
+  CALL
+  WHATSAPP
+  EMAIL
+  SITE_VISIT
+  OFFICE_MEETING
+  VIRTUAL_MEETING
+  HOME_VISIT // India team — agent visits client at home
+  EXPO_MEETING // Dubai team — meets prospect at a developer Expo (held in IN cities)
+  COLD_TO_LEAD // Logged when agent promotes a cold-data row to a real lead
+  MEETING // legacy — kept for backwards compatibility
+  TASK
+  NOTE
+  STATUS_CHANGE
+  ASSIGNMENT
+  LEAD_CREATED
+  BROCHURE_SENT
+  PROJECT_DISCUSSED
+  REMINDER_FIRED
+}
+
+enum ActivityStatus {
+  PLANNED
+  DONE
+  OVERDUE
+  CANCELLED
+}
+
+model Activity {
+  id                        String         @id @default(cuid())
+  leadId                    String
+  lead                      Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId                    String?
+  user                      User?          @relation(fields: [userId], references: [id])
+  type                      ActivityType
+  status                    ActivityStatus @default(PLANNED)
+  title                     String
+  description               String?
+  scheduledAt               DateTime?
+  completedAt               DateTime?
+  // ── Smart Timeline edit fields (admin-editable per-entry) ──
+  /// Free-text outcome label for this event (e.g. "Connected", "Site visit done").
+  /// Optional — set when an admin edits the entry or a logger captures an outcome.
+  outcome                   String?
+  /// Per-entry follow-up date. When an admin edits a timeline entry and it maps to
+  /// a follow-up, this is updated AND mirrored onto Lead.followupDate.
+  followupDate              DateTime?
+  /// Follow-up-workflow context token, set on COMPLETE / SNOOZE / ESCALATE /
+  /// FOLLOWUP_DATE_CHANGE action rows so the EOD report can bucket them without
+  /// re-deriving. Format "<action>:<detail>", e.g.
+  ///   "complete:call" | "complete:whatsapp" | "complete:email" | "complete:none"
+  ///   "snooze:contacted" | "snooze:no-contact"
+  ///   "escalate" | "followup-change:contacted" | "followup-change:reason"
+  /// Null on every other (non-workflow) activity. Additive; report-only.
+  actionContext             String?
+  // ── Visit/meeting attendance + live-tracking (SITE_VISIT, OFFICE_MEETING, VIRTUAL_MEETING) ──
+  /// Who actually attended (may differ from `userId`/owner — e.g. agent sent a colleague)
+  attendedByUserId          String?
+  /// Comma-separated user ids of co-attendees (joint visits)
+  additionalAttendees       String?
+  /// Number of times this activity was rescheduled (incremented when scheduledAt changes pre-completion)
+  rescheduledCount          Int            @default(0)
+  /// True if nobody showed up (used in SLA report)
+  isNoShow                  Boolean        @default(false)
+  /// Live-tracking — captured when agent taps "Start Site Visit"
+  startedAt                 DateTime?
+  startedLat                Float?
+  startedLng                Float?
+  endedAt                   DateTime?
+  endedLat                  Float?
+  endedLng                  Float?
+  /// JSON-stringified [{ts, lat, lng}, …] — polled every 60s between Start and End
+  locationTrack             String?
+  /// When the 30-min-before pre-meeting reminder fired (dedupe for the 5-min cron)
+  reminderSentAt            DateTime?
+  /// When the 1-HOUR-before reminder fired (agent + manager) — separate dedupe flag
+  reminderSentAt1h          DateTime?
+  // ── Expo meeting fields (Dubai team — meets prospects at developer expos in IN cities) ──
+  expoCity                  String? // "Gurgaon", "Delhi", "Mumbai", "Bangalore"
+  expoHotel                 String? // venue name
+  expoDeveloper             String? // which developer hosted (Emaar / Sobha / DLF…)
+  expoDeveloperContact      String? // developer's salesperson name we coordinated with
+  expoAgentAttended         Boolean        @default(false) // did our agent travel + attend in person?
+  // ── Dubai site-visit fields (we don't have an office in Dubai, so coordination matters) ──
+  dubaiDeveloperSalesperson String?
+  cabScheduled              Boolean        @default(false)
+  decisionInOffice          Boolean        @default(false) // did client decide on the spot at developer office
+  // ── India travel reimbursement (auto-calculated from distanceKm * per-km rate) ──
+  distanceKm                Float?
+  reimbursementAmount       Float? // INR, computed at log time using Setting.travelPerKmInr
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
+
+  edits ActivityEdit[]
+
+  @@index([leadId])
+  @@index([scheduledAt])
+  @@index([status])
+  @@index([type, completedAt])
+}
+
+// =====================================================
+// ACTIVITY EDIT — append-only audit trail for Smart Timeline edits.
+// When an ADMIN / Super-Admin edits a timeline Activity (date/time/type/outcome/
+// remark text/follow-up), the prior value is preserved here per changed field
+// (old → new + who + when). The Smart Timeline shows the LATEST Activity value;
+// this table retains the full edit history. NO timeline data is ever lost — the
+// entry is updated in place and the prior value is captured here.
+// =====================================================
+model ActivityEdit {
+  id           String   @id @default(cuid())
+  activityId   String
+  activity     Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  leadId       String // denormalized for fast per-lead audit queries
+  field        String // "type" | "outcome" | "description" | "scheduledAt" | "completedAt" | "followupDate"
+  oldValue     String?
+  newValue     String?
+  editedById   String?
+  editedBy     User?    @relation("ActivityEditedBy", fields: [editedById], references: [id], onDelete: SetNull)
+  editedByName String? // denormalized so the log stays readable if the user is renamed
+  createdAt    DateTime @default(now())
+
+  @@index([activityId])
+  @@index([leadId, createdAt])
+  @@index([editedById, createdAt])
+}
+
+enum CallDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CallOutcome {
+  CONNECTED
+  NOT_PICKED
+  CALLBACK
+  WRONG_NUMBER
+  BUSY
+  SWITCHED_OFF
+  INTERESTED
+  NOT_INTERESTED
+}
+
+model CallLog {
+  id                  String        @id @default(cuid())
+  leadId              String?
+  lead                Lead?         @relation(fields: [leadId], references: [id])
+  // Cross-module call linking (telephony layer). A call is auto-linked to a Lead
+  // (incl. Revival/cold leads — they ARE Lead rows) OR a BuyerRecord by phone
+  // fingerprint, so the recording + outcome surface in the RIGHT record's timeline.
+  // Both nullable & additive: a call with no CRM match stays unlinked (Unmatched
+  // Calls Queue). buyerId + leadId are mutually exclusive in practice but not
+  // enforced at the DB level (a number could theoretically be both — lead wins).
+  buyerId             String?
+  buyer               BuyerRecord?  @relation("BuyerCallLogs", fields: [buyerId], references: [id])
+  // Actor = the agent who made/took the call. Nullable (Lalit, 2026-07-01) so an
+  // INBOUND call whose telephony extension can't be matched to a CRM user is left
+  // UNASSIGNED (rendered "Unknown Agent") instead of being falsely stamped with
+  // the lead owner or an admin. A later manual reconciliation sets this + logs a
+  // separate audit event; the original record is never rewritten.
+  userId              String?
+  user                User?         @relation(fields: [userId], references: [id])
+  direction           CallDirection @default(OUTBOUND)
+  phoneNumber         String
+  durationSec         Int?
+  outcome             CallOutcome
+  notes               String?
+  // When a CallLog was created from a MIS-import remark cell, the actual person
+  // who made the call is in the remark text (e.g. "Nitisha: on 16 May..."). The
+  // importer-as-user (often the admin) is wrong for display. Set this column
+  // to the parsed agent name so the call history shows WHO actually called
+  // rather than who imported the sheet.
+  // Null when an agent logs a call live in the UI (user.name is correct then).
+  attributedAgentName String?
+  // IVR-ready fields
+  ivrProvider         String? // "asphone" / "acefone" / "exotel" / null for manual
+  ivrCallId           String?       @unique
+  ivrAccountId        String? // provider Account ID the call belonged to (multi-account setups)
+  recordingUrl        String?
+  startedAt           DateTime      @default(now())
+  endedAt             DateTime?
+  createdAt           DateTime      @default(now())
+
+  @@index([leadId])
+  @@index([userId])
+  @@index([buyerId])
+  @@index([startedAt])
+}
+
+// ── CallEvent — verbatim inbound telephony webhook audit ─────────────────────
+// EVERY provider webhook (AS Phone / Acefone / …) is logged here verbatim BEFORE
+// processing, so a call is never lost even if linking fails, and any event can be
+// replayed. processed flips true once a CallLog was upserted; error holds the last
+// processing failure (also enqueued in CallSyncTask for retry). Provider-agnostic.
+model CallEvent {
+  id             String   @id @default(cuid())
+  provider       String // "asphone" | "acefone" | …
+  providerCallId String? // the provider's call/uuid (for dedup + replay)
+  direction      String? // "inbound" | "outbound"
+  eventType      String? // provider event/status label, verbatim
+  accountId      String? // provider Account ID
+  rawPayload     Json // the ENTIRE webhook body + query, verbatim (audit/replay)
+  processed      Boolean  @default(false)
+  callLogId      String? // the CallLog this event produced/updated (if any)
+  error          String? // last processing error (null once processed)
+  receivedAt     DateTime @default(now())
+
+  @@index([provider, providerCallId])
+  @@index([processed])
+  @@index([receivedAt])
+}
+
+// ── CallSyncTask — telephony retry queue ─────────────────────────────────────
+// Durable at-least-once queue for telephony work that can transiently fail:
+//   WEBHOOK       — a received CallEvent whose linking/record step threw
+//   CLICK_TO_CALL — an outbound dial the provider API rejected (retryable codes)
+//   SYNC          — a reconciliation pull of recent calls from the provider API
+// Drained by /api/telephony/retry (wired into the cron heartbeat). Exponential
+// backoff via nextAttemptAt; gives up after maxAttempts (status=FAILED, surfaced
+// in the admin console). Provider-agnostic; payload is the job-specific input.
+model CallSyncTask {
+  id            String   @id @default(cuid())
+  kind          String // WEBHOOK | CLICK_TO_CALL | SYNC
+  provider      String
+  refId         String? // providerCallId / CallEvent.id / lead|buyer id — job-specific
+  payload       Json // job input (webhook data, dial params, sync cursor…)
+  status        String   @default("PENDING") // PENDING | DONE | FAILED
+  attempts      Int      @default(0)
+  maxAttempts   Int      @default(6)
+  lastError     String?
+  nextAttemptAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, nextAttemptAt])
+  @@index([kind])
+  @@index([provider, refId])
+}
+
+model Note {
+  id            String   @id @default(cuid())
+  leadId        String
+  lead          Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  body          String
+  // Raw speech-to-text transcript for VOICE notes (audit). body holds the
+  // auto-corrected text shown to users; voiceOriginal preserves what was spoken.
+  voiceOriginal String?
+  createdAt     DateTime @default(now())
+
+  @@index([leadId])
+}
+
+enum WAMessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+model WhatsAppMessage {
+  id            String             @id @default(cuid())
+  leadId        String?
+  lead          Lead?              @relation(fields: [leadId], references: [id])
+  phoneNumber   String
+  direction     WAMessageDirection
+  body          String
+  templateId    String?
+  providerMsgId String?            @unique
+  // ── Actor attribution (Lalit, 2026-07-01) ──
+  // Who actually SENT an OUTBOUND message. Nullable: INBOUND messages have no
+  // actor (the client sent them → rendered "Client"), and automation-sent
+  // outbound (after-hours welcome, speed-to-lead) has no human actor →
+  // rendered "System". A human agent send stamps their session user id here.
+  // The timeline NEVER derives the sender from the lead owner.
+  actorUserId   String?
+  actor         User?              @relation("WAMessageActor", fields: [actorUserId], references: [id])
+  receivedAt    DateTime           @default(now())
+
+  @@index([phoneNumber])
+  @@index([leadId])
+  @@index([actorUserId])
+}
+
+// =====================================================
+// ASSIGNMENT HISTORY (for distribution audit)
+// =====================================================
+
+model Assignment {
+  id         String   @id @default(cuid())
+  leadId     String
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  reason     String? // "round-robin" / "manual" / "rule:dubai"
+  assignedAt DateTime @default(now())
+
+  @@index([leadId])
+  @@index([userId])
+}
+
+// =====================================================
+// AUDIT LOG
+// =====================================================
+
+// ──────────────────────────────────────────────────────────
+// DAILY MOOD — end-of-day check-in (optional, max one per agent per day)
+// Drives: team-mood widget for admin + culture trend over time.
+// ──────────────────────────────────────────────────────────
+enum Mood {
+  FRUSTRATING // 😣
+  NOT_GREAT // 🙁
+  MIXED // 😐
+  LOOKS_GOOD // 🙂
+  AWESOME // 😍
+}
+
+model DailyMood {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date // truncated to day
+  mood      Mood
+  comment   String? // optional follow-up answer
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([date])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String // "lead.create", "lead.assign", "user.invite"
+  entity    String // "Lead" / "User" / ...
+  entityId  String?
+  meta      String? // JSON-stringified extras (SQLite has no JSON type)
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+// =====================================================
+// DEVICE SECURITY — trusted-device binding + sessions
+// =====================================================
+
+model Device {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId     String // client-generated UUID kept in the browser's localStorage
+  name         String // e.g. "Mehak – Chrome Windows" / "Mehak – iPhone"
+  type         String        @default("desktop") // mobile | desktop | tablet
+  browser      String?
+  os           String?
+  firstIp      String?
+  lastIp       String?
+  lastCity     String?
+  lastCountry  String?
+  status       String        @default("PENDING") // PENDING | APPROVED | BLOCKED
+  approvedById String?
+  approvedBy   User?         @relation("DeviceApprover", fields: [approvedById], references: [id])
+  approvedAt   DateTime?
+  createdAt    DateTime      @default(now())
+  lastSeenAt   DateTime      @default(now())
+  sessions     UserSession[]
+
+  @@unique([userId, deviceId])
+  @@index([userId])
+  @@index([status])
+}
+
+model UserSession {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceRef     String? // Device.id
+  device        Device?   @relation(fields: [deviceRef], references: [id], onDelete: SetNull)
+  ip            String?
+  city          String?
+  country       String?
+  userAgent     String?
+  createdAt     DateTime  @default(now()) // login time
+  lastActiveAt  DateTime  @default(now())
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  revokedReason String?
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+}
+
+// =====================================================
+// INTAKE API KEYS (for website + WhatsApp webhooks)
+// =====================================================
+
+model IntakeKey {
+  id        String     @id @default(cuid())
+  label     String
+  key       String     @unique
+  source    LeadSource
+  active    Boolean    @default(true)
+  hrScope   Boolean    @default(false) // true = authorizes the HR intake endpoint (/api/intake/hr), not Sales
+  createdAt DateTime   @default(now())
+  lastUsed  DateTime?
+}
+
+// =====================================================
+// SETTINGS (singleton key-value)
+// =====================================================
+
+model Setting {
+  key   String @id
+  value String
+}
+
+// ──────────────────────────────────────────────────────────
+// MESSAGE TEMPLATES — WhatsApp + Email library with placeholders.
+// Placeholders auto-substituted at send time:
+//   {{name}}      → lead first name
+//   {{fullname}}  → lead full name
+//   {{agent}}     → sender's first name
+//   {{project}}   → first interested project name (if any)
+//   {{budget}}    → formatted budget min (e.g. "AED 2.5M")
+//   {{phone}}     → lead phone (E.164)
+// Trigger lets the picker auto-suggest the right template for the stage.
+// ──────────────────────────────────────────────────────────
+enum TemplateKind {
+  WHATSAPP
+  EMAIL
+}
+
+enum TemplateTrigger {
+  FIRST_QUERY // brand-new lead, first ever contact
+  AFTER_CALL // just had a call, sending follow-up
+  AFTER_NOT_PICKED // 1+ missed-call attempts, re-engage
+  SCHEDULE_VISIT // book a site visit
+  POST_VISIT // after the site visit
+  NEGOTIATION // discussing price / payment plan
+  REENGAGE_COLD // dormant for weeks, fresh nudge
+  GENERIC // catch-all
+}
+
+model Template {
+  id          String          @id @default(cuid())
+  kind        TemplateKind
+  name        String
+  trigger     TemplateTrigger @default(GENERIC)
+  subject     String? // only used for EMAIL
+  body        String          @db.Text
+  active      Boolean         @default(true)
+  // Whether HR (recruiters) may see this template in their WhatsApp/email pickers.
+  // Templates are a shared pool with Sales; this gates Sales-only templates out of the
+  // HR UI (audit #41). Defaults true so existing behaviour is preserved; an admin can
+  // untick it to hide a Sales-only template from HR.
+  visibleToHr Boolean         @default(true)
+  createdById String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([kind, active])
+  @@index([trigger])
+}
+
+// ──────────────────────────────────────────────────────────
+// SAVED FILTERS — named views on /leads. Store the URL query string
+// (e.g. "ai=HOT&team=Dubai") and re-apply with one click. Shared filters
+// visible to whole team; private ones only to the creator.
+// ──────────────────────────────────────────────────────────
+model SavedFilter {
+  id          String   @id @default(cuid())
+  name        String
+  queryString String   @db.Text // e.g. "ai=HOT&team=Dubai&sort=touched_asc"
+  icon        String? // emoji, e.g. "🔥"
+  createdById String? // null = system seed (visible to all, only admin can delete)
+  isShared    Boolean  @default(true) // visible to whole team if true
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([createdById])
+  @@index([isShared, sortOrder])
+}
+
+// ──────────────────────────────────────────────────────────
+// WORKFLOW ENGINE — Zoho-style rules + drip campaigns.
+//
+// A Workflow has one TRIGGER + an ordered list of ACTIONS. When the trigger
+// fires for a lead, the engine queues every action (some immediate, some
+// delayed). A delayed action waits until its `runAt` time, then a cron sweep
+// dispatches it. WorkflowRun rows track which workflow×lead pairs have already
+// fired (idempotency) plus pending vs done state for delayed actions.
+// ──────────────────────────────────────────────────────────
+enum WorkflowTrigger {
+  LEAD_CREATED // new lead intake
+  STATUS_CHANGED // lead.status moved
+  BANT_CHANGED // BANT verdict set (Qualifies / Not qualified)
+  STAGE_TIME // X minutes in a specific stage
+  NO_CONTACT_DAYS // No call/WA/email in N days
+  NOT_PICKED_STREAK // N consecutive NOT_PICKED outcomes
+  COLD_PROMOTED // Cold-data → Lead promotion
+}
+
+enum WorkflowActionType {
+  SEND_WA // Send WhatsApp template (config.templateId)
+  SEND_EMAIL // Send email template (config.templateId)
+  CREATE_TASK // Create planned Activity for the owner (config: title, dueInMinutes)
+  NOTIFY_ADMIN // In-app + email notification to Admin/Manager
+  NOTIFY_OWNER // In-app notification to lead's owner
+  SET_FIELD // Set Lead field (config: field, value)
+  ADD_TAG // Append to Lead.tags (config: tag)
+}
+
+enum WorkflowRunStatus {
+  PENDING // queued, waiting for runAt
+  RUNNING
+  DONE
+  FAILED
+  SKIPPED // condition no longer met when dispatcher ran
+}
+
+model Workflow {
+  id            String          @id @default(cuid())
+  name          String
+  description   String?
+  trigger       WorkflowTrigger
+  triggerConfig String?         @db.Text // JSON — { status?: "NEW", days?: 7, etc. }
+  /// "Only fire if lead matches this query string" — e.g. "team=Dubai&ai=HOT"
+  /// Empty = applies to every lead.
+  filterQuery   String?
+  active        Boolean         @default(true)
+  createdById   String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  actions WorkflowAction[]
+  runs    WorkflowRun[]
+
+  @@index([trigger, active])
+}
+
+model WorkflowAction {
+  id            String             @id @default(cuid())
+  workflowId    String
+  workflow      Workflow           @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  sequenceOrder Int                @default(0)
+  type          WorkflowActionType
+  config        String             @db.Text // JSON
+  /// 0 = run immediately. >0 = schedule for runAt = trigger time + delayMinutes.
+  delayMinutes  Int                @default(0)
+
+  runs WorkflowRun[]
+
+  @@index([workflowId, sequenceOrder])
+}
+
+model WorkflowRun {
+  id         String            @id @default(cuid())
+  workflowId String
+  workflow   Workflow          @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  actionId   String? // null = the "trigger fired" master row (one per workflow+lead+triggerEvent)
+  action     WorkflowAction?   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  leadId     String
+  status     WorkflowRunStatus @default(PENDING)
+  runAt      DateTime // when to dispatch this action (now() for immediate, future for delayed)
+  startedAt  DateTime?
+  finishedAt DateTime?
+  error      String?           @db.Text
+  /// Idempotency dedupe key — same trigger+lead+actionId should never fire twice.
+  /// Built like "<workflowId>:<leadId>:<actionId>:<eventTs>" for delays, or "<workflowId>:<leadId>" for once-only.
+  dedupeKey  String            @unique
+  createdAt  DateTime          @default(now())
+
+  @@index([status, runAt])
+  @@index([leadId])
+}
+
+// =====================================================
+// NOTIFICATIONS — in-app bell + per-user inbox
+// =====================================================
+
+enum NotifKind {
+  LEAD_ASSIGNED // your lead arrived
+  LEAD_DUPLICATE // an existing lead re-contacted
+  CALL_SLA_BREACH // 15 min passed, no call logged
+  AUTO_ASSIGN_FIRED // 5 min, admin didn't assign — auto-assigned
+  REMINDER // generic follow-up reminder
+  SYSTEM // info / settings change
+  LUNCH_REMINDER // soft lunch-break reminder (2:00 / 2:25 PM IST)
+  AGENT_STATUS // field-movement check-in (I'm here / meeting / site visit) → manager
+  BUYER_ASSIGNED // a Buyer-Data record was assigned/transferred to you (≠ a lead)
+  BUYER_CONVERTED // a buyer was converted into a real Lead
+  BUYER_RETURNED // a buyer was returned to the Admin Buyer Pool (manual reject OR auto-5-attempts)
+}
+
+enum NotifSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model Notification {
+  id           String        @id @default(cuid())
+  userId       String // recipient
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind         NotifKind
+  severity     NotifSeverity @default(INFO)
+  title        String
+  body         String?
+  linkUrl      String? // where clicking it takes you (e.g. /leads/abc)
+  leadId       String? // optional related lead
+  // Source tracking — EVERY notification traces to a real record (notify() requires
+  // it). Nullable only for the historical rows that predate this; new rows always set
+  // sourceType. sourceId = the exact backing record; createdById = who/what fired it.
+  sourceType   String? // NotifSourceType (see src/lib/notifSource.ts)
+  sourceId     String? // the backing record id (Activity / Lead / CallLog / Device …)
+  createdById  String? // user behind the source event, or null for a system/cron job
+  readAt       DateTime? // null = unread
+  // When set + in the future, the notification is hidden from the inbox until that time.
+  // Cleared automatically by simply letting the timestamp pass (no cron needed — queries
+  // filter `snoozedUntil > now`).
+  snoozedUntil DateTime?
+  createdAt    DateTime      @default(now())
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+}
+
+// =====================================================
+// WEB PUSH — browser push notifications to phone / desktop
+// =====================================================
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String // who is subscribed
+  endpoint  String   @unique // browser-issued URL
+  p256dh    String // encryption pubkey
+  authKey   String // auth secret
+  userAgent String? // for debugging which device
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// =====================================================
+// CUSTOM FIELDS — admin can add new fields per entity, no code
+// =====================================================
+
+enum CustomFieldKind {
+  TEXT
+  TEXTAREA
+  NUMBER
+  DATE
+  SELECT
+  CHECKBOX
+}
+
+enum CustomFieldEntity {
+  LEAD
+  PROJECT
+}
+
+model CustomField {
+  id        String             @id @default(cuid())
+  entity    CustomFieldEntity
+  key       String
+  label     String
+  kind      CustomFieldKind    @default(TEXT)
+  options   String?
+  required  Boolean            @default(false)
+  position  Int                @default(0)
+  active    Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  values    CustomFieldValue[]
+
+  @@unique([entity, key])
+}
+
+model CustomFieldValue {
+  id       String      @id @default(cuid())
+  fieldId  String
+  field    CustomField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  entityId String
+  value    String
+
+  @@unique([fieldId, entityId])
+  @@index([entityId])
+}
+
+// =====================================================
+// AGENT TARGETS — daily call/meeting/booking targets
+// =====================================================
+
+enum TargetMetric {
+  CALLS // total dial-outs
+  CONNECTED_CALLS
+  SITE_VISITS
+  MEETINGS // legacy — kept for back-compat
+  VIRTUAL_MEETINGS
+  F2F_MEETINGS // office + site combined (in-person)
+  FRESH_CLIENTS // new leads created (or cold→lead promotions)
+  DEALS_CLOSED // count of WON
+  REVENUE_AED // sum of won deals in AED
+  REVENUE_INR
+  BOOKINGS
+}
+
+model Target {
+  id        String       @id @default(cuid())
+  userId    String?
+  team      String?
+  metric    TargetMetric
+  value     Float
+  period    String       @default("DAILY")
+  startDate DateTime     @default(now())
+  endDate   DateTime?
+
+  @@index([userId, metric, period])
+  @@index([team, metric, period])
+}
+
+// =====================================================
+// AGENT ATTENDANCE — login/logout tracking
+// =====================================================
+
+model AttendanceLog {
+  id        String    @id @default(cuid())
+  userId    String
+  loginAt   DateTime  @default(now())
+  logoutAt  DateTime?
+  ip        String?
+  userAgent String?
+
+  @@index([userId, loginAt])
+}
+
+// Daily attendance — drives round-robin (only PRESENT/LATE agents get leads).
+// One row per agent per day. Auto-set on first login (PRESENT if before 10:30am,
+// LATE after), can be admin-overridden.
+enum AttendanceStatus {
+  PRESENT // logged in by 10:30am
+  LATE // logged in 10:30am-7pm
+  ABSENT // never logged in (or admin marked)
+  ON_LEAVE // admin marked — planned leave
+}
+
+model Attendance {
+  id              String           @id @default(cuid())
+  userId          String
+  date            DateTime         @db.Date
+  status          AttendanceStatus @default(PRESENT)
+  markedAt        DateTime         @default(now())
+  markedBy        String? // null = self-mark / auto, else admin userId
+  notes           String?
+  // ── "I am here" agent self-check-in (distinct from the login auto-mark) ──
+  // Set when the agent taps the "I'm here" button on their dashboard. The card
+  // shows until this is set, then hides for the rest of the IST day; a new date
+  // row next day resets it. checkInIp / checkInDevice captured at that tap.
+  selfCheckedInAt DateTime?
+  checkInIp       String?
+  checkInDevice   String?
+
+  @@unique([userId, date])
+  @@index([date])
+}
+
+// =====================================================
+// AGENT FIELD-MOVEMENT STATUS — agents tap a button on their phone to log
+// where they are: arrived / left office / going-or-back-from a meeting or
+// site visit. Manager (Lalit) is notified on every event, with the duration
+// computed on the "Returned" tap. Distinct from Attendance (1 row/day, drives
+// round-robin); this is an append-only event log (many rows/day).
+//
+// PAIR MODEL — start/end events are linked on the row that CLOSES them:
+//   • A "Going …" event is created OPEN (endedAt = null, durationMin = null).
+//   • The matching "Returned …" event is created CLOSED at the same instant
+//     (endedAt = startedAt) AND back-fills the open "Going" row's endedAt +
+//     durationMin (so the opening row carries the duration too, and is no
+//     longer "open"). The "Returned" row stores the same durationMin + a
+//     pairedEventId pointing back at the "Going" row it closed.
+//   • HERE / LEAVING_OFFICE are standalone point events (always closed,
+//     durationMin = null).
+// "Currently OUT" = a GOING_* row with endedAt IS NULL.
+// =====================================================
+enum AgentStatusKind {
+  HERE // "I Am Here" — arrival / check-in (also marks Attendance self-check-in)
+  LEAVING_OFFICE // left the office for the day
+  GOING_MEETING // heading out to a meeting (start)
+  RETURNED_MEETING // back from the meeting (end → duration)
+  GOING_SITE_VISIT // heading out to a site visit (start)
+  RETURNED_SITE_VISIT // back from the site visit (end → duration)
+}
+
+model AgentStatusEvent {
+  id            String          @id @default(cuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        AgentStatusKind
+  startedAt     DateTime        @default(now())
+  endedAt       DateTime? // set on the closing ("Returned") row AND back-filled onto the opening ("Going") row
+  durationMin   Int? // minutes between the Going start and the Returned tap (on both paired rows)
+  pairedEventId String? // on a "Returned" row → the id of the "Going" row it closed
+  note          String?
+  createdAt     DateTime        @default(now())
+
+  // SV-2 stale-watch (heartbeat): dedup state for "your site visit is still active"
+  // reminders on an open GOING_* row — nudged at 2h/4h, escalated once to Requires-
+  // Review at 6h. Existing rows default to 0 / false (unwatched).
+  staleRemindersSent  Int       @default(0)
+  staleReviewFlagged  Boolean   @default(false)
+  staleLastRemindedAt DateTime?
+
+  @@index([userId, createdAt])
+  @@index([userId, status])
+  @@index([userId, status, endedAt]) // fast "open Going event for this user" lookup
+}
+
+// =====================================================
+// CRON RUN — per-execution health log for /api/cron/* jobs
+// Lets admins (and Lalit's helpers) verify each scheduled job ran
+// today on the /admin/cron-health page.
+// =====================================================
+model CronRun {
+  id         String    @id @default(cuid())
+  name       String // e.g. "morning-reminder"
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  status     String // "OK" | "ERROR" | "RUNNING"
+  error      String?
+  meta       String? // JSON string for extra context
+
+  @@index([name, startedAt])
+}
+
+// =====================================================
+// AI TRIAL MODE + USAGE TRACKING
+// (AI kill-switch / trial-before-full-run spec — Lalit 2026-06-03)
+//
+// Before AI is unleashed on the full ~25k-lead DB it is piloted on a small,
+// admin-selected sample so we can judge output quality + real token cost first.
+//   • AiTrialRun  — one pilot batch: selection, live progress, cost aggregates.
+//   • AiTrialItem — one (lead × feature) result inside a run, kept for manual
+//                   quality review and for the "clear trial outputs" control.
+//   • AiUsageLog  — every REAL provider call (trial or live); the source of
+//                   truth for the AI usage/cost dashboard. Written ONLY when an
+//                   actual API request is sent (never on page load / cached read).
+// All additive. The global kill-switch + trial-mode flags live in Setting
+// (keys "ai.enabled" / "ai.trialMode.enabled"), NOT here.
+// =====================================================
+enum AiTrialStatus {
+  DRAFT // created + cost-estimated, awaiting admin confirm
+  RUNNING
+  PAUSED // admin paused — completed items kept, resumable
+  STOPPED // admin stopped — partial results kept, NOT auto-resumed
+  DONE
+  FAILED
+}
+
+model AiTrialRun {
+  id              String        @id @default(cuid())
+  status          AiTrialStatus @default(DRAFT)
+  // ── selection ──
+  sampleSize      Int // 10 / 25 / 50 / 100 (or custom)
+  team            String? // "India" | "Dubai" | null = all teams
+  source          String? // Lead.source filter | null = any source
+  features        String // CSV of feature keys: summary,score,nextAction,waDraft,coldRevival,propertyMatch
+  // ── provider snapshot (captured at run start) ──
+  provider        String? // "gemini" | "anthropic"
+  model           String? // resolved model id
+  // ── live progress ──
+  totalLeads      Int           @default(0)
+  processed       Int           @default(0)
+  failed          Int           @default(0)
+  // ── usage / cost (tokens as ints; cost in MICRO-USD to avoid float drift) ──
+  inputTokens     Int           @default(0)
+  outputTokens    Int           @default(0)
+  estCostMicroUsd Int? // pre-run estimate shown for confirmation
+  costMicroUsd    Int           @default(0) // actual accumulated
+  totalMs         Int           @default(0) // summed processing time
+  // ── control / audit ──
+  createdById     String? // admin who created it (User.id; no FK so history survives user removal)
+  confirmedAt     DateTime? // admin confirmed the estimate → allowed to run
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  qualityNote     String? // admin's post-review notes (good / bad / too generic / …)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  items           AiTrialItem[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AiTrialItem {
+  id           String     @id @default(cuid())
+  runId        String
+  run          AiTrialRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  leadId       String // Lead.id (no FK — a deleted lead must not block trial history)
+  feature      String // which feature this row is for
+  status       String // "PENDING" | "DONE" | "FAILED" | "SKIPPED"
+  inputTokens  Int        @default(0)
+  outputTokens Int        @default(0)
+  costMicroUsd Int        @default(0)
+  ms           Int? // processing time for this item
+  output       String? // generated text, kept for manual quality review
+  error        String?
+  createdAt    DateTime   @default(now())
+
+  @@index([runId])
+  @@index([leadId])
+}
+
+model AiUsageLog {
+  id           String   @id @default(cuid())
+  provider     String // "gemini" | "anthropic"
+  model        String
+  feature      String? // logical feature: "score" | "summary" | "chat" | "trial" | …
+  leadId       String? // when tied to a specific lead
+  trialRunId   String? // when part of a trial run
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  costMicroUsd Int      @default(0)
+  ms           Int?
+  ok           Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([feature])
+}
+
+// ── AI COPILOT PILOT — GPT-4.1-mini per-lead analysis (Lalit's leads only) ──
+// AiAnalysis: one row per "Analyze Lead" / "Re-analyze" click.
+// resultJson stores the full structured JSON from GPT (see ai-openai.ts for schema).
+// NEVER modifies CRM fields automatically — output is always suggestion-only.
+model AiAnalysis {
+  id            String   @id @default(cuid())
+  leadId        String
+  triggeredBy   String   @default("manual") // "manual" | "re-analyze"
+  triggeredById String? // User.id who clicked (no FK — admin removal must not cascade)
+  resultJson    String   @db.Text // serialised AiAnalysisResult JSON
+  model         String   @default("gpt-4.1-mini")
+  inputTokens   Int      @default(0)
+  outputTokens  Int      @default(0)
+  costMicroUsd  Int      @default(0)
+  ok            Boolean  @default(true)
+  error         String?
+  createdAt     DateTime @default(now())
+
+  feedbacks AiSuggestionFeedback[]
+
+  @@index([leadId, createdAt])
+}
+
+// One row per Accept/Edit/Reject action on an AI-suggested field value.
+// Builds the "AI Learning Layer" — Lalit's corrections inform prompt improvement.
+model AiSuggestionFeedback {
+  id          String     @id @default(cuid())
+  analysisId  String
+  analysis    AiAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  leadId      String
+  fieldName   String // "budget" | "authority" | "meetingStatus" | "nextAction" | …
+  aiValue     String     @db.Text // what GPT suggested
+  action      String // "ACCEPT" | "EDIT" | "REJECT"
+  editedValue String?    @db.Text // if EDIT, the corrected value
+  userId      String? // who acted
+  createdAt   DateTime   @default(now())
+
+  @@index([analysisId])
+  @@index([leadId])
+  @@index([fieldName, action])
+}
+
+// ── AI EXTRACTION — per-lead structured field extraction ─────────────────
+// Each row is one extraction run (triggered manually or after an activity).
+// resultJson holds a serialised AIExtractionResult so the schema stays stable
+// as extracted fields evolve. Auto-apply is gated by the Setting key
+// "ai.extraction.autoApply" (default "false") so Lalit can review quality
+// on 20 sample leads before enabling batch auto-fill.
+model AiExtraction {
+  id           String   @id @default(cuid())
+  leadId       String
+  resultJson   String   @db.Text // serialised AIExtractionResult JSON
+  triggeredBy  String   @default("manual") // call_log|wa_message|voice_note|meeting_note|import|manual
+  provider     String?
+  model        String?
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  costMicroUsd Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([leadId, createdAt])
+}
+
+// ── Customer Intelligence System (pre-assignment check) ───────────────────
+// Master customer profile consolidating identity across all data sources.
+// Created/updated when a STRONG match is confirmed.
+model CustomerProfile {
+  id               String    @id @default(cuid())
+  name             String
+  primaryPhone     String?
+  secondaryPhone   String?
+  whatsappPhone    String?
+  email            String?
+  city             String?
+  company          String?
+  isInvestor       Boolean?
+  totalProperties  Int       @default(0)
+  totalTxValueAed  Int       @default(0)
+  previousProjects String    @default("[]") // JSON string[]
+  previousAgents   String    @default("[]") // JSON string[]
+  firstSeenAt      DateTime  @default(now())
+  lastInteractedAt DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  matches   IntelligenceMatch[]
+  portfolio PropertyPortfolio[]
+
+  @@index([primaryPhone])
+  @@index([email])
+  @@index([name])
+}
+
+enum MatchType {
+  STRONG
+  MEDIUM
+  WEAK
+  NONE
+}
+
+// One per Lead — pre-assignment intelligence check result.
+// Populated BEFORE round-robin / SLA / automation runs.
+// leadId is a loose string reference (no FK) — no cascades needed.
+model IntelligenceMatch {
+  id        String           @id @default(cuid())
+  leadId    String?          @unique
+  profileId String?
+  profile   CustomerProfile? @relation(fields: [profileId], references: [id])
+
+  matchType            MatchType @default(NONE)
+  confidence           Int       @default(0) // 0–100
+  matchedBy            String    @default("[]") // JSON [{field,value,source,recordId}]
+  historyJson          String    @default("[]") // JSON full previous timeline
+  previousAgentName    String?
+  previousStatus       String?
+  lastContactAt        DateTime?
+  totalRecordsFound    Int       @default(0)
+  totalPropertiesFound Int       @default(0)
+
+  // Project-to-project comparison
+  projectMatch String? // "SAME_PROJECT" | "DIFFERENT_PROJECT" | "EXISTING_BUYER"
+  projectNote  String?
+
+  // AI summary (generated after match when AI enabled)
+  aiSummary         String?
+  suggestedApproach String?
+  aiCheckedAt       DateTime?
+
+  checkedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([profileId])
+}
+
+// Imported property buyer / investor records (Section 11 columns).
+// Phone-matched to CustomerProfile on import.
+model PropertyPortfolio {
+  id        String           @id @default(cuid())
+  profileId String?
+  profile   CustomerProfile? @relation(fields: [profileId], references: [id])
+
+  date                DateTime?
+  project             String
+  tower               String?
+  unit                String?
+  bedrooms            String?
+  transactionValueAed Int?
+  actualSizeSqft      Int?
+  ownerName           String
+  primaryPhone        String?
+  secondaryPhone      String?
+  agentName           String?
+  status              String?
+  followUpDate        DateTime?
+  remarks             String?
+  importSource        String?
+
+  createdAt DateTime @default(now())
+
+  @@index([primaryPhone])
+  @@index([ownerName])
+  @@index([project])
+}
+
+// =====================================================
+// HR RECRUITMENT MODULE
+// =====================================================
+
+enum HRCandidateStatus {
+  NEW
+  NOT_CALLED
+  PIPELINE
+  VIRTUAL_INTERVIEW_SCHEDULED
+  HR_INTERVIEW_COMPLETED
+  FINAL_INTERVIEW_SCHEDULED
+  FINAL_INTERVIEW_COMPLETED
+  SHORTLISTED
+  OFFER_RELEASED
+  JOINED
+  HOLD
+  NOT_INTERESTED
+  NOT_SUITABLE
+  HIGH_SALARY
+  OTHER_PROFILE
+  REJECTED
+  OFFER_DECLINED
+  WRONG_NUMBER
+  SWITCH_OFF
+  NEVER_RESPONSE
+  NOT_RESPONDING
+  // Added per HR CRM final spec (NEVER_RESPONSE / NOT_INTERESTED / *_COMPLETED kept for legacy records)
+  INTERESTED
+  INVALID_NUMBER
+  F2F_INTERVIEW_SCHEDULED
+  INTERVIEW_HELD
+  NO_SHOW
+  EXPECTED_JOINING
+  FRESHER
+  CLOSED
+}
+
+enum HRActivityType {
+  CALL_CONNECTED
+  CALL_NOT_ANSWERED
+  CALL_BUSY
+  CALL_SWITCHED_OFF
+  CALL_WRONG_NUMBER
+  CALL_LATER
+  WHATSAPP_SENT
+  WHATSAPP_RECEIVED
+  EMAIL_LOGGED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_ATTENDED
+  INTERVIEW_NO_SHOW
+  INTERVIEW_RESCHEDULED
+  OFFER_RELEASED
+  OFFER_DECLINED
+  CANDIDATE_JOINED
+  FOLLOWUP_CREATED
+  FOLLOWUP_COMPLETED
+  STATUS_CHANGED
+  NOTE_ADDED
+  RESUME_UPLOADED
+  VOICE_NOTE
+  VOICE_GUIDANCE
+  ESCALATION_RAISED
+  ESCALATION_REPLIED
+  ESCALATION_RESOLVED
+}
+
+enum HRInterviewType {
+  VIRTUAL
+  HR
+  FINAL
+  FACE_TO_FACE
+}
+
+enum HRConfirmStatus {
+  PENDING
+  CONFIRMED
+  NOT_CONFIRMED
+  NOT_REACHABLE
+  RESCHEDULED
+  CANCELLED
+}
+
+enum HRAttendStatus {
+  SCHEDULED
+  ARRIVED      // candidate has arrived / checked in (audit #61)
+  LATE         // arrived but late
+  IN_PROGRESS  // interview underway
+  ATTENDED
+  NO_SHOW
+  RESCHEDULED
+  CANCELLED
+}
+
+enum HRFollowUpType {
+  CALL_BACK
+  INTERVIEW_CONFIRMATION
+  REMINDER
+  WHATSAPP_FOLLOWUP
+  EMAIL_FOLLOWUP
+  SALARY_DISCUSSION
+  OFFER_DISCUSSION
+  JOINING_FOLLOWUP
+  NO_SHOW_RECOVERY
+  CUSTOM
+}
+
+model HRCandidate {
+  id                   String            @id @default(cuid())
+  name                 String
+  phone                String?
+  whatsappPhone        String?
+  email                String?
+  location             String? // "Location"
+  currentCompany       String? // "Present Company"
+  currentProfile       String? // "Designation"
+  experience           String? // "Total Exp (Yrs)"
+  realEstateExperience String? // "Real estate Experience"
+  currentSalary        Float?
+  expectedSalary       Float?
+  noticePeriod         String? // "Notice Period (Days)"
+  source               String? // "Source Portal"
+  status               HRCandidateStatus @default(NEW)
+  remarks              String? // "Remarks / Notes"
+  nextActionDate       DateTime? // "Follow Up Date"
+  primaryOwnerId       String?
+  secondaryOwnerId     String?
+  // phone||email dedup fingerprint (same logic as Lead)
+  fingerprint          String?           @unique
+  // The bulk import batch that created this candidate — drives Import History
+  // "Delete this batch" (removes the candidate + cascaded workflow records).
+  importBatchId        String?
+  importBatch          HRImport?         @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  primaryOwner   User?            @relation("HRPrimary", fields: [primaryOwnerId], references: [id])
+  secondaryOwner User?            @relation("HRSecondary", fields: [secondaryOwnerId], references: [id])
+  activities     HRActivity[]
+  remarkEntries  HRRemark[] // conversation-thread remarks (multiple HR can log against one candidate) — see HRRemark
+  interviews     HRInterview[]
+  followUps      HRFollowUp[]
+  resumes        HRResume[]
+  applications   HRApplication[] // every website/form submission (re-applies append here)
+  voiceMessages  HRVoiceMessage[]
+  escalations    HREscalation[]
+
+  // Soft-delete (recycle bin / import rollback) — scoped queries hide deletedAt != null.
+  deletedAt      DateTime?
+
+  // ── Recruiting scorecard (from the HR Data workbook) ────────────────────────
+  // All kept as free-text String? so messy real-world spreadsheet values import
+  // cleanly (ratings like "Good"/"7/10", "Yes"/"No", "₹50k", partial dates…).
+  // Experience breakdown
+  salesExperience      String? // Sales Exp (Yrs)
+  callingExperience    String? // Calling Exp (Yrs)
+  altEmail             String? // secondary "E-Mail" column
+  // Screening / process flags
+  sopMet               String? // SOP Requirement Met?
+  contactedBy          String? // recruiter who first contacted (Contacted By)
+  inviteMailSent       String? // F2F Invite Mail Sent?
+  candidateAcknowledged String? // Candidate Acknowledged?
+  arrivedOnTime        String? // Arrived on Time?
+  // F2F interview assessment scorecard
+  scorePersonality     String?
+  scoreConfidence      String?
+  scoreCommunication   String?
+  scoreBehaviour       String?
+  scoreGrasping        String? // Grasping Power
+  scoreListening       String? // Listening Ability
+  scoreNegotiation     String? // Negotiation Ability
+  scoreCultureFit      String? // Culture Fit
+  // Sales track record
+  highestProductSold   String?
+  dealValue            String? // Deal Value (₹)
+  avgIncentive         String? // Avg Monthly Incentive
+  incentiveConsistent  String? // Incentive Consistent?
+  callsPerDay          String?
+  connectedCallsPerDay String? // Connected Calls/Day
+  lastSaleDate         String? // Last Sale Date (kept as text — imported values vary)
+  // HR outcome
+  hrDecision           String?
+  hrDetailedRemarks    String? @db.Text
+  finalStatus          String? // "Lalit Sir Final Status"
+
+  // Verbatim recruiter-entered status from the source sheet/intake, BEFORE
+  // categorizeStatus() maps it to a canonical bucket — so the exact original label
+  // is never lost (hrStatus.displayStatus reads this). Audit finding #23.
+  originalStatus       String?
+  // Joining dates: expected (offer/EXPECTED_JOINING) vs actual (JOINED). Enables
+  // "Joining Today" tiles + auto-join. Audit findings #58/#65.
+  expectedJoiningDate  DateTime?
+  actualJoiningDate    DateTime?
+  // Structured reason captured when a candidate is rejected/declined (audit #111),
+  // so rejection reporting is possible. Free-text key from a fixed UI list (hrReasons.ts).
+  rejectionReason      String?
+  // Compensation currency (INR / AED) — the business also serves the UAE market, so
+  // salary can't be hardcoded to ₹. Defaults INR. Audit #137.
+  salaryCurrency       String   @default("INR")
+  // Offer management (audit #64) — the offer used to be a bare status flip. These
+  // capture the actual offer terms + acceptance so offer reporting is meaningful.
+  offeredSalary        Float?
+  offerDate            DateTime?
+  proposedJoiningDate  DateTime?
+
+  @@index([status])
+  @@index([primaryOwnerId])
+  @@index([secondaryOwnerId]) // Junior-HR scope filters on this via OR — audit #139/#140
+  @@index([nextActionDate])
+  @@index([createdAt])
+  @@index([importBatchId])
+  @@index([deletedAt])
+}
+
+model HRActivity {
+  id          String             @id @default(cuid())
+  candidateId String
+  candidate   HRCandidate        @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?              @relation("HRActivities", fields: [userId], references: [id])
+  type        HRActivityType
+  notes       String?            @db.Text
+  oldStatus   HRCandidateStatus?
+  newStatus   HRCandidateStatus?
+  // The REAL time the interaction happened (IST), distinct from createdAt (the row
+  // insert time). Lets a call be logged with its true time / backdated (audit #3).
+  occurredAt  DateTime?
+  // Call duration in seconds (manual entry until telephony is integrated) — audit #2.
+  durationSec Int?
+  createdAt   DateTime           @default(now())
+
+  @@index([candidateId, createdAt])
+}
+
+// A single remark in a candidate's conversation thread. Unlike HRCandidate.remarks
+// (one free-text cell), this is a proper multi-entry log: several HR people can each
+// add a remark against the same candidate, and imported Excel cells that stack many
+// remarks are SPLIT into one row per remark (see lib/hrRemarks.parseHrRemarksCell).
+// The Remarks card renders these newest-first (order by remarkAt desc).
+model HRRemark {
+  id          String      @id @default(cuid())
+  candidateId String
+  candidate   HRCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  // The HR user who logged it (null for imported remarks whose author is only in text).
+  authorId    String?
+  author      User?       @relation("HRRemarks", fields: [authorId], references: [id])
+  // Denormalized display name of the author — set for BOTH manual (the logging user)
+  // and imported (the name parsed out of the remark text, e.g. "Nitisha") remarks, so
+  // historical attribution is never lost even when the author isn't a CRM user.
+  authorName  String?
+  text        String      @db.Text
+  // When the remark was actually made. For imports this is the date parsed from the
+  // cell (falls back to the candidate's createdAt); for manual remarks it is now().
+  // Distinct from createdAt (row-insert time) so historical remarks sort correctly.
+  remarkAt    DateTime    @default(now())
+  source      String      @default("MANUAL") // MANUAL | IMPORT
+  createdAt   DateTime    @default(now())
+
+  @@index([candidateId, remarkAt])
+}
+
+model HRInterview {
+  id                 String          @id @default(cuid())
+  candidateId        String
+  candidate          HRCandidate     @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  type               HRInterviewType
+  scheduledAt        DateTime
+  interviewerId      String?
+  interviewer        User?           @relation("HRInterviewer", fields: [interviewerId], references: [id])
+  confirmationStatus HRConfirmStatus @default(PENDING)
+  attendanceStatus   HRAttendStatus  @default(SCHEDULED)
+  result             String?
+  recommendation     String? // post-interview outcome: SELECTED | REJECTED | HOLD | null
+  notes              String?         @db.Text
+  noShowReason       String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([candidateId])
+  @@index([scheduledAt])
+  @@index([interviewerId, scheduledAt])
+}
+
+model HRFollowUp {
+  id          String         @id @default(cuid())
+  candidateId String
+  candidate   HRCandidate    @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?          @relation("HRFollowUps", fields: [userId], references: [id])
+  type        HRFollowUpType @default(CALL_BACK)
+  dueAt       DateTime
+  completedAt DateTime?
+  notes       String?
+  autoCreated Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+
+  @@index([candidateId])
+  @@index([dueAt])
+  @@index([completedAt])
+}
+
+model HRImport {
+  id           String   @id @default(cuid())
+  fileName     String
+  importedById String?
+  importedBy   User?    @relation("HRImports", fields: [importedById], references: [id])
+  total        Int      @default(0)
+  imported     Int      @default(0)
+  updated      Int      @default(0)
+  failed       Int      @default(0)
+  skipped      Int      @default(0)
+  errors       String?  @db.Text // JSON array of {row, reason} for the error report
+  createdAt    DateTime @default(now())
+
+  candidates HRCandidate[]
+
+  @@index([createdAt])
+}
+
+model HRResume {
+  id           String      @id @default(cuid())
+  candidateId  String
+  candidate    HRCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  url          String // Vercel Blob URL or base64 dataURL
+  filename     String
+  mimeType     String      @default("application/pdf")
+  sizeBytes    Int?
+  // SHA-256 of the file bytes — drives cross-candidate duplicate-resume detection.
+  contentHash  String?
+  isActive     Boolean     @default(true)
+  uploadedById String?
+  uploadedBy   User?       @relation("HRResumeUploads", fields: [uploadedById], references: [id])
+  createdAt    DateTime    @default(now())
+
+  @@index([candidateId])
+  @@index([contentHash])
+}
+
+// One row per website/form submission. A re-applying candidate (matched by
+// mobile/email) does NOT create a duplicate HRCandidate — a new HRApplication is
+// appended instead, so the profile shows the full application history + statuses.
+model HRApplication {
+  id                 String            @id @default(cuid())
+  candidateId        String
+  candidate          HRCandidate       @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  positionApplied    String
+  source             String // Website Career Page | Website Job Application | Walk-in Form | Internship Form | HR Landing Page
+  locationPreference String?
+  experience         String?
+  resumeId           String? // → the HRResume created for this submission (if any)
+  statusAtApply      HRCandidateStatus @default(NEW)
+  submittedAt        DateTime // form submission timestamp (from payload, else now)
+  rawPayload         Json? // original submission, for audit / replay
+  createdAt          DateTime          @default(now())
+
+  @@index([candidateId, submittedAt])
+  @@index([source])
+}
+
+// Delivery + failed-submission log for the real-time website→HR intake. Every
+// POST /api/intake/hr writes exactly one row (success OR failure).
+model HRIntakeLog {
+  id            String   @id @default(cuid())
+  receivedAt    DateTime @default(now())
+  source        String?
+  outcome       String // CREATED | APPENDED | FAILED
+  httpStatus    Int
+  candidateId   String?
+  applicationId String?
+  error         String?  @db.Text
+  payload       Json?
+  ip            String?
+
+  @@index([receivedAt])
+  @@index([outcome])
+}
+
+// ── HR VOICE ENGINE (shared shape with Sales LeadVoiceMessage/LeadEscalation) ──
+// Candidate-scoped voice with the SAME plumbing as the Sales side: original audio
+// bytes stored verbatim (bytea, ≤5MB enforced in the API), played back exactly as
+// recorded, streamed inline by the play endpoint, NEVER selected in list queries.
+// Reuses the VoiceMessageKind enum. GUIDANCE = Admin/Senior HR → candidate owner
+// (one-way coaching); ESCALATION / ESCALATION_REPLY = the Junior↔Senior thread.
+model HRVoiceMessage {
+  id             String               @id @default(cuid())
+  candidateId    String
+  candidate      HRCandidate          @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  kind           VoiceMessageKind
+  createdById    String // User id (resolved in API; no back-relation to keep User model untouched)
+  audioData      Bytes
+  mimeType       String               @default("audio/webm")
+  durationSec    Int?
+  transcript     String? // OPTIONAL — never blocks save (Lalit rule)
+  transcriptLang String?
+  textNote       String?
+  title          String?
+  escalationId   String?
+  escalation     HREscalation?        @relation(fields: [escalationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime             @default(now())
+  reads          HRVoiceMessageRead[]
+
+  @@index([candidateId, kind])
+  @@index([escalationId])
+}
+
+model HREscalation {
+  id           String           @id @default(cuid())
+  candidateId  String
+  candidate    HRCandidate      @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  raisedById   String // Junior HR who raised it
+  reason       String
+  status       String           @default("PENDING") // PENDING | MANAGER_REPLIED | RESOLVED
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  messages     HRVoiceMessage[]
+
+  @@index([candidateId])
+  @@index([status])
+}
+
+model HRVoiceMessageRead {
+  id             String         @id @default(cuid())
+  voiceMessageId String
+  voiceMessage   HRVoiceMessage @relation(fields: [voiceMessageId], references: [id], onDelete: Cascade)
+  userId         String
+  understoodAt   DateTime       @default(now())
+
+  @@unique([voiceMessageId, userId])
+}
+
+// Saved candidate-list views (parity with Sales SavedFilter). `query` is the
+// serialized filter/column state; shared views are visible to all HR users.
+model HRSavedFilter {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  query     String   @db.Text
+  isShared  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// =====================================================
+// BUYER DATA MODULE — TRANSACTION & PROPERTY RECORDS
+// =====================================================
+
+// Buyer record — transaction-level data for properties sold/under agreement.
+// ADMIN-only gate: contains passport & financial data.
+// buyerKey = normalized (name/phone) for repeat-buyer rollup detection.
+model BuyerRecord {
+  id               String    @id @default(cuid())
+  // Client info
+  clientName       String // Primary buyer name
+  coBuyerNames     String? // JSON: ["Name 1", "Name 2"] — co-buyers / family members
+  phones           String? // JSON: ["+9711234567", "..."] — all contact phones
+  emails           String? // JSON: ["email@example.com"] — email addresses
+  passport         String? // Passport number (sensitive data — ADMIN only)
+  nationality      String? // e.g. "Indian", "UAE National"
+  passportExpiry   String? // Passport expiry (free text — sheets store dd/mm/yyyy etc.; kept verbatim)
+  ownerName        String? // Registered owner name (may differ from the buyer/client)
+  country          String? // Property / buyer country (e.g. "UAE", "India")
+  // Property details
+  developer        String? // Developer / builder (e.g. "Emaar", "Godrej Properties") — first-class property attribute, backfilled from extraFields
+  projectName      String? // e.g. "Burj Vista", "Godrej Properties Mumbai"
+  tower            String? // Tower / Building name
+  unitNumber       String? // Unit/Apartment/Villa number
+  propertyType     String? // "Residential", "Commercial", "Plot"
+  configuration    String? // e.g. "2BR", "3BR+M", "Shop"
+  size             String? // Size as written on the sheet (e.g. "1,250 sq.ft", "120 sqm")
+  actualSize       String? // Actual / carpet size (verbatim) when the sheet distinguishes it
+  area             String? // Locality / community / area (e.g. "Downtown", "Sector 150")
+  // Transaction details
+  transactionValue Float? // Deal price in market currency
+  pricePerSqFt     Float? // Price / sqft (useful for comparables)
+  transactionDate  DateTime? // Date of transaction / agreement
+  transactionId    String? // Deal ID / Transaction reference number
+  transactionType  String? // "Primary", "Resale", "Rent", "Off-plan", etc.
+  role             String? // Buyer's role in the deal (e.g. "Buyer", "Seller", "Investor")
+  // Agent & source
+  agentName        String? // Sales agent name (may differ from system User)
+  source           String? // "Sheet import", "Manual entry", "Excel batch"
+  sourceFile       String? // Original filename (if imported)
+  // Flexibility — preserve unmapped columns from import sheets as JSON
+  extraFields      Json? // { "fieldName": "value", ... } for custom sheet columns
+  // IMMUTABLE audit of the ENTIRE original import row (every column, incl. mapped
+  // ones). Mirrors Lead.rawImport — guarantees every imported value is recoverable
+  // verbatim. Surfaced in the buyer detail Imported Fields ("Original Imported Row").
+  // NOTE: BuyerRecord.remarks (below, lifecycle section) doubles as the verbatim
+  // imported-remarks store (= Raw History source, like Lead.rawRemarks) AND the
+  // working notes — the buyer detail Raw History + Smart Timeline both read it.
+  rawImport        Json? // verbatim full import row { "<header>": "<value>", ... }
+  // Repeat-buyer detection
+  buyerKey         String? // Normalized (fname+lname+phone hash) for rollup. Index for dedup.
+  // ── Market segregation (Dubai Buyer Data) ───────────────────────────────────
+  // THIS module is "Dubai Buyer Data" — only Dubai/UAE buyers live here. The
+  // `market` field is the seam that keeps it market-scoped: every read in this
+  // module pins market:"Dubai" (see DUBAI_MARKET / dubaiBuyerWhere in
+  // src/lib/buyerScope.ts), assignment is limited to Dubai-team users + admins,
+  // and visibility is Dubai-team + admin only. A FUTURE Gurgaon/India Buyer Data
+  // module will be a SEPARATE module with its own market value (e.g. "Gurgaon"),
+  // its own pages, and its own assignment rules — do NOT turn this into a shared
+  // all-markets system by widening these queries.
+  market           String    @default("Dubai") // "Dubai" today; future modules use their own value.
+  // Metadata
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  importBatchId    String? // Link to BuyerImportBatch (when bulk-imported)
+
+  // ── Lifecycle / worked-pipeline (Part 5a) ──────────────────────────────────
+  // BuyerRecord is no longer a flat admin repository — it is a lightweight Leads-
+  // style pipeline: Admin Pool → assigned to an agent → CONVERTED (became a real
+  // Lead) or REJECTED/returned to the pool. ownerId null ⇒ sitting in the pool.
+  ownerId              String? // agent currently working this buyer (null = Admin Buyer Pool)
+  owner                User?     @relation("BuyerOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  assignedAt           DateTime? // when ownerId was last set
+  poolStatus           String    @default("ADMIN_POOL") // ADMIN_POOL | ASSIGNED | CONVERTED | REJECTED
+  // ── Imported buyer status + follow-up (additive migration 20260630170000) ────
+  // businessStatus = the REAL imported buyer status (e.g. "Hot", "Cool Off",
+  // "Booked") — DISTINCT from poolStatus (the Admin-Pool/Assigned lifecycle). The
+  // Buyer view shows them as two separate fields so "Status" is no longer mistaken
+  // for "Admin Pool" (R4). followupDate makes buyer follow-up behave like a lead's
+  // (drives follow-up lists/sorting); parsed from the import via parseImportDate —
+  // Excel serials incl. decimals, dd/mm/yyyy, ISO (R5). Both nullable + additive.
+  businessStatus       String?
+  followupDate         DateTime?
+  attemptCount         Int       @default(0) // contact attempts (No Answer / Not Picked / WA No Response). Auto-return to pool at 5.
+  remarks              String? // free-text working notes — RETAINED across reassignments
+  // Conversion → a real Lead.
+  convertedLeadId      String? // FK → Lead (the created lead). SetNull so deleting the lead doesn't delete the buyer.
+  convertedLead        Lead?     @relation("BuyerConvertedLead", fields: [convertedLeadId], references: [id], onDelete: SetNull)
+  convertedAt          DateTime?
+  convertedById        String? // user who converted
+  // Rejection / return to pool.
+  rejectedAt           DateTime?
+  rejectedById         String? // agent/admin who rejected
+  rejectionReason      String?
+  // Terminal-reject audit (additive 20260701_..): a Rejected buyer leaves the working
+  // pipeline (poolStatus=REJECTED) and stays in the Rejected tab until an admin
+  // REACTIVATES it. rejectCategory = the reject bucket (e.g. Not Interested / Wrong
+  // Number / Already Bought / Budget); aiEligibleForRevival = the reject-time call on
+  // whether the AI Reactivation Engine may later recommend re-engaging this client.
+  rejectCategory       String?
+  aiEligibleForRevival Boolean?
+  returnedToPoolAt     DateTime? // when it last went back to the Admin Pool (return-to-pool OR auto-5-attempts)
+  // Recycle-bin (Part 5b) — admin bulk-delete is REVERSIBLE. A soft-deleted buyer
+  // is excluded from every list/pool/rollup/dedup read (deletedAt:null filter) but
+  // the row + its assignment/activity history are retained and can be restored.
+  deletedAt            DateTime?
+  deletedById          String? // admin who soft-deleted it
+
+  // Agent-handling history (who worked it, attempts, returns) + buyer-scoped activity log.
+  assignments  BuyerAssignment[]
+  activities   BuyerActivity[]
+  stickyNotes  BuyerStickyNote[]
+  fieldHistory BuyerFieldHistory[]
+  // Telephony: calls auto-linked to this buyer by phone (recording + outcome land
+  // in the buyer timeline as a BuyerActivity too — see src/lib/telephony).
+  callLogs     CallLog[]           @relation("BuyerCallLogs")
+
+  @@index([buyerKey])
+  @@index([projectName])
+  @@index([transactionDate])
+  @@index([createdAt])
+  @@index([importBatchId])
+  @@index([ownerId])
+  @@index([poolStatus])
+  @@index([ownerId, poolStatus])
+  @@index([deletedAt])
+  @@index([market])
+  @@index([followupDate])
+}
+
+// ── BuyerAssignment — agent-handling history ─────────────────────────────────
+// One row per "stint": the period a single agent held a buyer. Opened on assign,
+// closed (returnedAt set) on reject / auto-5-attempts / admin reassign. This is
+// the admin-visible audit of WHO handled a buyer, HOW MANY attempts they logged
+// in that stint, and WHY it came back. History is never deleted on reassignment.
+model BuyerAssignment {
+  id              String      @id @default(cuid())
+  buyerId         String
+  buyer           BuyerRecord @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  userId          String // agent who held the buyer for this stint
+  user            User        @relation("BuyerAssignmentAgent", fields: [userId], references: [id])
+  assignedAt      DateTime    @default(now())
+  assignedById    String? // admin/manager who made the assignment
+  returnedAt      DateTime? // null = still the active stint
+  returnReason    String? // MANUAL_REJECT | AUTO_5_ATTEMPTS | ADMIN_REASSIGN
+  attemptsInStint Int         @default(0) // contact attempts logged DURING this stint
+  createdAt       DateTime    @default(now())
+
+  @@index([buyerId])
+  @@index([userId])
+}
+
+// ── BuyerActivity — buyer-scoped timeline / activity log ─────────────────────
+// Calls, notes, WhatsApp, voice notes, attempts, and lifecycle transitions
+// (ASSIGNED / RETURNED / CONVERTED / REJECTED). Powers the buyer's conversation
+// timeline (5b) and the buyer reports (6) — calls logged, WA interactions, notes,
+// voice notes, attempt counts. type is a free string (mirrors the Activity model's
+// string-typed buyer side) so new kinds don't need a migration.
+model BuyerActivity {
+  id          String      @id @default(cuid())
+  buyerId     String
+  buyer       BuyerRecord @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  userId      String? // who logged it (null for system rows)
+  user        User?       @relation("BuyerActivityUser", fields: [userId], references: [id])
+  // CALL | NOTE | WHATSAPP | VOICE_NOTE | ATTEMPT_NO_ANSWER | ATTEMPT_NOT_PICKED |
+  // ATTEMPT_WA_NO_RESPONSE | ASSIGNED | RETURNED | CONVERTED | REJECTED
+  type        String
+  description String?
+  createdAt   DateTime    @default(now())
+
+  @@index([buyerId])
+  @@index([userId])
+  @@index([buyerId, createdAt])
+}
+
+// ── BuyerStickyNote — per-agent private scratchpad on a buyer ─────────────────
+// Mirrors StickyNote (the Lead one): unique on (buyerId, userId) so every user
+// gets exactly one private note per buyer. Never shown to other users. Powers the
+// buyer-detail Quick Note widget at parity with the Lead view.
+model BuyerStickyNote {
+  id        String      @id @default(cuid())
+  buyerId   String
+  buyer     BuyerRecord @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation("BuyerStickyNoteUser", fields: [userId], references: [id], onDelete: Cascade)
+  body      String      @default("")
+  updatedAt DateTime    @updatedAt
+  createdAt DateTime    @default(now())
+
+  @@unique([buyerId, userId])
+  @@index([userId])
+}
+
+// Bulk import batches — track where BuyerRecords came from (Google Sheet, Excel, etc.)
+model BuyerImportBatch {
+  id           String   @id @default(cuid())
+  source       String // "Google Sheet", "Excel file", etc.
+  sourceRef    String? // URL or file name
+  recordCount  Int      @default(0) // Number of rows imported
+  successCount Int      @default(0) // Rows created/updated successfully
+  errorCount   Int      @default(0) // Rows failed (logged in BuyerImportLog)
+  importedAt   DateTime @default(now())
+  importedById String? // User who ran the import
+  importedBy   User?    @relation("BuyerImports", fields: [importedById], references: [id])
+  rawPayload   Json? // Original sheet data (for audit / replay)
+  // ── Import revert (mirrors ImportBatch) — soft-delete → restore → hard-purge ──
+  // status ACTIVE | DELETED. On revert, every BuyerRecord stamped with this batch id
+  // is soft-deleted (deletedAt) and the batch flips DELETED; purge hard-deletes them.
+  status       String    @default("ACTIVE")
+  deletedAt    DateTime?
+  deletedById  String?
+  deleteReason String?
+
+  @@index([importedAt])
+  @@index([status])
+}
+
+// Import error log — one row per failed record during BuyerImportBatch
+model BuyerImportLog {
+  id        String   @id @default(cuid())
+  batchId   String // Reference to BuyerImportBatch
+  rowNum    Int // Row number in source sheet
+  error     String   @db.Text // Error message (missing required field, invalid date, etc.)
+  rawRow    Json? // Original row data
+  createdAt DateTime @default(now())
+
+  @@index([batchId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GALLERY / RESOURCE LIBRARY — client-shareable content (brochures, payment
+// plans, creatives, images, PDFs, text templates). Admin/Manager upload;
+// agents view + share. Each resource is EXACTLY ONE of:
+//   • FILE — uploaded bytes (≤5 MB image/* or application/pdf) in fileData.
+//   • URL  — externally-hosted file; admin pastes a link in fileUrl (no upload).
+//   • TEXT — a text template in textContent (no file).
+//
+// STORAGE NOTE: there is NO blob backend (@vercel/blob/S3/Cloudinary) in this
+// app, so uploaded files live in Postgres bytea (fileData). The size cap keeps
+// rows small; fileData is NEVER selected in list queries — only streamed by the
+// public download endpoint. For large-file / high-volume use, provisioning
+// Vercel Blob (BLOB_READ_WRITE_TOKEN + @vercel/blob) is the recommended future
+// upgrade — an infra/billing decision, not done here.
+// ─────────────────────────────────────────────────────────────────────────────
+enum ResourceType {
+  FILE // uploaded bytes stored in fileData
+  URL // external link in fileUrl
+  TEXT // text template in textContent
+}
+
+enum ResourceShareChannel {
+  WHATSAPP
+  EMAIL
+  ATTACH // attached to in-CRM lead communication (no external send)
+}
+
+model Resource {
+  id           String       @id @default(cuid())
+  title        String
+  // Flexible category string (Brochure | Payment Plan | Creative | Image | PDF |
+  // Template | Other …). Kept a free string so admins can add categories without
+  // a migration. UI offers the common set + free entry.
+  category     String       @default("Other")
+  type         ResourceType
+  // ── FILE fields (type = FILE) ──
+  fileName     String?
+  mimeType     String?
+  fileSize     Int? // bytes — display + cap enforcement
+  // Raw bytes. NEVER selected in list/search queries (only the download route
+  // selects it). Nullable so URL/TEXT rows carry no blob.
+  fileData     Bytes?
+  // ── URL field (type = URL) ──
+  fileUrl      String?
+  // ── TEXT field (type = TEXT) ──
+  textContent  String?      @db.Text
+  // Optional association tags.
+  projectName  String? // associate with a project (free string)
+  tags         String? // comma-separated tags for search
+  uploadedById String?
+  uploadedBy   User?        @relation("ResourceUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime? // soft-delete (recycle, reversible)
+
+  shares ResourceShare[]
+
+  @@index([category])
+  @@index([type])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@index([projectName])
+}
+
+// One row per share event — "which file was shared with which client, how".
+model ResourceShare {
+  id         String               @id @default(cuid())
+  resourceId String
+  resource   Resource             @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  // Nullable — a share may be ad-hoc (copied a link from the gallery with no lead).
+  leadId     String?
+  lead       Lead?                @relation("ResourceShareLead", fields: [leadId], references: [id], onDelete: SetNull)
+  sharedById String?
+  sharedBy   User?                @relation("ResourceSharedBy", fields: [sharedById], references: [id], onDelete: SetNull)
+  channel    ResourceShareChannel
+  recipient  String? // phone / email captured at share time
+  note       String?
+  sharedAt   DateTime             @default(now())
+
+  @@index([resourceId])
+  @@index([leadId])
+  @@index([sharedById])
+  @@index([sharedAt])
+}
+
+// ── Lead Voice Communication (additive — 2 channels, one store) ──────────────
+// ONE store with a `kind` discriminator keeps the two channels cleanly separated
+// while sharing all audio plumbing: Manager Voice Guidance (admin→agent, one-way)
+// and the Escalation Thread (agent→manager ↔ manager→agent). The ORIGINAL audio
+// bytes are stored verbatim (bytea, ≤5MB enforced in the API), played back EXACTLY
+// as recorded (never converted/replaced), streamed INLINE by the play endpoint and
+// NEVER selected in list queries (mirrors Resource.fileData). Transcript is the
+// browser-STT text (editable before save), stored queryable for future AI.
+enum VoiceMessageKind {
+  GUIDANCE // Admin/Lalit → agent: one-way voice guidance on a lead
+  ESCALATION // Agent → manager: opens / part of an escalation thread
+  ESCALATION_REPLY // Manager → agent: reply within an escalation thread
+}
+
+model LeadVoiceMessage {
+  id             String             @id @default(cuid())
+  leadId         String
+  lead           Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  kind           VoiceMessageKind
+  createdById    String
+  createdBy      User               @relation("VoiceMsgCreator", fields: [createdById], references: [id])
+  // Original audio — plays back exactly as recorded; never converted/replaced.
+  audioData      Bytes
+  mimeType       String             @default("audio/webm")
+  durationSec    Int?
+  // Auto transcript (browser STT v1, editable before save) — queryable for future AI.
+  transcript     String?
+  transcriptLang String?
+  textNote       String? // optional accompanying text (escalation)
+  title          String? // optional title / category (guidance)
+  // Escalation linkage — null for guidance; set for ESCALATION / ESCALATION_REPLY.
+  escalationId   String?
+  escalation     LeadEscalation?    @relation(fields: [escalationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime           @default(now())
+  reads          VoiceMessageRead[]
+
+  @@index([leadId, kind])
+  @@index([escalationId])
+}
+
+// The escalation thread container — reason + status + the raising agent.
+model LeadEscalation {
+  id           String             @id @default(cuid())
+  leadId       String
+  lead         Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  raisedById   String
+  raisedBy     User               @relation("EscalationRaiser", fields: [raisedById], references: [id])
+  reason       String
+  status       String             @default("PENDING") // PENDING | MANAGER_REPLIED | RESOLVED
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  messages     LeadVoiceMessage[]
+
+  @@index([leadId])
+  @@index([status])
+}
+
+// Per-user "listened / understood" tracking → unread badge + mark-understood.
+model VoiceMessageRead {
+  id             String           @id @default(cuid())
+  voiceMessageId String
+  voiceMessage   LeadVoiceMessage @relation(fields: [voiceMessageId], references: [id], onDelete: Cascade)
+  userId         String
+  understoodAt   DateTime         @default(now())
+
+  @@unique([voiceMessageId, userId])
+}
+
+// ── Buyer field-level change history (Buyer-view parity with LeadFieldHistory) ──
+// Financial-grade audit of every inline-edit to a BuyerRecord (old→new + who +
+// when + source). Mirrors LeadFieldHistory; written by the buyer update route,
+// rendered by the shared ChangeHistoryCard on the buyer detail (admin/manager).
+model BuyerFieldHistory {
+  id          String      @id @default(cuid())
+  buyerId     String
+  buyer       BuyerRecord @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  field       String
+  oldValue    String?
+  newValue    String?
+  changedById String?
+  changedBy   User?       @relation("BuyerFieldChangedBy", fields: [changedById], references: [id])
+  changedAt   DateTime    @default(now())
+  source      String? // "inline-edit" | "bulk-import" | "system"
+
+  @@index([buyerId, changedAt])
+  @@index([changedById, changedAt])
+  @@index([field, changedAt])
+}
+
+// ── Dashboard Voice Broadcast (admin → team / individual) ────────────────────
+// Lalit/Admin records a voice message and sends it to EVERYONE, a TEAM, or one
+// USER; recipients see + play it on their dashboard. Completely separate from the
+// lead-specific LeadVoiceMessage channels above. Original audio stored verbatim
+// (bytea, ≤5MB), streamed inline by the audio endpoint, NEVER selected in lists.
+// Transcript is OPTIONAL and NEVER required — the message always saves even if
+// transcription is absent/failed (Lalit rule).
+enum BroadcastTarget {
+  ALL // every active sales user
+  TEAM // a single team (targetTeam)
+  USER // one user (targetUserId)
+}
+
+model VoiceBroadcast {
+  id           String               @id @default(cuid())
+  createdById  String
+  createdBy    User                 @relation("BroadcastCreator", fields: [createdById], references: [id])
+  audioData    Bytes
+  mimeType     String               @default("audio/webm")
+  durationSec  Int?
+  transcript   String? // OPTIONAL — never blocks save
+  title        String?
+  targetKind   BroadcastTarget
+  targetTeam   String? // "Dubai" | "India" when targetKind = TEAM
+  targetUserId String?
+  targetUser   User?                @relation("BroadcastTarget", fields: [targetUserId], references: [id])
+  createdAt    DateTime             @default(now())
+  reads        VoiceBroadcastRead[]
+
+  @@index([createdAt])
+  @@index([targetKind, targetTeam])
+  @@index([targetUserId])
+}
+
+// Per-recipient listened tracking → "new" badge until played.
+model VoiceBroadcastRead {
+  id          String         @id @default(cuid())
+  broadcastId String
+  broadcast   VoiceBroadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  heardAt     DateTime       @default(now())
+
+  @@unique([broadcastId, userId])
+}
+
+// =====================================================
+// CUSTOMER LAYER (Step 1 foundation — additive only)
+// =====================================================
+// A Customer is the canonical HUMAN behind one-or-more enquiries (Leads). The
+// link between a Lead and its Customer is the ONLY thing stored about the
+// relationship; everything describing the customer's CURRENT state — status,
+// owner-of-record, confidence, contact rollup, health — is COMPUTED LIVE from the
+// set of linked enquiries (src/lib/customer/compute.ts). Nothing derivable is
+// persisted, so a new enquiry can never make a stored value go stale.
+model Customer {
+  // IMMUTABLE surrogate identity — never a mobile/email/name (those change).
+  id               String   @id @default(uuid())
+  // OPTIONAL admin display-name override; NULL ⇒ computed from linked enquiries.
+  displayName      String?
+  // Admin-selected canonical owner-of-record; NULL ⇒ computed ("Multiple Owners").
+  canonicalOwnerId String?
+  canonicalOwner   User?    @relation("CustomerCanonicalOwner", fields: [canonicalOwnerId], references: [id], onDelete: SetNull)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // All enquiries currently linked. Unlink clears the lead's customerId (SetNull).
+  enquiries  Lead[]              @relation("CustomerEnquiries")
+  // Immutable, append-only audit of every link/unlink decision.
+  linkAudits CustomerLinkAudit[]
+
+  @@index([canonicalOwnerId])
+}
+
+// IMMUTABLE, APPEND-ONLY audit of every merge/link/unlink decision. Written ONCE
+// when an admin links/unlinks an enquiry; NEVER updated or deleted. Together these
+// rows are a complete, replayable history + the basis for one-click reversibility.
+model CustomerLinkAudit {
+  id                 String    @id @default(cuid())
+  customerId         String?
+  customer           Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  leadId             String
+  action             String // "LINK" | "UNLINK" (text, no enum — the log can't be invalidated by a future enum edit)
+  performedById      String?
+  performedBy        User?     @relation("CustomerLinkAuditActor", fields: [performedById], references: [id], onDelete: SetNull)
+  performedAt        DateTime  @default(now())
+  reason             String?
+  // Live confidence + factors snapshotted at decision time (never otherwise stored).
+  confidenceSnapshot Int?
+  matchFactors       Json?
+  previousOwnerId    String?
+  currentOwnerId     String?
+  // Membership transition (makes a link/unlink exactly reversible).
+  prevCustomerId     String?
+  newCustomerId      String?
+  rollbackAvailable  Boolean   @default(true)
+
+  @@index([customerId])
+  @@index([leadId])
+  @@index([performedById])
+  @@index([performedAt])
+}

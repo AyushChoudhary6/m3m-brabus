@@ -1,0 +1,496 @@
+@import "tailwindcss";
+
+/* Map Tailwind's `dark:` prefix to the data-theme="dark" attribute used
+   by this app (ThemeToggle sets it on <html>). Without this, dark: would
+   fire on prefers-color-scheme: dark (OS setting), not on the user's manual
+   toggle — causing the two dark-mode mechanisms to diverge. */
+@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-navy: #0b1a33;
+  --color-navy-2: #0f2347;
+  --color-gold: #c9a24b;
+  --color-gold-2: #e7c97a;
+  --color-ink: #0b1a33;
+  --color-line: #e5e7eb;
+  --color-bg: #f5f6fa;
+  --color-good: #16a34a;
+  --color-warn: #d97706;
+  --color-hot: #ef4444;
+  --color-warm: #f59e0b;
+  --color-cold: #3b82f6;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ─── Theme tokens — Light (default) ─── */
+:root {
+  --bg-app:     #f5f6fa;
+  --bg-card:    #ffffff;
+  --bg-muted:   #f7f8fa;
+  --text-base:  #0b1a33;
+  --text-muted: #6b7280;
+  --border:     #e5e7eb;
+  /* Accent — defaults to brand gold. Overridden by:
+   *   • Festive theme — auto-swapped during festival weeks (emerald for Eid,
+   *     pink for Diwali, etc.) by AccentPainter component.
+   *   • User picker — manager can pick a custom hex in Theme menu, persisted
+   *     to localStorage as wcr.accent.
+   *
+   * --cta-primary = the "Save / primary action" button colour. Defaults to
+   * brand navy (#0b1a33) but follows the accent during festive mode + when
+   * user picks a custom accent. So Save buttons turn Eid green during Eid,
+   * Diwali pink during Diwali, etc. — matches Lalit's expectation that the
+   * accent should affect the whole UI, not just gold elements.
+   */
+  --accent-primary: #c9a24b;
+  --accent-primary-2: #e7c97a;
+  --cta-primary: #0b1a33;
+  --cta-primary-2: #0f2347;
+}
+
+/* Paint the brand gold AND primary CTA backgrounds with the accent vars.
+   When AccentPainter sets the override, both follow. .btn-primary uses
+   var(--cta-primary) (defaults navy, festive shifts to accent). */
+.btn-gold        { background: var(--accent-primary) !important; color: #0b1a33; }
+.btn-gold:hover  { background: var(--accent-primary-2) !important; }
+.btn-primary     { background: var(--cta-primary) !important; color: #fff; }
+.btn-primary:hover { background: var(--cta-primary-2) !important; }
+.bg-\[\#c9a24b\] { background-color: var(--accent-primary) !important; }
+.text-\[\#c9a24b\] { color: var(--accent-primary) !important; }
+.border-\[\#c9a24b\] { border-color: var(--accent-primary) !important; }
+.hover\:bg-\[\#e7c97a\]:hover { background-color: var(--accent-primary-2) !important; }
+.bg-\[\#0b1a33\] { background-color: var(--cta-primary) !important; }
+.hover\:bg-\[\#0f2347\]:hover { background-color: var(--cta-primary-2) !important; }
+.ai-tag          { color: var(--accent-primary); }
+
+/* ─── Theme tokens — Dark.
+   Applied via data-theme="dark" on <html>. The inline script in
+   src/app/layout.tsx sets this BEFORE first paint to avoid a flash of
+   light theme. Lalit's ask: "Set user can choose day mode or light mode."
+   First pass touches the app shell + cards + base text — Tailwind utility
+   colours (bg-white, text-gray-X) on specific components still need
+   per-component dark: variants for full coverage. */
+[data-theme="dark"] {
+  /* Deep navy/charcoal — NOT pure black. Layered surfaces give depth:
+     app (deepest) → card → muted → elevated (popovers/menus). */
+  --bg-app:      #0b1220;   /* page background — soft navy-charcoal */
+  --bg-card:     #111a2e;   /* cards / topbar / bottom-nav surface */
+  --bg-muted:    #1a2438;   /* inputs, hover fills, secondary surfaces */
+  --bg-elevated: #1e2a42;   /* popovers, menus, kanban cards (sit above cards) */
+  --text-base:   #e8edf5;   /* primary text — ~15.5:1 on --bg-app (AAA) */
+  --text-muted:  #9fb0c9;   /* secondary text — ~7:1 on --bg-app (AA+) */
+  --border:      #29354f;   /* hairline borders */
+  --border-strong: #3a486a; /* hover / focus borders */
+  /* Brand gold reads a touch brighter on dark so it stays legible on navy. */
+  --accent-on-dark: #d9b765;
+}
+
+html, body { background: var(--bg-app); color: var(--text-base); font-family: var(--font-sans); }
+
+/* Cards + key surfaces follow the theme tokens automatically. */
+[data-theme="dark"] .card { background: var(--bg-card); border-color: var(--border); color: var(--text-base); }
+[data-theme="dark"] .bg-white { background-color: var(--bg-card) !important; }
+[data-theme="dark"] .border-\[\#e5e7eb\] { border-color: var(--border) !important; }
+[data-theme="dark"] .text-gray-500, [data-theme="dark"] .text-gray-600 { color: var(--text-muted); }
+[data-theme="dark"] .text-gray-700, [data-theme="dark"] .text-gray-800, [data-theme="dark"] .text-\[\#0b1a33\] { color: var(--text-base); }
+[data-theme="dark"] .bg-\[\#f5f6fa\], [data-theme="dark"] .bg-\[\#f7f8fa\] { background-color: var(--bg-muted) !important; }
+[data-theme="dark"] table.tbl td { border-bottom-color: var(--border); }
+[data-theme="dark"] table.tbl th { border-bottom-color: var(--border); color: var(--text-muted); }
+
+/* ─── Dark-mode polish for Tailwind utility chips/badges/inputs ─────────────
+   Lalit screenshot of /leads in dark mode showed "Not picked 3+/7+ days" chips
+   + Smart Lists pills + filter dropdowns all invisible — the light bg-X-50 +
+   dark text-X-800 pattern that doesn't auto-invert.
+   Fix: blanket dark overrides for the colour families actually in use across
+   the app. Translucent backgrounds (rgba) keep the colour identity while
+   sitting on a dark base; text shifts to a lighter shade of the same hue. */
+
+/* Form inputs + selects + textareas — surface follows --bg-card, text follows --text-base */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--bg-card) !important;
+  color: var(--text-base) !important;
+  border-color: var(--border) !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder { color: var(--text-muted); }
+
+/* ─── Display serif — the "luxury real estate" heading voice. Applied ONLY on the
+   login + dashboard hero via .font-display; body text stays Inter for clarity. ─── */
+.font-display {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  letter-spacing: -0.01em;
+}
+
+/* ─── Brand sweep — retire decorative SaaS-blue in favour of the navy + champagne
+   gold identity. Scoped to the INTERACTIVE shades only (links / accents / edit
+   hints / active states = blue-600 / 500 / 400). Semantic STATUS blue (cold lead
+   & "Fresh Lead" = blue-100/700/800, WhatsApp channel borders) uses different
+   shades and is deliberately left intact so "cold" still reads blue. ─── */
+.text-blue-600, .text-blue-500 { color: #9a7b2e !important; }   /* champagne-dark link/accent */
+.text-blue-400                 { color: #b78f33 !important; }
+.hover\:text-blue-600:hover,
+.hover\:text-blue-700:hover    { color: #7a6024 !important; }
+[data-theme="dark"] .dark\:text-blue-400        { color: #d9b765 !important; }
+[data-theme="dark"] .dark\:hover\:text-blue-300:hover { color: #e7c97a !important; }
+[data-theme="dark"] .dark\:border-blue-400      { border-color: #d9b765 !important; }
+/* Unify the off-brand HR navy (#1a2e4a) onto the single brand navy (#0b1a33). */
+.text-\[\#1a2e4a\]   { color: #0b1a33 !important; }
+.border-\[\#1a2e4a\] { border-color: #0b1a33 !important; }
+.bg-\[\#1a2e4a\]     { background-color: #0b1a33 !important; }
+
+/* Tailwind colour-family chips — all bg-X-50 / bg-X-100 / text-X-700/800/900 / border-X-300 */
+[data-theme="dark"] .bg-amber-50,   [data-theme="dark"] .bg-amber-100    { background-color: rgba(245,158,11,0.18) !important; }
+[data-theme="dark"] .bg-red-50,     [data-theme="dark"] .bg-red-100      { background-color: rgba(239,68,68,0.18)  !important; }
+[data-theme="dark"] .bg-emerald-50, [data-theme="dark"] .bg-emerald-100  { background-color: rgba(16,185,129,0.18) !important; }
+[data-theme="dark"] .bg-green-50,   [data-theme="dark"] .bg-green-100    { background-color: rgba(34,197,94,0.18)  !important; }
+[data-theme="dark"] .bg-teal-50,    [data-theme="dark"] .bg-teal-100     { background-color: rgba(20,184,166,0.18) !important; }
+[data-theme="dark"] .bg-blue-50,    [data-theme="dark"] .bg-blue-100     { background-color: rgba(59,130,246,0.18) !important; }
+[data-theme="dark"] .bg-indigo-50,  [data-theme="dark"] .bg-indigo-100   { background-color: rgba(99,102,241,0.18) !important; }
+[data-theme="dark"] .bg-purple-50,  [data-theme="dark"] .bg-purple-100   { background-color: rgba(168,85,247,0.18) !important; }
+[data-theme="dark"] .bg-pink-50,    [data-theme="dark"] .bg-pink-100     { background-color: rgba(236,72,153,0.18) !important; }
+[data-theme="dark"] .bg-orange-50,  [data-theme="dark"] .bg-orange-100   { background-color: rgba(249,115,22,0.18) !important; }
+[data-theme="dark"] .bg-sky-50,     [data-theme="dark"] .bg-sky-100      { background-color: rgba(14,165,233,0.18) !important; }
+[data-theme="dark"] .bg-yellow-50,  [data-theme="dark"] .bg-yellow-100   { background-color: rgba(234,179,8,0.18)  !important; }
+[data-theme="dark"] .bg-violet-50,  [data-theme="dark"] .bg-violet-100   { background-color: rgba(139,92,246,0.18) !important; }
+
+[data-theme="dark"] .text-amber-700,   [data-theme="dark"] .text-amber-800,   [data-theme="dark"] .text-amber-900   { color: #fbbf24 !important; }
+[data-theme="dark"] .text-red-700,     [data-theme="dark"] .text-red-800,     [data-theme="dark"] .text-red-900     { color: #fca5a5 !important; }
+[data-theme="dark"] .text-emerald-700, [data-theme="dark"] .text-emerald-800, [data-theme="dark"] .text-emerald-900 { color: #6ee7b7 !important; }
+[data-theme="dark"] .text-green-700,   [data-theme="dark"] .text-green-800,   [data-theme="dark"] .text-green-900   { color: #86efac !important; }
+[data-theme="dark"] .text-teal-700,    [data-theme="dark"] .text-teal-800,    [data-theme="dark"] .text-teal-900    { color: #5eead4 !important; }
+[data-theme="dark"] .text-blue-700,    [data-theme="dark"] .text-blue-800,    [data-theme="dark"] .text-blue-900    { color: #93c5fd !important; }
+[data-theme="dark"] .text-indigo-700,  [data-theme="dark"] .text-indigo-800,  [data-theme="dark"] .text-indigo-900  { color: #a5b4fc !important; }
+[data-theme="dark"] .text-purple-700,  [data-theme="dark"] .text-purple-800,  [data-theme="dark"] .text-purple-900  { color: #d8b4fe !important; }
+[data-theme="dark"] .text-pink-700,    [data-theme="dark"] .text-pink-800,    [data-theme="dark"] .text-pink-900    { color: #f9a8d4 !important; }
+[data-theme="dark"] .text-orange-700,  [data-theme="dark"] .text-orange-800,  [data-theme="dark"] .text-orange-900  { color: #fdba74 !important; }
+[data-theme="dark"] .text-sky-700,     [data-theme="dark"] .text-sky-800,     [data-theme="dark"] .text-sky-900     { color: #7dd3fc !important; }
+[data-theme="dark"] .text-yellow-700,  [data-theme="dark"] .text-yellow-800,  [data-theme="dark"] .text-yellow-900  { color: #fde047 !important; }
+
+[data-theme="dark"] .border-amber-300,   [data-theme="dark"] .border-amber-200,   [data-theme="dark"] .border-amber-400   { border-color: rgba(245,158,11,0.4) !important; }
+[data-theme="dark"] .border-red-300,     [data-theme="dark"] .border-red-200,     [data-theme="dark"] .border-red-500     { border-color: rgba(239,68,68,0.4)  !important; }
+[data-theme="dark"] .border-emerald-300, [data-theme="dark"] .border-emerald-200, [data-theme="dark"] .border-emerald-500 { border-color: rgba(16,185,129,0.4) !important; }
+[data-theme="dark"] .border-teal-300                                                                                       { border-color: rgba(20,184,166,0.4) !important; }
+[data-theme="dark"] .border-blue-300                                                                                       { border-color: rgba(59,130,246,0.4) !important; }
+[data-theme="dark"] .border-indigo-300                                                                                     { border-color: rgba(99,102,241,0.4) !important; }
+[data-theme="dark"] .border-pink-300                                                                                       { border-color: rgba(236,72,153,0.4) !important; }
+
+/* The existing .chip-* utility classes also use light bg + dark text */
+[data-theme="dark"] .chip-hot   { background: rgba(239,68,68,0.18);  color: #fca5a5; }
+[data-theme="dark"] .chip-warm  { background: rgba(245,158,11,0.18); color: #fbbf24; }
+[data-theme="dark"] .chip-cold  { background: rgba(59,130,246,0.18); color: #93c5fd; }
+[data-theme="dark"] .chip-new   { background: rgba(99,102,241,0.18); color: #a5b4fc; }
+[data-theme="dark"] .chip-won   { background: rgba(34,197,94,0.18);  color: #86efac; }
+[data-theme="dark"] .chip-lost  { background: rgba(55,65,81,0.4);    color: #e5e7eb; }
+[data-theme="dark"] .src        { background: rgba(99,102,241,0.18); color: #a5b4fc; }
+[data-theme="dark"] .src-wa     { background: rgba(34,197,94,0.18);  color: #86efac; }
+
+/* Hover backgrounds on white surfaces — kill the white flash in dark mode */
+[data-theme="dark"] .hover\:bg-amber-50:hover    { background-color: rgba(245,158,11,0.25) !important; }
+[data-theme="dark"] .hover\:bg-emerald-50:hover  { background-color: rgba(16,185,129,0.25) !important; }
+[data-theme="dark"] .hover\:bg-gray-50:hover     { background-color: var(--bg-muted) !important; }
+[data-theme="dark"] .hover\:bg-gray-100:hover    { background-color: var(--bg-muted) !important; }
+[data-theme="dark"] .active\:bg-amber-50:active  { background-color: rgba(245,158,11,0.25) !important; }
+
+/* ─── Dark-mode component coverage (the surfaces that hardcode light values
+   in the component-class blocks further down). Translucent + token-based so
+   they track the theme and keep WCAG-AA contrast on the deep-navy base. ─── */
+
+/* Common Tailwind neutral surfaces used on cards/menus/rows */
+[data-theme="dark"] .bg-gray-50,
+[data-theme="dark"] .bg-gray-100      { background-color: var(--bg-muted) !important; }
+[data-theme="dark"] .bg-gray-900      { background-color: var(--bg-card) !important; }
+[data-theme="dark"] .text-gray-400    { color: var(--text-muted) !important; }
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-black       { color: var(--text-base) !important; }
+[data-theme="dark"] .border-gray-100,
+[data-theme="dark"] .border-gray-200,
+[data-theme="dark"] .border-gray-300  { border-color: var(--border) !important; }
+[data-theme="dark"] .divide-gray-100 > * + *,
+[data-theme="dark"] .divide-gray-200 > * + * { border-color: var(--border) !important; }
+/* Slate neutrals + light placeholders/dividers the gray net above misses (UI
+   audit 2026-06-27): slate card/row surfaces (ConversationStreamCard, calendar,
+   AI workspace), the lightest gray text (em-dash placeholders / heatmap zeros),
+   and the hardcoded #e5e7eb hairline (Inbox/team/reports/archived/overdue). */
+[data-theme="dark"] .bg-slate-50,
+[data-theme="dark"] .bg-slate-100     { background-color: var(--bg-muted) !important; }
+[data-theme="dark"] .hover\:bg-slate-50:hover,
+[data-theme="dark"] .hover\:bg-slate-100:hover { background-color: var(--bg-muted) !important; }
+[data-theme="dark"] .text-gray-300    { color: var(--text-muted) !important; }
+[data-theme="dark"] .border-\[\#e5e7eb\]         { border-color: var(--border) !important; }
+[data-theme="dark"] .divide-\[\#e5e7eb\] > * + * { border-color: var(--border) !important; }
+
+/* Ghost/secondary button — white surface → card surface */
+[data-theme="dark"] .btn-ghost        { background: var(--bg-card); border-color: var(--border); color: var(--text-base); }
+[data-theme="dark"] .btn-ghost:hover  { border-color: var(--border-strong); background: var(--bg-muted); }
+/* Gold button: brighter gold so it stays legible; keep dark navy ink on top */
+[data-theme="dark"] .btn-gold         { color: #0b1220; }
+
+/* Tables — header/body borders + hover row tint */
+[data-theme="dark"] .tbl th           { color: var(--text-muted); border-bottom-color: var(--border); }
+[data-theme="dark"] .tbl td           { border-bottom-color: var(--border); }
+[data-theme="dark"] .tbl tr:hover td  { background: rgba(255,255,255,0.035); }
+
+/* Pills, chips base, segmented control, kanban, timeline, KPI surfaces */
+[data-theme="dark"] .pill             { background: var(--bg-muted); color: var(--text-muted); }
+[data-theme="dark"] .chip-lost        { background: rgba(148,163,184,0.18); color: #cbd5e1; }
+[data-theme="dark"] .src-web          { background: rgba(14,165,233,0.18);  color: #7dd3fc; }
+[data-theme="dark"] .src-csv          { background: rgba(245,158,11,0.18);  color: #fbbf24; }
+[data-theme="dark"] .src-event        { background: rgba(217,70,239,0.18);  color: #f0abfc; }
+[data-theme="dark"] .src-call         { background: rgba(239,68,68,0.18);   color: #fca5a5; }
+[data-theme="dark"] .seg              { background: var(--bg-muted); }
+[data-theme="dark"] .seg button,
+[data-theme="dark"] .seg a            { color: var(--text-muted); }
+[data-theme="dark"] .seg button.on,
+[data-theme="dark"] .seg a.on         { background: var(--bg-elevated); color: var(--text-base); box-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+[data-theme="dark"] .col              { background: rgba(255,255,255,0.03); }
+[data-theme="dark"] .kanban-card      { background: var(--bg-elevated); border-color: var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+[data-theme="dark"] .kanban-card:hover{ border-color: var(--accent-on-dark); }
+[data-theme="dark"] .tl-line          { border-left-color: var(--border); }
+[data-theme="dark"] .grad-card        { background: linear-gradient(135deg, #0f1d38, #15264a); }
+
+/* Brand-gold accents lift slightly on dark for legibility (default theme only;
+   a user/festive accent override sets --accent-primary which still wins). */
+[data-theme="dark"] .ai-tag           { color: var(--accent-on-dark); }
+
+/* Generic translucent menus/popovers built with bg-white get the elevated
+   surface so menus don't glow pure-card against cards. */
+[data-theme="dark"] .shadow-2xl,
+[data-theme="dark"] .shadow-xl        { box-shadow: 0 12px 40px rgba(0,0,0,0.55) !important; }
+
+/* Sidebar */
+.sidebar { background: linear-gradient(180deg, #0b1a33 0%, #0f2347 100%); }
+.nav-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .55rem .9rem; border-radius: .5rem;
+  color: #cbd5e1; cursor: pointer; font-size: .9rem;
+  transition: all .15s ease; text-decoration: none;
+}
+.nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+.nav-item.active {
+  background: rgba(201,162,75,.15);
+  color: #fff;
+  border-left: 3px solid #c9a24b;
+}
+
+/* Card */
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; }
+.kpi  { padding: 1rem 1.1rem; }
+.grad-card { background: linear-gradient(135deg, #0b1a33, #152d57); color: #fff; }
+
+/* Chips */
+.chip { display:inline-flex; align-items:center; gap:.35rem; padding:.18rem .55rem; border-radius:999px; font-size:.72rem; font-weight:600; line-height:1; }
+.chip-hot  { background:#fee2e2; color:#991b1b; }
+.chip-warm { background:#fef3c7; color:#92400e; }
+.chip-cold { background:#dbeafe; color:#1e40af; }
+.chip-new  { background:#e0e7ff; color:#3730a3; }
+.chip-won  { background:#dcfce7; color:#166534; }
+.chip-lost { background:#f3f4f6; color:#374151; }
+.src       { background:#eef2ff; color:#3730a3; }
+.src-wa    { background:#dcfce7; color:#166534; }
+.src-web   { background:#e0f2fe; color:#075985; }
+.src-csv   { background:#fef3c7; color:#92400e; }
+.src-event { background:#fae8ff; color:#7e22ce; }
+.src-call  { background:#fee2e2; color:#991b1b; }
+
+/* Buttons */
+.btn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem .9rem; border-radius:.55rem; font-weight:600; font-size:.85rem; transition:all .12s; }
+.btn-primary { background: #0b1a33; color:#fff; }
+.btn-primary:hover { background: #0f2347; }
+.btn-gold { background: #c9a24b; color: #0b1a33; }
+.btn-gold:hover { background: #e7c97a; }
+.btn-ghost { background:#fff; border:1px solid #e5e7eb; color: #0b1a33; }
+.btn-ghost:hover { border-color:#9ca3af; }
+
+/* Tables */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:#6b7280; padding:.7rem .9rem; border-bottom:1px solid #e5e7eb; }
+.tbl td { padding:.85rem .9rem; border-bottom:1px solid #f1f2f6; font-size:.9rem; vertical-align:middle; }
+.tbl tr:hover td { background:#fafbff; }
+
+/* Avatar */
+.avatar { width:30px; height:30px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:.72rem; color:#fff; }
+
+/* Misc */
+.dot { width:6px; height:6px; border-radius:999px; display:inline-block; margin-right:6px; vertical-align:middle; }
+.pill { font-size:.7rem; color:#6b7280; background:#f3f4f6; padding:.15rem .5rem; border-radius:999px; }
+.tl-dot { width:10px; height:10px; border-radius:999px; background:#c9a24b; position:absolute; left:-5px; top:6px; }
+.tl-line { border-left:2px solid #e5e7eb; padding-left:1rem; position:relative; margin-left:.5rem; }
+.col { background:#f1f3f8; border-radius:12px; padding:.8rem; min-height:60vh; }
+.kanban-card { background:#fff; border-radius:10px; border:1px solid #e5e7eb; padding:.7rem; margin-bottom:.6rem; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+.kanban-card:hover { border-color: #c9a24b; }
+.seg { display:inline-flex; background:#eef0f5; border-radius:.55rem; padding:3px; }
+.seg button, .seg a { padding:.35rem .8rem; border-radius:.45rem; font-size:.82rem; font-weight:600; color:#4b5563; text-decoration: none; }
+.seg button.on, .seg a.on { background:#fff; color:#0b1a33; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+.ai-tag { font-size:.7rem; color:#c9a24b; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOBILE FORM HARDENING
+   Lalit: "Some popups, selection, dropdown open in mobile, forms UI gets
+   distorted. Test it and fix them."
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* iOS auto-zoom prevention.
+   When an <input>/<select>/<textarea> has font-size < 16px, iOS Safari zooms
+   the viewport in on focus. The zoom then PERSISTS, leaving the form / modal
+   shifted off-screen until the user manually pinches back out — which looks
+   like "distorted UI". Force min 16px on all form controls below the lg
+   breakpoint. Tailwind text-* utilities still apply on lg+. */
+@media (max-width: 1023.98px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="url"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input:not([type]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Body scroll-lock helper. When a modal opens it should add this class to
+   <body> via useBodyScrollLock() so the background page can't scroll under
+   the modal. Without this, the page jumps when the modal mounts (especially
+   on iOS where momentum scroll keeps going), which reads as "distorted".
+   The fixed+top trick preserves the scroll position so it doesn't jump back
+   to 0 on close. */
+body.modal-open {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* All modal/sheet wrappers should respect the iPhone home-indicator safe
+   area. Use these utility classes in fixed bottom sheets / modals. */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-top    { padding-top:    env(safe-area-inset-top); }
+
+/* ── No-scrollbar utility (used by mobile tab bars + horizontal chip strips).
+   Hides the visible scrollbar but keeps the scrollable area functional. */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ── Lead-detail mobile tabs (§9.4)
+   The lead detail page tags each card with `data-lead-section="overview" |
+   "timeline" | "actions" | "projects" | "admin"`. The mobile tab bar
+   (LeadMobileTabs.tsx) sets `body[data-lead-tab="..."]` on click. These
+   rules hide non-matching sections on phones + tablet-portrait — iPad
+   landscape and above (≥1024px) sees the 2-col grid (lg:grid-cols-3)
+   with all sections visible; no tab gating needed there.
+
+   Default (no body attr) = overview tab. Listed explicitly so the very
+   first paint hides the long sections even before React hydrates. */
+@media (max-width: 1023px) {
+  body:not([data-lead-tab]) [data-lead-section]:not([data-lead-section="overview"]) { display: none !important; }
+  body[data-lead-tab="overview"] [data-lead-section]:not([data-lead-section="overview"]) { display: none !important; }
+  body[data-lead-tab="timeline"] [data-lead-section]:not([data-lead-section="timeline"]) { display: none !important; }
+  body[data-lead-tab="actions"]  [data-lead-section]:not([data-lead-section="actions"])  { display: none !important; }
+  body[data-lead-tab="projects"] [data-lead-section]:not([data-lead-section="projects"]) { display: none !important; }
+  body[data-lead-tab="admin"]    [data-lead-section]:not([data-lead-section="admin"])    { display: none !important; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PRINT STYLES — Lead detail "Client briefing" view
+   When an agent hits Cmd/Ctrl+P or the 🖨 Print button on /leads/[id], we
+   want a clean one-page handout: no nav, no sticky bars, no modals, no
+   buttons — just the lead cards laid out top-to-bottom in black on white.
+   All other pages inherit the same nav/button suppression which is fine —
+   the lead-detail page is the only one currently expected to be printed.
+   ─────────────────────────────────────────────────────────────────────── */
+@media print {
+  /* Strip the app chrome: global sidebar/topbar, mobile shell header + bottom
+     nav, modals, every sticky element, every "stuck-to-bottom" floating bar,
+     and every <button> (they're action triggers, useless on paper). */
+  nav,
+  .mobile-shell-header,
+  .mobile-shell-bottom-nav,
+  [class*="sticky"],
+  [class*="bottom-0"],
+  [class*="fixed"],
+  button,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Body lock helper used by modals must not blank the page when printing
+     (some browsers fire print() while modal-open is still set). */
+  body.modal-open {
+    overflow: visible !important;
+    touch-action: auto;
+  }
+
+  /* Force a print-friendly canvas: white background, black ink, full width,
+     no theme-dependent surface colours bleeding through. */
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt;
+  }
+  body {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Show ALL lead cards regardless of the active mobile tab — the mobile
+     tab CSS above hides non-matching [data-lead-section] cards via
+     display:none, which print would otherwise inherit. Override here so
+     Overview + Timeline + Actions + Projects + Admin all print together. */
+  [data-lead-section] {
+    display: block !important;
+  }
+
+  /* Keep cards together — avoid splitting a single card across two pages.
+     `break-inside: avoid` is the modern spelling, `page-break-inside: avoid`
+     is the legacy one — both ship for browser coverage. */
+  .card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    border: 1px solid #cccccc !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Collapse the 2-column grid into a single stacked column so cards print
+     in natural reading order (left column then right column). */
+  .grid {
+    display: block !important;
+  }
+
+  /* Make sure links print as plain text — no underline noise on every
+     phone/email span. The URL itself stays in the DOM if needed. */
+  a {
+    color: #000000 !important;
+    text-decoration: none !important;
+  }
+
+  /* Print header — branded one-line banner at the top of page 1. Plain
+     content string (no attr() dependency) so it renders reliably across
+     Chromium, Firefox, and WebKit print engines. */
+  body::before {
+    content: "White Collar Realty — Client briefing";
+    display: block;
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0b1a33 !important;
+    border-bottom: 2px solid #c9a24b;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Standard A4 margins — leaves room for the printer's hard edge plus a
+     bit of breathing space around the briefing. */
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+}

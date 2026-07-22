@@ -1,0 +1,20 @@
+node_modules/
+.next/
+out/
+*.log
+.env
+.env.local
+.env*.local
+prisma/dev.db
+prisma/dev.db-journal
+.DS_Store
+*.tsbuildinfo
+.claude/
+# Local data backups (lead PII / correction snapshots) — never commit
+backups/
+# Deploy safety: local-only state + log (machine-specific)
+.last-deploy-sha
+docs/DEPLOY_LOG.md
+
+# Generated review/report snapshots (contain PII — regenerate on demand)
+docs/reviews/
