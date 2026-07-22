@@ -1,11 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
-  "buildCommand": "printf '\\n>>> REFUSING TO BUILD ON VERCEL.\\n>>> This site is prerendered by headless Chrome (scripts/prerender.mjs) over 30\\n>>> routes. A Vercel build container has no guaranteed Chrome, so building here\\n>>> would ship an empty SPA shell and silently delete 30 crawlable pages.\\n>>> Deployments are made by .github/workflows/deploy.yml, which builds and\\n>>> prerenders on a GitHub runner and ships with `vercel deploy --prebuilt`.\\n>>> To deploy: push to main (or open a PR) and let that workflow run.\\n\\n' >&2; exit 1",
+  "buildCommand": "npm run build:static",
   "outputDirectory": "dist",
-  "git": {
-    "deploymentEnabled": false
-  },
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [

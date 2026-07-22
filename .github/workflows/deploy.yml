@@ -37,10 +37,15 @@
 # ============================================================
 name: Deploy
 
+# DEPLOY PATH: this repo now deploys via Vercel's own Git integration —
+# vercel.json runs `npm run build:static` (build + prerender via @sparticuz
+# headless Chromium) on every push, no secrets required. This workflow is the
+# alternative "prebuilt on a GitHub runner" path (reliable Chrome, full
+# prerender) and runs only when triggered by hand, to avoid double-deploying.
+# To use it: add VERCEL_TOKEN/ORG_ID/PROJECT_ID secrets, disable Vercel's Git
+# integration, then run it from the Actions tab.
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: deploy-${{ github.ref }}
