@@ -10,8 +10,13 @@
 // ============================================================
 "use strict";
 
-const axios = require("axios");
 const { config } = require("../config/env");
+
+// Node's built-in fetch (Node 18+) is used instead of axios here on purpose:
+// Apps Script answers a POST with a 302 to script.googleusercontent.com, and
+// fetch follows that hop as a GET exactly like the browser does. axios (via
+// follow-redirects) re-POSTs to the echo URL, which 405s / hangs — the same
+// behaviour that made the browser choose text/plain in the first place.
 
 /**
  * Build the payload the Apps Script expects. The script writes columns named
@@ -70,22 +75,43 @@ async function forwardLead(lead, extra) {
 
   const payload = buildSheetPayload(lead, extra);
 
-  const res = await axios.post(config.googleScriptUrl, JSON.stringify(payload), {
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    timeout: config.googleTimeoutMs,
-    maxRedirects: 5, // Apps Script 302s to script.googleusercontent.com
-    // Treat only 2xx as success; anything else throws and is logged.
-    validateStatus: (s) => s >= 200 && s < 300,
-  });
+  // Manual timeout — fetch has no timeout option; AbortController provides it.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), config.googleTimeoutMs);
+
+  let res;
+  try {
+    res = await fetch(config.googleScriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      redirect: "follow", // follow the 302 → googleusercontent echo, as a GET
+      signal: controller.signal,
+    });
+  } catch (e) {
+    const err = new Error(e.name === "AbortError" ? "Apps Script timed out" : e.message);
+    err.code = "sheets_unreachable";
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (!res.ok) {
+    const err = new Error(`Apps Script HTTP ${res.status}`);
+    err.code = "sheets_http_error";
+    throw err;
+  }
 
   // The script returns { success: boolean }. A 200 with success:false means it
   // read the lead and refused it (e.g. its own honeypot) — surface that.
-  const data = res.data;
-  const accepted =
-    data == null ||
-    data === "" ||
-    data.success === true ||
-    (typeof data === "string" && !/"success"\s*:\s*false/.test(data));
+  const text = await res.text();
+  let data = null;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    /* non-JSON 200 — treat as accepted below */
+  }
+  const accepted = data == null || data.success === true || !/"success"\s*:\s*false/.test(text);
 
   if (!accepted) {
     const err = new Error((data && data.error) || "Apps Script rejected the lead");
