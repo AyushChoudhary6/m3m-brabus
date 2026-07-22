@@ -212,7 +212,7 @@ h1, h2, h3, h4 {
    (0.94) the glyph box is shorter than the letters, so descenders (g, y — worst
    on the italic serif accent) were being clipped. Add bottom room for them and
    pull it back with an equal negative margin so line spacing is unchanged. */
-.ed-line { display: block; overflow: hidden; padding-bottom: 0.18em; margin-bottom: -0.18em; }
+.ed-line { display: block; overflow: hidden; padding-bottom: 0.32em; margin-bottom: -0.32em; }
 .ed-line > span { display: block; will-change: transform; }
 
 /* Slow ambient breath on framed imagery */

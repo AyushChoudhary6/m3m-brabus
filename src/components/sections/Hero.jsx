@@ -139,7 +139,10 @@ export default function Hero() {
 
           // ---- entrance ----
           gsap.set(videoWrap.current, { autoAlpha: 0, scale: 1.12, filter: "blur(16px)" });
-          gsap.set(q(".ed-line > span"), { yPercent: 112 });
+          // 140% (not just >100%) so the slide-up start stays fully below the
+          // mask even with the descender padding on .ed-line (else a sliver of
+          // the letter-tops would peek at the bottom before the reveal).
+          gsap.set(q(".ed-line > span"), { yPercent: 140 });
           gsap.set(q(".hero-fade"), { autoAlpha: 0, y: 20 });
 
           gsap
