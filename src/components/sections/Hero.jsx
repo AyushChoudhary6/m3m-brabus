@@ -242,8 +242,9 @@ export default function Hero() {
             <div className="gold-glow pointer-events-none absolute -inset-1/4 [background:radial-gradient(38%_38%_at_26%_22%,rgba(201,168,106,0.16),transparent_66%)]" />
             <div className="grain pointer-events-none absolute inset-0" />
 
-            {/* content */}
-            <div className="relative z-10 flex h-full flex-col justify-between p-6 md:p-10 lg:p-14">
+            {/* content — extra top padding on mobile so the ledger clears the
+                fixed navbar logo (they overlapped at phone widths). */}
+            <div className="relative z-10 flex h-full flex-col justify-between p-6 pt-20 md:p-10 lg:p-14">
               {/* top ledger */}
               <div className="hero-fade flex items-center justify-between">
                 <span className="kicker text-champagne">{PROJECT.developer} · with {PROJECT.partner}</span>

@@ -29,7 +29,7 @@ export default function WhatsAppFloat() {
 
   return (
     <div
-      className={`fixed right-4 z-[45] flex flex-col gap-3 transition-all duration-500 ease-lux lg:right-6 ${
+      className={`fixed right-4 z-[45] hidden flex-col gap-3 transition-all duration-500 ease-lux lg:flex lg:right-6 ${
         up ? "opacity-100" : "pointer-events-none translate-y-2 opacity-0"
       } bottom-24 lg:bottom-8`}
     >

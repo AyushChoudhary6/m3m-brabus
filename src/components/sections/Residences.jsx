@@ -130,7 +130,10 @@ export default function Residences() {
             <article key={r.id} className="res-card group [perspective:1400px]" data-cursor="VIEW">
               {/* tilting plate — typographic, no photograph */}
               <div className="res-tilt relative [transform-style:preserve-3d]">
-                <div className="res-plate relative flex aspect-[4/5] flex-col justify-between overflow-hidden rounded-[1.5rem] border border-line bg-paper p-6 transition-colors duration-500 group-hover:border-brass/50 sm:p-8">
+                {/* Mobile: size to content (no fixed aspect) so the feature list
+                    never clips and there's no empty image void; the plate keeps
+                    its gallery-plate 4:5 aspect on desktop. */}
+                <div className="res-plate relative flex flex-col justify-start gap-12 overflow-hidden rounded-[1.5rem] border border-line bg-paper p-6 transition-colors duration-500 group-hover:border-brass/50 sm:p-8 md:aspect-[4/5] md:justify-between md:gap-0">
                   {/* decorative only — a lit corner and a travelling gold glare,
                       depicting nothing and captioned as nothing */}
                   <div className="pointer-events-none absolute inset-0 [background:radial-gradient(120%_90%_at_10%_0%,rgba(201,168,106,0.14),transparent_60%)]" />
