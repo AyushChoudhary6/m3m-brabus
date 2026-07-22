@@ -106,8 +106,9 @@ export default function Lifestyle() {
        ratio of travel to section height. Same feel, one card longer. */
     <section ref={root} id="lifestyle" className="relative md:h-[280vh]">
       <div className="flex flex-col md:sticky md:top-0 md:h-svh md:overflow-hidden">
-        {/* header */}
-        <div className="container-lux pt-[clamp(4rem,11vh,7rem)] md:pt-[13vh]">
+        {/* header — kept compact on desktop so the cards below have room to fit
+            the sticky viewport without their bottoms being clipped. */}
+        <div className="container-lux pt-[clamp(4rem,11vh,7rem)] md:pt-[9vh]">
           <div className="grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
             <div className="flex items-baseline gap-5">
               <span className="idx">05</span>
@@ -141,7 +142,7 @@ export default function Lifestyle() {
               return (
                 <article
                   key={p.n}
-                  className="amen group relative flex min-h-[max(26rem,calc(78vw*4/3))] w-[78vw] flex-none flex-col overflow-hidden rounded-[1.25rem] border border-line bg-paper transition-colors duration-500 hover:border-brass/40 sm:min-h-[calc(58vw*4/3)] sm:w-[58vw] md:min-h-[calc(30vw*4/3)] md:w-[30vw] lg:min-h-[calc(26vw*4/3)] lg:w-[26vw]"
+                  className="amen group relative flex min-h-[max(26rem,calc(78vw*4/3))] w-[78vw] flex-none flex-col overflow-hidden rounded-[1.25rem] border border-line bg-paper transition-colors duration-500 hover:border-brass/40 sm:min-h-[calc(58vw*4/3)] sm:w-[58vw] md:h-[clamp(20rem,58vh,30rem)] md:min-h-0 md:w-[30vw] lg:w-[26vw]"
                 >
                   <div
                     aria-hidden="true"
@@ -198,7 +199,7 @@ export default function Lifestyle() {
             <Link
               to="/amenities"
               data-cursor="OPEN"
-              className="amen group relative flex min-h-[max(26rem,calc(78vw*4/3))] w-[78vw] flex-none flex-col overflow-hidden rounded-[1.25rem] border border-brass/25 bg-paper transition-colors duration-500 hover:border-brass/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass sm:min-h-[calc(58vw*4/3)] sm:w-[58vw] md:min-h-[calc(30vw*4/3)] md:w-[30vw] lg:min-h-[calc(26vw*4/3)] lg:w-[26vw]"
+              className="amen group relative flex min-h-[max(26rem,calc(78vw*4/3))] w-[78vw] flex-none flex-col overflow-hidden rounded-[1.25rem] border border-brass/25 bg-paper transition-colors duration-500 hover:border-brass/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass sm:min-h-[calc(58vw*4/3)] sm:w-[58vw] md:h-[clamp(20rem,58vh,30rem)] md:min-h-0 md:w-[30vw] lg:w-[26vw]"
             >
               <div
                 aria-hidden="true"
