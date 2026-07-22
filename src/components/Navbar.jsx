@@ -117,13 +117,18 @@ export default function Navbar() {
       <header
         ref={navRef}
         className={clsx(
-          "fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,padding] duration-500 ease-lux",
+          "fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-[background-color,border-color] duration-500 ease-lux",
           scrolled
-            ? "border-b border-line/70 bg-canvas/85 py-4 backdrop-blur-xl"
-            : "border-b border-transparent bg-transparent py-6"
+            ? "border-b border-line/70 bg-canvas/85 backdrop-blur-xl"
+            : "border-b border-transparent bg-transparent"
         )}
       >
-        <div className="flex items-center justify-between gap-6 px-[var(--spacing-gutter)]">
+        <div
+          className={clsx(
+            "flex items-center justify-between gap-6 px-[var(--spacing-gutter)] transition-[padding] duration-500 ease-lux",
+            scrolled ? "py-4" : "py-6"
+          )}
+        >
           <Link to="/" className="nav-logo flex shrink-0 items-baseline gap-2 leading-none">
             <span className="font-display text-2xl tracking-[-0.01em] text-ink">M3M</span>
             <span className="font-serif text-2xl italic text-brass">Brabus</span>
