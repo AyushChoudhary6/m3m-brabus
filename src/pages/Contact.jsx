@@ -2,7 +2,8 @@ import { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { Phone, Mail, MapPin, MessageCircle, ArrowRight, ArrowUpRight, CalendarCheck, FileDown } from "lucide-react";
+import { Phone, Mail, MapPin, ArrowRight, ArrowUpRight, CalendarCheck, FileDown } from "lucide-react";
+import WhatsAppIcon from "../components/ui/WhatsAppIcon.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
@@ -98,7 +99,7 @@ export default function Contact() {
 
   const CHANNELS = [
     { icon: Phone, k: t("contact.chSales"), v: PROJECT.phone, href: `tel:${PROJECT.phone}` },
-    { icon: MessageCircle, k: "WhatsApp", v: t("contact.chWhatsappValue"), href: `https://wa.me/${PROJECT.whatsapp}` },
+    { icon: WhatsAppIcon, k: "WhatsApp", v: t("contact.chWhatsappValue"), href: `https://wa.me/${PROJECT.whatsapp}` },
     { icon: Mail, k: t("contact.chEmail"), v: PROJECT.email, href: `mailto:${PROJECT.email}` },
     { icon: MapPin, k: t("contact.chAddress"), v: PROJECT.address, href: "/location" },
   ];

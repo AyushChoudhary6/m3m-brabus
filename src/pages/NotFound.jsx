@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowUpRight, Phone, MessageCircle, RotateCw } from "lucide-react";
+import { ArrowUpRight, Phone, RotateCw } from "lucide-react";
+import WhatsAppIcon from "../components/ui/WhatsAppIcon.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo from "../components/ui/Seo.jsx";
 import { Reveal } from "../components/ui/Reveal.jsx";
@@ -153,7 +154,7 @@ export default function NotFound() {
                     onClick={() => trackWhatsApp("404")}
                     className="mono inline-flex items-center gap-2 text-[0.68rem] tracking-[0.18em] text-ink-soft transition-colors hover:text-ink"
                   >
-                    <MessageCircle size={13} className="text-brass" />
+                    <WhatsAppIcon size={13} className="text-brass" />
                     WhatsApp
                   </a>
                 </div>

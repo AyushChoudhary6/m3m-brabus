@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { MessageCircle, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
+import WhatsAppIcon from "./WhatsAppIcon.jsx";
 import { trackWhatsApp, trackCall } from "../../lib/analytics.js";
 import { whatsappUrl } from "../../lib/whatsapp.js";
 import { useI18n } from "../../lib/i18n.jsx";
@@ -44,7 +45,7 @@ export default function WhatsAppFloat() {
         data-cursor="CHAT"
         className="group grid h-12 w-12 place-items-center rounded-full bg-[#25D366] text-white shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)] transition-transform duration-300 hover:scale-105 lg:h-14 lg:w-14"
       >
-        <MessageCircle size={22} />
+        <WhatsAppIcon size={22} />
       </a>
       <a
         href={`tel:${PROJECT.phone}`}

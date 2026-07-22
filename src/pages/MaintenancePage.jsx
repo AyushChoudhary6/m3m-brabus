@@ -1,4 +1,5 @@
-import { Phone, MessageCircle, RotateCw } from "lucide-react";
+import { Phone, RotateCw } from "lucide-react";
+import WhatsAppIcon from "../components/ui/WhatsAppIcon.jsx";
 import Seo from "../components/ui/Seo.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT } from "../lib/site.js";
@@ -86,7 +87,7 @@ export default function MaintenancePage() {
             onClick={() => trackWhatsApp("Maintenance")}
             className="mono inline-flex items-center gap-2 rounded-full border border-line px-6 py-4 text-[0.66rem] tracking-[0.18em] text-ink-soft transition-colors hover:border-brass/50 hover:text-brass"
           >
-            <MessageCircle size={14} className="text-brass" />
+            <WhatsAppIcon size={14} className="text-brass" />
             {t("maintenance.whatsappTeam")}
           </a>
         </div>

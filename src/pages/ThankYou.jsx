@@ -3,7 +3,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Phone, MessageCircle, Download, PhoneCall, FileText, CalendarCheck } from "lucide-react";
+import { ArrowUpRight, Phone, Download, PhoneCall, FileText, CalendarCheck } from "lucide-react";
+import WhatsAppIcon from "../components/ui/WhatsAppIcon.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo from "../components/ui/Seo.jsx";
 import { useEnquiry } from "../components/ui/Enquiry.jsx";
@@ -227,7 +228,7 @@ export default function ThankYou() {
                 onClick={() => trackWhatsApp("thank_you")}
                 className="group inline-flex items-center gap-2.5 rounded-full border border-line px-7 py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors duration-500 hover:border-brass/50 hover:text-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
               >
-                <MessageCircle size={14} className="text-brass" />
+                <WhatsAppIcon size={14} className="text-brass" />
                 WhatsApp
               </a>
             </div>

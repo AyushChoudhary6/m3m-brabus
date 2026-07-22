@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
-import { Phone, MessageCircle, CalendarCheck, Download } from "lucide-react";
+import { Phone, CalendarCheck, Download } from "lucide-react";
+import WhatsAppIcon from "./ui/WhatsAppIcon.jsx";
 import { useEnquiry } from "./ui/Enquiry.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT } from "../lib/site.js";
@@ -60,7 +61,7 @@ export default function MobileCTA() {
         aria-label={label("m.whatsappAria", { en: "Chat on WhatsApp", ar: "الدردشة عبر واتساب" })}
         className={`${cell} border-s border-line text-ink`}
       >
-        <MessageCircle size={17} className="text-[#25D366]" aria-hidden="true" />
+        <WhatsAppIcon size={17} className="text-[#25D366]" aria-hidden="true" />
         <span>{t("m.whatsapp")}</span>
       </a>
 
