@@ -52,7 +52,7 @@ const PANELS = [
   // A renamed or retired category should surface as a build-time failure, not
   // as a silently empty plate in the tour.
   if (!c) throw new Error(`Lifestyle: no amenity category "${cat}"`);
-  return { n, d, icon: c.icon, items: c.items };
+  return { n, d, img: cat, icon: c.icon, items: c.items };
 });
 
 const TOTAL = PANELS.length + 1; // the index card closes the sequence
@@ -125,7 +125,7 @@ export default function Lifestyle() {
             </div>
             {/* Said once, plainly, rather than implied by a missing picture. */}
             <p className="mono max-w-[46ch] text-[0.56rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-              Described, not depicted — no amenity photography has been released for this address
+              Representative imagery · these are not photographs of this address
             </p>
           </div>
         </div>
@@ -149,6 +149,22 @@ export default function Lifestyle() {
                     className="pointer-events-none absolute inset-0 opacity-90 transition-opacity duration-700 ease-lux group-hover:opacity-100"
                     style={{ background: field(i) }}
                   />
+                  {/* Representative amenity photograph — royalty-free, self-hosted,
+                      NOT a render of this project. It fills the top of the card
+                      and fades into the card bg so the text below stays legible. */}
+                  <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[62%] overflow-hidden rounded-t-[1.25rem]">
+                    <picture>
+                      <source type="image/webp" srcSet={`/renders/lifestyle/${p.img}.webp`} />
+                      <img
+                        src={`/renders/lifestyle/${p.img}.jpg`}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover opacity-[0.72] transition-[transform,opacity] duration-[1200ms] ease-lux group-hover:scale-[1.04] group-hover:opacity-90"
+                      />
+                    </picture>
+                    <div className="absolute inset-0 [background:linear-gradient(180deg,rgba(14,11,8,0.35)_0%,rgba(27,22,15,0.35)_45%,var(--color-paper)_100%)]" />
+                  </div>
                   {/* watermark numeral — the sequence, set large and nearly out */}
                   <span
                     aria-hidden="true"
