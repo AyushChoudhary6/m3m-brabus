@@ -1,0 +1,12 @@
+# Backend
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Prisma generated client
+prisma/generated/
+
+# Logs
+*.log
+npm-debug.log*

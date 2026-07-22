@@ -1,0 +1,60 @@
+// ============================================================
+// Prisma schema — Neon PostgreSQL.
+//
+// This is the PRIMARY data store for leads (Google Sheets stays as a business
+// backup, written in parallel by the backend). The model is intentionally CRM-
+// shaped so it maps cleanly onto White Collar CRM later without a frontend or
+// API change — see server/README.md "Future CRM support".
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// A single enquiry captured from any CTA form on the site.
+model Lead {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Core lead fields (what the CRM cares about)
+  name    String  @db.VarChar(120)
+  phone   String  @db.VarChar(20)
+  email   String? @db.VarChar(160)
+  project String? @db.VarChar(160) // configuration / project of interest
+  budget  String? @db.VarChar(80)
+  message String? @db.Text
+
+  // Lifecycle
+  source String @default("Website") @db.VarChar(60)
+  status String @default("Fresh Lead") @db.VarChar(40)
+
+  // Provenance & attribution (nullable — present only when the client sends them)
+  page        String? @db.VarChar(255)
+  ipAddress   String? @map("ip_address") @db.VarChar(64)
+  utmSource   String? @map("utm_source") @db.VarChar(120)
+  utmMedium   String? @map("utm_medium") @db.VarChar(120)
+  utmCampaign String? @map("utm_campaign") @db.VarChar(160)
+  referrer    String? @db.VarChar(512)
+  device      String? @db.VarChar(40)
+
+  // Anti-abuse triage signals (soft — recorded, not used to reject)
+  spamScore Int?    @map("spam_score")
+  fillMs    Int?    @map("fill_ms")
+
+  // Idempotency key shared with the retrying client and Google Sheets, so a
+  // buyer on a flaky connection produces one lead, not several.
+  externalId String? @unique @map("external_id") @db.VarChar(64)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([phone])
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@map("leads")
+}

@@ -19,8 +19,19 @@
 import { getAttribution } from "./attribution.js";
 import { screenLead, rememberSubmission, resetTimer } from "./spam.js";
 
-const ENDPOINT =
+// The Apps Script the site has always used. Kept as the fallback so the live
+// site never breaks: if the backend URL is not configured, leads go straight
+// here exactly as before.
+const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycby15y1STKpEpp6FoRC21qLwDi7NLinkjZ1yqEXQJFKHjvXHNwKNYvAMSsLD4BKZsf9NAg/exec";
+
+// When VITE_API_URL is set, every lead goes to OUR backend (POST /api/leads),
+// which validates it, persists it to Neon (primary) and forwards it to the same
+// Apps Script (backup) — see server/. One request from the browser; the backend
+// does the rest. When unset, we post to Apps Script directly, as before.
+const API_BASE =
+  (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_URL) || "";
+const ENDPOINT = API_BASE ? `${API_BASE.replace(/\/+$/, "")}/api/leads` : APPS_SCRIPT_URL;
 
 const KEY_QUEUE = "mb-lead-queue";
 const KEY_LOCK = "mb-lead-flush"; // crude cross-tab mutex so two tabs don't double-post
@@ -144,7 +155,13 @@ async function postOnce(payload) {
     return { ok: false, retry: true, error: e?.message || "Network error" };
   }
 
-  if (!res.ok) return { ok: false, retry: true, error: `HTTP ${res.status}` };
+  if (!res.ok) {
+    // A 4xx (other than 429) means the request itself was rejected — a validation
+    // failure or hard refusal. Replaying identical bytes will be refused again,
+    // so don't queue it. 429 (rate limit) and 5xx are transient → retry.
+    const retry = res.status === 429 || res.status >= 500;
+    return { ok: false, retry, error: `HTTP ${res.status}` };
+  }
 
   const out = await res.json().catch(() => null);
 
