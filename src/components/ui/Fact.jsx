@@ -12,15 +12,19 @@ export default function Fact({ fact, className = "" }) {
   const known = Boolean(fact.value);
 
   return (
-    <div className={`group flex gap-4 ${className}`}>
-      <span className="mt-0.5 shrink-0 text-brass" aria-hidden="true">
+    {/* Icon sits ABOVE the text on phones. Beside it, the icon plus its gap took
+        ~36px of a ~195px two-up cell, which left too little room for even a
+        two-word label like "Request details" — it wrapped every time. Stacked,
+        the label gets the full cell width and fits on one line. */}
+    <div className={`group flex flex-col gap-2.5 sm:flex-row sm:gap-4 ${className}`}>
+      <span className="shrink-0 text-brass sm:mt-0.5" aria-hidden="true">
         <Icon size={20} strokeWidth={1.4} />
       </span>
       <div className="min-w-0">
         <p className="mono text-[0.58rem] leading-relaxed tracking-[0.2em] text-ink-faint">{fact.label}</p>
 
         {known ? (
-          <p className="mt-1.5 text-balance font-display text-base font-light leading-snug text-ink sm:text-lg">
+          <p className="mt-1.5 text-balance font-display text-[0.95rem] font-light leading-snug text-ink sm:text-lg">
             {fact.value}
           </p>
         ) : (
@@ -32,7 +36,7 @@ export default function Fact({ fact, className = "" }) {
           <button
             type="button"
             onClick={() => openEnquiry(fact.label)}
-            className="mt-1.5 text-balance text-left font-display text-base font-light leading-snug text-brass transition-colors hover:text-brass-soft sm:text-lg"
+            className="mt-1.5 text-balance text-left font-display text-[0.95rem] font-light leading-snug text-brass transition-colors hover:text-brass-soft sm:text-lg"
           >
             {fact.cta || "On request"}
             <ArrowUpRight
