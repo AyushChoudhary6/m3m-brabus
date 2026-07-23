@@ -175,12 +175,16 @@ export default function Navbar() {
               <Download size={13} className="transition-transform duration-500 group-hover:translate-y-0.5" />
               {t("nav.brochure")}
             </button>
+            {/* Hidden from 1180px up — the exact width the inline links appear at.
+                Below that the bar has no links, so the burger is the only
+                navigation and must stay (hiding it at lg would leave 1024–1180px
+                with no nav at all). */}
             <button
               aria-label="Open menu"
               aria-expanded={open}
               onClick={() => setOpen(true)}
               data-cursor="OPEN"
-              className="mono flex items-center gap-2 text-[0.8rem] tracking-[0.16em] text-ink transition-colors hover:text-brass"
+              className="mono flex items-center gap-2 text-[0.8rem] tracking-[0.16em] text-ink transition-colors hover:text-brass min-[1180px]:hidden"
             >
               <span className="hidden sm:inline">{t("nav.menu")}</span>
               <Menu size={18} />
