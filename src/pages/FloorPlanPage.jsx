@@ -274,9 +274,6 @@ export default function FloorPlanPage() {
             ))}
           </dl>
         </div>
-        <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          {t("floorplan.footFigures")}
-        </p>
       </section>
 
       {/* plan questions */}
