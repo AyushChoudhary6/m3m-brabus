@@ -2,11 +2,9 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { ArrowUpRight } from "lucide-react";
 import Fact from "../ui/Fact.jsx";
-import { useEnquiry } from "../ui/Enquiry.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
-import { PROJECT_FACTS, PRICE, OFFICIAL_SOURCE, hasValue } from "../../lib/facts.js";
+import { PROJECT_FACTS, PRICE, hasValue } from "../../lib/facts.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -25,12 +23,9 @@ const KNOWN_COUNT = FACTS.filter(hasValue).length;
 /* Qualifiers are honest but wordy, and wordy kills a scan grid. They are
    lifted out to numbered footnotes directly beneath, so the grid stays
    readable at five columns without a single caveat being dropped. */
-const NOTED = FACTS.filter((f) => f.note);
-const NOTE_INDEX = new Map(NOTED.map((f, i) => [f.key, i + 1]));
 
 export default function ProjectHighlights() {
   const root = useRef(null);
-  const { openEnquiry } = useEnquiry();
   const { t } = useI18n();
 
   useGSAP(
@@ -48,10 +43,6 @@ export default function ProjectHighlights() {
           scrollTrigger: { trigger: q(".ph-grid")[0], start: "top 88%" },
         });
 
-        gsap.from(q(".ph-foot"), {
-          autoAlpha: 0, y: 14, duration: 0.7, ease: "power3.out",
-          scrollTrigger: { trigger: q(".ph-grid")[0], start: "bottom 92%" },
-        });
       });
     },
     { scope: root },
@@ -81,7 +72,6 @@ export default function ProjectHighlights() {
         <ul className="ph-grid grid list-none grid-cols-2 gap-px border border-line bg-line p-0 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {FACTS.map(({ note, ...fact }) => {
             const known = hasValue(fact);
-            const marker = NOTE_INDEX.get(fact.key);
             return (
               <li
                 key={fact.key}
@@ -99,49 +89,12 @@ export default function ProjectHighlights() {
                 <div className="relative">
                   <Fact fact={fact} />
                 </div>
-                {marker && (
-                  <span className="mono absolute right-4 top-5 text-[0.5rem] tracking-[0.1em] text-brass/60" aria-hidden="true">
-                    {marker}
-                  </span>
-                )}
                 <span className="pointer-events-none absolute inset-x-0 bottom-0 h-px w-0 bg-brass transition-all duration-700 ease-lux group-hover/cell:w-full" />
               </li>
             );
           })}
         </ul>
 
-        <div className="ph-foot mt-8 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
-          <ol className="list-none space-y-2 p-0">
-            {NOTED.map((f, i) => (
-              <li key={f.key} className="flex gap-3 text-xs leading-relaxed text-ink-faint">
-                <span className="mono shrink-0 text-[0.5rem] tracking-[0.1em] text-brass/60">{i + 1}</span>
-                <span>
-                  <span className="text-ink-soft">{f.label}</span> — {f.note}
-                </span>
-              </li>
-            ))}
-          </ol>
-
-          <div className="flex flex-wrap items-center gap-x-7 gap-y-4 lg:justify-end">
-            <button
-              type="button"
-              onClick={() => openEnquiry("Project highlights")}
-              data-cursor="ASK"
-              className="group/cta inline-flex items-center gap-2.5 border-b border-brass/50 pb-1 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors hover:border-brass focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
-            >
-              {t("shighlights.askUnpublished")}
-              <ArrowUpRight size={14} className="transition-transform duration-500 group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-0.5" />
-            </button>
-            <a
-              href={OFFICIAL_SOURCE}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mono text-[0.58rem] tracking-[0.18em] text-ink-faint transition-colors hover:text-ink-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
-            >
-              {t("shighlights.sourceListing")}
-            </a>
-          </div>
-        </div>
       </div>
     </section>
   );
