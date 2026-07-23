@@ -121,10 +121,6 @@ export default function Lifestyle() {
             <div className="hidden h-px w-full max-w-40 origin-left bg-line md:block">
               <div className="life-bar h-px w-full origin-left scale-x-0 bg-brass" />
             </div>
-            {/* Said once, plainly, rather than implied by a missing picture. */}
-            <p className="mono max-w-[46ch] text-[0.56rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-              {t("slifestyle.repImagery")}
-            </p>
           </div>
         </div>
 
