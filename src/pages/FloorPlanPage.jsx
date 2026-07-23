@@ -182,11 +182,15 @@ export default function FloorPlanPage() {
             <p className="rise-b mt-6 max-w-[52ch] leading-relaxed text-ink-soft">
               {t("floorplan.openCoreIntro")}
             </p>
-            <dl className="mt-8 border-t border-line">
+            {/* Two columns from sm up. Stacked, these four rows made the section
+                taller than the viewport, so the heading was already scrolling off
+                before the last point was read — the argument is meant to be taken
+                in at once. Paired, the whole block sits in a single view. */}
+            <dl className="mt-7 grid border-t border-line sm:grid-cols-2 sm:gap-x-10">
               {OPEN_CORE.map((o) => (
-                <div key={o.tKeyT} className="rise-b border-b border-line py-5">
+                <div key={o.tKeyT} className="rise-b border-b border-line py-4">
                   <dt className="font-display text-lg text-ink">{t(o.tKeyT)}</dt>
-                  <dd className="mt-2 max-w-[52ch] text-sm leading-relaxed text-ink-soft">{t(o.tKeyD)}</dd>
+                  <dd className="mt-1.5 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{t(o.tKeyD)}</dd>
                 </div>
               ))}
             </dl>
