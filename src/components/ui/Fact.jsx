@@ -11,11 +11,11 @@ export default function Fact({ fact, className = "" }) {
   const Icon = icon(fact.icon);
   const known = Boolean(fact.value);
 
+  /* Icon sits ABOVE the text on phones. Beside it, the icon plus its gap took
+     ~36px of a ~195px two-up cell, which left too little room for even a
+     two-word label like "Request details" — it wrapped every time. Stacked, the
+     label gets the full cell width and fits on one line. */
   return (
-    {/* Icon sits ABOVE the text on phones. Beside it, the icon plus its gap took
-        ~36px of a ~195px two-up cell, which left too little room for even a
-        two-word label like "Request details" — it wrapped every time. Stacked,
-        the label gets the full cell width and fits on one line. */}
     <div className={`group flex flex-col gap-2.5 sm:flex-row sm:gap-4 ${className}`}>
       <span className="shrink-0 text-brass sm:mt-0.5" aria-hidden="true">
         <Icon size={20} strokeWidth={1.4} />
