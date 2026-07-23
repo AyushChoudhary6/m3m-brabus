@@ -171,7 +171,10 @@ export default function FloorPlanPage() {
       {/* open-core, explained */}
       <section className="container-lux py-[clamp(4rem,11vh,7rem)]">
 
-        <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+        {/* items-stretch so the figure matches the column beside it. With a fixed
+            aspect ratio its height came from its width alone, so the taller text
+            column left a growing well of empty space under the image. */}
+        <div className="grid items-stretch gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div>
             <h2 className="rise-b max-w-[18ch] font-display text-[clamp(1.9rem,4.4vw,3.2rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
               {t("floorplan.openCoreTitle")} <span className="font-serif italic text-brass">{t("floorplan.plainLanguage")}</span>
@@ -189,7 +192,8 @@ export default function FloorPlanPage() {
             </dl>
           </div>
 
-          <figure className="fp-img-wrap relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-line">
+          {/* Keeps its 4:5 crop while stacked; fills the row once side by side. */}
+          <figure className="fp-img-wrap relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-line lg:aspect-auto lg:h-full lg:min-h-[30rem]">
             <div className="fp-img-inner ed-breath absolute inset-0 scale-[1.06]">
               <Media
                 src={px(IMG.livingRoom, 1400)}
