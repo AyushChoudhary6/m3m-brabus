@@ -246,16 +246,14 @@ export default function ReviewsPage() {
         <p className="blk mb-8 max-w-[62ch] leading-relaxed text-ink-soft">
           {t("reviews.verifyIntro")}
         </p>
-        <ol className="border-t border-line">
-          {VERIFY.map((v, i) => (
-            <li
-              key={v.id}
-              className="blk grid grid-cols-1 gap-2 border-b border-line py-6 sm:grid-cols-[minmax(0,3rem)_1fr] sm:gap-8"
-            >
-              <div>
-                <h2 className="font-display text-xl text-ink md:text-2xl">{v.t}</h2>
-                <p className="mt-2.5 max-w-[62ch] text-sm leading-relaxed text-ink-soft">{v.d}</p>
-              </div>
+        {/* The 3rem track here held the removed numeral and was indenting every
+            row against nothing. Paired into two columns so the checklist reads
+            in one view. */}
+        <ol className="grid border-t border-line md:grid-cols-2 md:gap-x-12">
+          {VERIFY.map((v) => (
+            <li key={v.id} className="blk border-b border-line py-5">
+              <h2 className="font-display text-lg text-ink md:text-xl">{v.t}</h2>
+              <p className="mt-1.5 max-w-[52ch] text-sm leading-relaxed text-ink-soft">{v.d}</p>
             </li>
           ))}
         </ol>

@@ -23,3 +23,35 @@ ${urls}
 
 await writeFile(resolve("dist/sitemap.xml"), xml, "utf8");
 console.log(`✓ sitemap.xml — ${ROUTES.length} urls`);
+
+/* robots.txt is generated here rather than kept in public/ so its Sitemap line
+   can never drift from the host the sitemap was actually written with — it had
+   been left pointing at a domain that does not resolve. */
+const robots = `# ${SITE}
+User-agent: *
+Allow: /
+
+# The brochure is delivered after the enquiry form; keep the file itself out of
+# the index so it is not handed straight to searchers.
+Disallow: /brochure/*.pdf
+
+# AI crawlers — explicitly welcomed (see PRD Ch.1: AI Search discoverability)
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: ${SITE}/sitemap.xml
+`;
+await writeFile(resolve("dist/robots.txt"), robots, "utf8");
+console.log(`✓ robots.txt — sitemap host ${SITE}`);

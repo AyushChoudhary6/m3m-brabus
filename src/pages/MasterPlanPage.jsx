@@ -257,14 +257,14 @@ export default function MasterPlanPage() {
           </figure>
         </div>
 
-        <dl className="mt-[clamp(2.5rem,7vh,4.5rem)] border-t border-line">
-          {READ.map((r, i) => (
-            <div
-              key={r.tKey}
-              className="read-row grid grid-cols-1 gap-2 border-b border-line py-6 lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-8"
-            >
-              <dt className="font-display text-xl leading-snug text-ink">{t(r.tKey)}</dt>
-              <dd className="max-w-[64ch] text-sm leading-relaxed text-ink-soft">{t(r.dKey)}</dd>
+        {/* Paired into two columns: read end to end these seven points ran a
+            quarter-screen past the fold, so the earlier ones had scrolled away
+            before the last was reached. */}
+        <dl className="mt-[clamp(2.5rem,7vh,4.5rem)] grid border-t border-line md:grid-cols-2 md:gap-x-12">
+          {READ.map((r) => (
+            <div key={r.tKey} className="read-row border-b border-line py-5">
+              <dt className="font-display text-lg leading-snug text-ink md:text-xl">{t(r.tKey)}</dt>
+              <dd className="mt-1.5 max-w-[52ch] text-sm leading-relaxed text-ink-soft">{t(r.dKey)}</dd>
             </div>
           ))}
         </dl>
@@ -431,14 +431,14 @@ export default function MasterPlanPage() {
           {t("masterplan.verifyIntro")}
         </p>
 
-        <ul className="border-t border-line">
+        <ul className="grid border-t border-line md:grid-cols-2 md:gap-x-12">
           {VERIFY.map((v) => (
             <li
               key={v}
-              className="ver-row flex items-start gap-4 border-b border-line py-4 text-ink-soft"
+              className="ver-row flex items-start gap-4 border-b border-line py-3.5 text-ink-soft"
             >
               <Check size={13} strokeWidth={2} className="mt-1.5 shrink-0 text-brass" aria-hidden="true" />
-              <span className="max-w-[72ch] leading-relaxed">{t(v)}</span>
+              <span className="max-w-[54ch] text-sm leading-relaxed">{t(v)}</span>
             </li>
           ))}
         </ul>
