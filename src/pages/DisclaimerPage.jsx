@@ -97,7 +97,6 @@ export default function DisclaimerPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Disclaimer", path: "/disclaimer" }]} />
       <PageHeader
-        eyebrow={`${t("disclaimer.eyebrow")} ${LAST_UPDATED}`}
         title={t("disclaimer.title")}
         accent={t("disclaimer.accent")}
         lede={t("disclaimer.lede")}

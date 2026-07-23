@@ -294,7 +294,6 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
     }
   };
 
-  const kicker = sent ? t("enq.received") : isVisit ? "Site visit" : isBrochure ? "Brochure" : auto ? t("enq.invitation") : subject ? `${t("enq.enquiry")} · ${subject}` : t("enq.private");
 
   // nothing rendered until the modal is asked for — the prerender captures no dialog
   if (!mounted) return null;
@@ -327,7 +326,6 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
 
         {sent ? (
           <div className="relative py-6 text-center">
-            <p className="kicker">{kicker}</p>
             <h3 className="mt-4 font-display text-[clamp(2rem,7vw,3rem)] font-light leading-[0.95] text-ink">
               {t("enq.thankYou")} <span className="font-serif italic text-brass">{form.name.split(" ")[0] || "friend"}.</span>
             </h3>
@@ -353,7 +351,6 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
           </div>
         ) : (
           <div className="relative">
-            <p className="kicker">{kicker}</p>
             <h3 className="mt-3 font-display text-[clamp(1.9rem,6vw,2.6rem)] font-light leading-[1.02] tracking-[-0.01em] text-ink">
               {isVisit ? (
                 <>Book your <span className="font-serif italic text-brass">site visit.</span></>

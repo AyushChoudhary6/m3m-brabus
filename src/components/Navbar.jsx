@@ -252,7 +252,6 @@ export default function Navbar() {
 
               <div className="flex flex-col gap-6">
                 <div>
-                  <p className="kicker">{t("nav.salesEnquiries")}</p>
                   <a
                     href={`tel:${PROJECT.phone}`}
                     className="mt-2 block font-display text-2xl text-ink transition-colors hover:text-brass"

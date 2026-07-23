@@ -148,7 +148,6 @@ export default function PricePage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Price", path: "/price" }]} />
       <PageHeader
-        eyebrow={t("price.eyebrow")}
         title={t("price.title")}
         accent={t("price.accent")}
         lede={t("price.lede").replace("{price}", PROJECT.price)}
@@ -241,7 +240,6 @@ export default function PricePage() {
           <div className="relative overflow-hidden rounded-[1.5rem] border border-brass/25 bg-paper p-8 md:p-11">
             <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
             <div className="relative">
-              <p className="rise kicker">{t("price.priceRequest")}</p>
               <h2 className="rise mt-4 max-w-[16ch] font-display text-[clamp(1.9rem,3.6vw,2.7rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
                 {t("price.beSentSheet")} <span className="font-serif italic text-brass">{t("price.dayItExists")}</span>
               </h2>

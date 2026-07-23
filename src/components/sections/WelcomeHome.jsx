@@ -87,7 +87,6 @@ export default function WelcomeHome() {
       <div className="container-lux py-[clamp(5rem,14vh,10rem)]">
         {sent ? (
           <div className="flex min-h-[46vh] flex-col items-center justify-center text-center">
-            <p className="kicker mb-8">{t("swelcome.enquiryReceived")}</p>
             <h2 className="font-display text-[clamp(3rem,11vw,9rem)] font-light leading-[0.92] text-ink">
               <span className="block overflow-hidden"><span className="welcome-word block">{t("swelcome.welcome")}</span></span>
               <span className="block overflow-hidden"><span className="welcome-word block font-serif italic text-brass">{t("swelcome.home")}</span></span>

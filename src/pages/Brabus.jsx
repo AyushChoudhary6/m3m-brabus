@@ -74,7 +74,6 @@ export default function Brabus() {
       <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: "BRABUS", path: "/brabus" }]} />
       <PageHeader
         compact
-        eyebrow={t("brabus.eyebrow")}
         title={t("brabus.title")}
         accent={t("brabus.accent")}
         lede={`${PROJECT.developer} ${t("brabus.ledePart1")} ${PROJECT.partner} ${t("brabus.ledePart2")}`}

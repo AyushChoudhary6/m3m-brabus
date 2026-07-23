@@ -139,7 +139,6 @@ export default function MasterPlanPage() {
       />
       <PageHeader
         compact
-        eyebrow={t("masterplan.eyebrow")}
         title={t("masterplan.title")}
         accent={t("masterplan.accent")}
         lede={t("masterplan.lede")}
@@ -311,7 +310,6 @@ export default function MasterPlanPage() {
           <div className="relative overflow-hidden rounded-[1.5rem] border border-brass/25 bg-paper p-8 md:p-11">
             <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
             <div className="relative">
-              <p className="rise kicker">{t("masterplan.requestKicker")}</p>
               <h2 className="rise mt-4 max-w-[18ch] font-display text-[clamp(1.9rem,3.6vw,2.7rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
                 {t("masterplan.requestTitle")}{" "}
                 <span className="font-serif italic text-brass">{t("masterplan.requestAccent")}</span>

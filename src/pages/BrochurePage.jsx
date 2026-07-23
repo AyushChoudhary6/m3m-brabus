@@ -108,7 +108,6 @@ export default function BrochurePage() {
       />
       <Breadcrumbs trail={[{ name: t("breadcrumb.home"), path: "/" }, { name: t("breadcrumb.brochure"), path: "/brochure" }]} />
       <PageHeader
-        eyebrow={t("brochure.eyebrow")}
         title={t("brochure.title")}
         accent={t("brochure.accent")}
         lede={`${t("brochure.ledeA")} ${PROJECT.name} — ${PROJECT.configs.toLowerCase()} · ${PROJECT.sizes} · ${PROJECT.location}. ${t("brochure.ledeB")}`}
@@ -143,7 +142,6 @@ export default function BrochurePage() {
       <section className="dl container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="grid items-center gap-10 border-t border-line pt-[clamp(3rem,8vh,5rem)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div>
-            <span className="dl-rise kicker">{t("brochure.downloadKicker")}</span>
             <h2 className="dl-rise mt-4 max-w-[14ch] font-display text-[clamp(2.1rem,5vw,3.6rem)] font-light leading-[1.02] tracking-[-0.02em] text-ink">
               {t("brochure.requestTitleA")}{" "}
               <span className="font-serif italic text-brass">{t("brochure.requestTitleB")}</span>
@@ -203,7 +201,6 @@ export default function BrochurePage() {
       {/* no obligation note */}
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
         <div className="border-t border-line pt-8">
-          <span className="rise kicker">{t("brochure.noObligationKicker")}</span>
           <p className="rise mt-5 max-w-[62ch] font-serif text-[clamp(1.15rem,2.2vw,1.5rem)] italic leading-relaxed text-ink">
             {t("brochure.noObligationP1")}
           </p>

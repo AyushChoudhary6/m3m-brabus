@@ -143,7 +143,6 @@ export default function PossessionPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Possession", path: "/possession" }]} />
       <PageHeader
-        eyebrow={t("possession.eyebrow")}
         title={t("possession.headerTitle")}
         accent={t("possession.headerAccent")}
         lede={`${t("possession.ledePre")}${PROJECT.name}${t("possession.ledeMid")}"${PROJECT.possession}"${t("possession.ledePost")}`}

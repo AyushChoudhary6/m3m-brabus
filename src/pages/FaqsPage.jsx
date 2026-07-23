@@ -385,7 +385,6 @@ export default function FaqsPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "FAQs", path: "/faqs" }]} />
       <PageHeader
-        eyebrow={t("faqs.eyebrow")}
         title={t("faqs.heroTitle")}
         accent={t("faqs.heroAccent")}
         lede={`${BANK.length} ${t("faqs.ledeA")} ${PROJECT.name}${t("faqs.ledeB")}`}

@@ -52,7 +52,6 @@ export default function MaintenancePage() {
       <div className="gold-glow pointer-events-none absolute -left-40 top-1/4 h-[34rem] w-[34rem] rounded-full bg-brass/[0.07] blur-[130px]" />
 
       <div className="container-lux relative py-[clamp(4rem,12vh,8rem)]">
-        <p className="kicker">{PROJECT.name}</p>
 
         <h1 className="mt-6 max-w-[14ch] font-display text-[clamp(2.6rem,7vw,5.5rem)] font-light leading-[0.98] tracking-[-0.03em] text-ink">
           {t("maintenance.titleLead")} <span className="font-serif italic text-brass">{t("maintenance.titleAccent")}</span>

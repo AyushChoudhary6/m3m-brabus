@@ -83,7 +83,6 @@ export default function Amenities() {
       <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: t("amenitiespage.crumb"), path: "/amenities" }]} />
       <PageHeader
         compact
-        eyebrow={t("amenitiespage.eyebrow")}
         title={t("amenitiespage.title")}
         accent={t("amenitiespage.accent")}
         lede={t("amenitiespage.lede")}

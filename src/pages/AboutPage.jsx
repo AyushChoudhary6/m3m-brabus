@@ -127,7 +127,6 @@ export default function AboutPage() {
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "About", path: "/about" }]} />
       <PageHeader
         compact
-        eyebrow={t("about.eyebrow")}
         title={t("about.title")}
         accent={t("about.accent")}
         lede={t("about.lede")}
@@ -321,7 +320,6 @@ export default function AboutPage() {
           <div className="relative overflow-hidden rounded-[1.5rem] border border-brass/25 bg-paper p-8 md:p-11">
             <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
             <div className="relative">
-              <p className="rise kicker">{t("about.reachKicker")}</p>
               <h2 className="rise mt-4 max-w-[18ch] font-display text-[clamp(1.9rem,3.6vw,2.7rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
                 {t("about.reachTitle")} <span className="font-serif italic text-brass">{t("about.reachAccent")}</span>
               </h2>

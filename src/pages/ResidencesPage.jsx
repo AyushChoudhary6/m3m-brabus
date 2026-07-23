@@ -119,7 +119,6 @@ export default function ResidencesPage() {
       <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: t("residences.crumb"), path: "/residences" }]} />
       <PageHeader
         compact
-        eyebrow={t("residences.eyebrow")}
         title={t("residences.title")}
         accent={t("residences.accent")}
         lede={`${PROJECT.configs} ${t("residences.ledeMid")} ${PROJECT.sizes}${t("residences.ledeTail")}`}
@@ -153,7 +152,6 @@ export default function ResidencesPage() {
             </figure>
 
             <div>
-              <span className="rr-rise kicker">{r.tag}</span>
               <h2 className="rr-rise mt-3 font-display text-[clamp(2rem,4.4vw,3.4rem)] font-light leading-[1.02] tracking-[-0.02em] text-ink">
                 {r.name}
               </h2>
@@ -202,7 +200,7 @@ export default function ResidencesPage() {
       </section>
 
       {/* comparison — semantic table, with the two unpublished figures gated */}
-      <ConfigTable index="02" kicker={t("residences.configKicker")} />
+      <ConfigTable />
 
       {/* specification schedule */}
       <section className="spec-grid container-lux pb-[clamp(4rem,12vh,8rem)]">

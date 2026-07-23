@@ -38,7 +38,6 @@ function PostNotFound() {
       />
       <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: t("blogindex.crumb"), path: "/blogs" }]} />
       <section className="container-lux py-[clamp(4rem,14vh,9rem)]">
-        <p className="kicker">{t("blogpost.notFoundKicker")}</p>
         <h1 className="mt-6 max-w-[16ch] font-display text-[clamp(2.4rem,6vw,4.5rem)] font-light leading-[1] tracking-[-0.03em] text-ink">
           {t("blogpost.notFoundTitle1")} <span className="font-serif italic text-brass">{t("blogpost.notFoundTitle2")}</span>
         </h1>
@@ -146,7 +145,6 @@ export default function BlogPost() {
       <header className="relative overflow-hidden">
         <div className="gold-glow pointer-events-none absolute -left-40 top-0 h-[32rem] w-[32rem] rounded-full bg-brass/[0.07] blur-[130px]" />
         <div className="container-lux relative pb-[clamp(2.5rem,6vh,4rem)] pt-[clamp(1.5rem,4vh,3rem)]">
-          <p className="bp-rise kicker">{post.category}</p>
           <h1 className="bp-rise mt-6 max-w-[20ch] font-display text-[clamp(2.1rem,5.4vw,4.2rem)] font-light leading-[1.02] tracking-[-0.03em] text-ink">
             {post.title}
           </h1>
@@ -196,7 +194,6 @@ export default function BlogPost() {
       {related.length > 0 && (
         <section className="bp-rel-grid container-lux pb-[clamp(4rem,11vh,7rem)]">
           <div className="mb-8 flex items-baseline gap-5 border-t border-line pt-8">
-            <span className="kicker">{t("blogpost.continueReading")}</span>
             <Link
               to="/blogs"
               className="mono ml-auto text-[0.6rem] tracking-[0.18em] text-ink-soft transition-colors hover:text-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass"
@@ -245,7 +242,7 @@ export default function BlogPost() {
         </section>
       )}
 
-      <RelatedPages links={["/overview", "/price", "/contact"]} title={t("blogpost.relatedTitle")} />
+      <RelatedPages links={["/overview", "/price", "/contact"]} />
       <CtaBand title={t("blogpost.ctaAskTitle")} accent={t("blogpost.clientTeam")} subject={`Blog — ${post.title}`} />
     </div>
   );

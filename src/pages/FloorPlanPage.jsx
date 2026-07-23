@@ -145,7 +145,6 @@ export default function FloorPlanPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Floor Plan", path: "/floor-plan" }]} />
       <PageHeader
-        eyebrow={t("floorplan.eyebrow")}
         title={t("floorplan.title")}
         accent={t("floorplan.accent")}
         lede={t("floorplan.lede").replace("{configs}", PROJECT.configs).replace("{sizes}", PROJECT.sizes).replace("{location}", PROJECT.location)}

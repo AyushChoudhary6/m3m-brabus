@@ -294,7 +294,6 @@ export default function GuidesPage() {
       <Breadcrumbs trail={TRAIL} />
       <PageHeader
         compact
-        eyebrow={t("guides.eyebrow")}
         title={t("guides.headerTitle")}
         accent={t("guides.headerAccent")}
         lede={t("guides.lede")}
@@ -469,7 +468,6 @@ export default function GuidesPage() {
           <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
           <div className="relative grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
             <div>
-              <p className="rise kicker">{t("guides.checklistKicker")}</p>
               <h2 className="rise mt-4 max-w-[18ch] font-display text-[clamp(1.9rem,3.8vw,2.8rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
                 {t("guides.checklistTitleA")} <span className="font-serif italic text-brass">{t("guides.checklistTitleB")}</span>
               </h2>

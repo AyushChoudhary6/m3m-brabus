@@ -141,7 +141,6 @@ export default function Contact() {
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }]} />
       <PageHeader
         compact
-        eyebrow={t("contact.eyebrow")}
         title={t("contact.headerTitle")}
         accent={t("contact.headerAccent")}
         lede={t("contact.headerLede")}
@@ -181,7 +180,6 @@ export default function Contact() {
             <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
             {sent ? (
               <div className="relative py-8 text-center">
-                <p className="kicker">{t("enq.received")}</p>
                 <h2 className="mt-4 font-display text-[clamp(2rem,6vw,3rem)] font-light leading-[0.95] text-ink">
                   {t("enq.thankYou")} <span className="font-serif italic text-brass">{form.name.split(" ")[0] || t("contact.friend")}.</span>
                 </h2>
@@ -191,7 +189,6 @@ export default function Contact() {
               </div>
             ) : (
               <div className="relative">
-                <p className="kicker">{t("contact.enquiryKicker")}</p>
                 <h2 className="mt-3 font-display text-[clamp(1.8rem,3.4vw,2.4rem)] font-light leading-[1.05] text-ink">
                   {t("contact.formTitle")} <span className="font-serif italic text-brass">{t("contact.formTitleAccent")}</span>
                 </h2>

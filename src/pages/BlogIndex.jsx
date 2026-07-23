@@ -89,7 +89,6 @@ export default function BlogIndex() {
       <Breadcrumbs trail={TRAIL} />
       <PageHeader
         compact
-        eyebrow={t("blogindex.eyebrow")}
         title={t("blogindex.title")}
         accent={t("blogindex.accent")}
         lede={t("blogindex.lede")}

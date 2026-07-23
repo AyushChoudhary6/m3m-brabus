@@ -109,7 +109,6 @@ export default class ErrorBoundary extends Component {
         <div className="pointer-events-none absolute -left-40 top-1/4 h-[32rem] w-[32rem] rounded-full bg-brass/[0.07] blur-[130px]" />
 
         <div className="container-lux relative py-[clamp(4rem,12vh,7rem)]">
-          <p className="kicker">{PROJECT.name}</p>
 
           <h1 className="mt-6 max-w-[15ch] font-display text-[clamp(2.4rem,6.5vw,4.8rem)] font-light leading-[1] tracking-[-0.03em] text-ink">
             Something went <span className="font-serif italic text-brass">wrong.</span>

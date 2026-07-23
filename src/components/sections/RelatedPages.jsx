@@ -32,17 +32,14 @@ const ALL = {
   "/disclaimer": { t: "srelated.disclaimerTitle", d: "srelated.disclaimerDesc" },
 };
 
-export default function RelatedPages({ links = [], title }) {
+export default function RelatedPages({ links = [] }) {
   const { t } = useI18n();
   const items = links.map((p) => ({ path: p, ...ALL[p] })).filter((i) => i.t);
   if (!items.length) return null;
-  const heading = title ?? t("srelated.continueExploring");
 
   return (
     <section className="container-lux py-[clamp(3rem,9vh,5rem)]">
-      <div className="mb-8 flex items-baseline gap-5 border-t border-line pt-8">
-        <span className="kicker">{heading}</span>
-      </div>
+      <div className="mb-8 border-t border-line" />
       <div className="grid gap-x-12 gap-y-0 md:grid-cols-2 lg:grid-cols-3">
         {items.map((i) => (
           <Link

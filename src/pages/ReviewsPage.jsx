@@ -127,7 +127,6 @@ export default function ReviewsPage() {
       />
       <Breadcrumbs trail={[{ name: t("breadcrumb.home"), path: "/" }, { name: t("breadcrumb.reviews"), path: "/reviews" }]} />
       <PageHeader
-        eyebrow={t("reviews.eyebrow")}
         title={t("reviews.title")}
         accent={t("reviews.accent")}
         lede={t("reviews.lede")}

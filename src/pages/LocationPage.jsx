@@ -137,7 +137,6 @@ export default function LocationPage() {
       <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: t("location.crumb"), path: "/location" }]} />
       <PageHeader
         compact
-        eyebrow={t("location.eyebrow")}
         title={t("location.title")}
         accent={t("location.accent")}
         lede={`${PROJECT.address} — ${t("location.ledeBody")}`}

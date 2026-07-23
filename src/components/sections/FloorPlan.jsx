@@ -451,7 +451,6 @@ function PlanLightbox({ rootRef, index, onIndex, onClose }) {
         {/* masthead — which home, and the switch between them */}
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line px-5 py-4 md:px-8 md:py-5">
           <div className="min-w-0">
-            <p className="kicker">{plan.tag}</p>
             <h2 id={titleId} className="mt-1 font-display text-2xl font-light tracking-[-0.01em] text-ink md:text-3xl">
               {plan.label} <span className="font-serif italic text-brass">{t("sfloorplan.floorPlan")}</span>
             </h2>
@@ -646,7 +645,6 @@ export default function FloorPlan() {
               {/* plan header + live readout */}
               <div className="relative mb-5 flex items-end justify-between gap-4 border-b border-line pb-4">
                 <div>
-                  <p className="kicker">{t(plan.tagKey)}</p>
                   <h3 className="mt-1.5 font-display text-2xl font-light tracking-[-0.01em] text-ink md:text-3xl">{plan.label}</h3>
                 </div>
                 <div className="text-right">

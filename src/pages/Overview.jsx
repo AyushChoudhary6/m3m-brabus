@@ -60,7 +60,6 @@ export default function Overview() {
       <Breadcrumbs trail={[{ name: t("home.crumbHome"), path: "/" }, { name: t("overview.crumb"), path: "/overview" }]} />
       <PageHeader
         compact
-        eyebrow={t("overview.eyebrow")}
         title={t("overview.title")}
         accent={t("overview.accent")}
         lede={`${PROJECT.configs} ${t("overview.ledeOf")} ${PROJECT.sizes} ${t("overview.ledeAt")} ${PROJECT.location}${t("overview.ledeOnRoad")} ${PROJECT.developer} ${t("overview.ledeTail")}`}

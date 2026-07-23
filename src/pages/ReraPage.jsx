@@ -140,7 +140,6 @@ export default function ReraPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "RERA", path: "/rera" }]} />
       <PageHeader
-        eyebrow={t("rera.eyebrow")}
         title={t("rera.title")}
         accent={t("rera.accent")}
         lede={`${PROJECT.rera}. ${t("rera.ledeA")} ${PROJECT.name} ${t("rera.ledeB")}`}

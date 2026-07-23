@@ -173,7 +173,6 @@ export default function ConstructionStatusPage() {
         ]}
       />
       <PageHeader
-        eyebrow={t("construction.eyebrow")}
         title={t("construction.headerTitle")}
         accent={t("construction.headerAccent")}
         lede={t("construction.lede").replace("{name}", PROJECT.name)}
@@ -293,7 +292,6 @@ export default function ConstructionStatusPage() {
           <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
           <div className="relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
             <div>
-              <p className="sec-rise kicker">{t("construction.visitKicker")}</p>
               <h2 className="sec-rise mt-4 max-w-[18ch] font-display text-[clamp(1.9rem,3.6vw,2.7rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
                 {t("construction.visitTitleA")}{" "}
                 <span className="font-serif italic text-brass">{t("construction.visitTitleB")}</span>

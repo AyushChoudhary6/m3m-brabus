@@ -181,16 +181,6 @@ h1, h2, h3, h4 {
   padding-inline: var(--spacing-gutter);
 }
 
-/* Editorial eyebrow — mono small caps, gold */
-@utility kicker {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--color-brass);
-  font-weight: 500;
-}
-
 @utility mono {
   font-family: var(--font-mono);
   letter-spacing: 0.16em;
@@ -468,7 +458,7 @@ h1, h2, h3, h4 {
    either — without this they were the last thing still falling back to the OS.
    Latin runs (EN, 01, BRABUS) keep the mono face: it sits ahead of the Arabic
    font here, and the Arabic unicode-range does not claim latin. */
-[dir="rtl"] .mono, [dir="rtl"] .kicker, [dir="rtl"] .idx {
+[dir="rtl"] .mono, [dir="rtl"] .idx {
   font-family: var(--font-mono), "Noto Sans Arabic Variable", "SF Arabic", "Geeza Pro", Tahoma, sans-serif;
   /* Wide latin tracking looks broken on Arabic script */
   letter-spacing: 0.06em;

@@ -180,7 +180,6 @@ export default function Gallery() {
       <Breadcrumbs trail={[{ name: t("breadcrumb.home"), path: "/" }, { name: t("breadcrumb.gallery"), path: "/gallery" }]} />
       <PageHeader
         compact
-        eyebrow={t("gallery.eyebrow")}
         title={t("gallery.title")}
         accent={t("gallery.accent")}
         lede={`${t("gallery.ledeA")} ${PROJECT.name} ${t("gallery.ledeB")}`}
@@ -287,7 +286,6 @@ export default function Gallery() {
           <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_82%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
           <div className="relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
             <div>
-              <p className="req-rise kicker">{t("gallery.imageryOnRequest")}</p>
               <h2 className="req-rise mt-4 max-w-[17ch] font-display text-[clamp(1.9rem,3.8vw,2.9rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
                 {t("gallery.restSharedA")}{" "}
                 <span className="font-serif italic text-brass">{t("gallery.restSharedB")}</span>

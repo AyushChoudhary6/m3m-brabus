@@ -126,7 +126,6 @@ export default function ThankYou() {
       />
 
       <PageHeader
-        eyebrow={t("thankyou.eyebrow")}
         title={t("thankyou.title")}
         accent={t("thankyou.accent")}
         lede={`${t("thankyou.ledePre")}${PROJECT.name}${t("thankyou.ledePost")}`}
@@ -197,7 +196,6 @@ export default function ThankYou() {
           <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
           <div className="relative grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-16">
             <div>
-              <p className="rise kicker">{t("thankyou.ratherNotWaitKicker")}</p>
               <h2 className="rise mt-4 max-w-[20ch] font-display text-[clamp(1.9rem,3.6vw,2.7rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
                 {t("thankyou.reachableTitle")} <span className="font-serif italic text-brass">{t("thankyou.reachableAccent")}</span>
               </h2>

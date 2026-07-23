@@ -103,7 +103,6 @@ export default function Amenities() {
       <div className="container-lux">
         <div className="am-rise mb-[clamp(2.5rem,6vh,4rem)] flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-xl">
-            <p className="kicker mb-5">{t("samenities.kicker")}</p>
             <h2 className="font-display text-[clamp(2rem,5vw,3.4rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
               {t("samenities.headingLead")} <span className="font-serif italic text-brass">{t("samenities.headingAccent")}</span>
             </h2>

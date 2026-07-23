@@ -123,7 +123,6 @@ export default function PrivacyPolicyPage() {
       />
       <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Privacy Policy", path: "/privacy-policy" }]} />
       <PageHeader
-        eyebrow={`${t("privacy.eyebrow")} ${LAST_UPDATED}`}
         title={t("privacy.title")}
         accent={t("privacy.accent")}
         lede={t("privacy.lede")}

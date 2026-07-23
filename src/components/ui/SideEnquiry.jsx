@@ -110,7 +110,6 @@ export default function SideEnquiry() {
 
           {sent ? (
             <div className="relative py-4 text-center">
-              <p className="kicker">{t("enq.received")}</p>
               <h3 className="mt-3 font-display text-3xl font-light leading-none text-ink">
                 {t("enq.thankYou")} <span className="font-serif italic text-brass">{form.name.split(" ")[0] || "friend"}.</span>
               </h3>
@@ -120,7 +119,6 @@ export default function SideEnquiry() {
             </div>
           ) : (
             <div className="relative">
-              <p className="kicker">{t("enq.private")}</p>
               <h3 className="mt-2 font-display text-[1.7rem] font-light leading-[1.05] tracking-[-0.01em] text-ink">
                 {t("enq.titleA")} <span className="font-serif italic text-brass">{t("enq.titleB")}</span>
               </h3>

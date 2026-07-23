@@ -43,7 +43,7 @@ const CELL =
   "max-md:before:text-[0.55rem] max-md:before:uppercase max-md:before:tracking-[0.2em] " +
   "max-md:before:text-ink-faint max-md:before:content-[attr(data-label)]";
 
-export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
+export default function ConfigTable() {
   const root = useRef(null);
   const { openEnquiry } = useEnquiry();
   const { t } = useI18n();

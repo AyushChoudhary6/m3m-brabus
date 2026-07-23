@@ -25,7 +25,6 @@ export default function Faq() {
       />
       <div className="container-lux grid gap-14 lg:grid-cols-[0.8fr_1.2fr]">
         <Reveal>
-          <p className="kicker mb-5">{t("sfaq.answers")}</p>
           <h2 className="text-[clamp(2rem,5vw,3.4rem)] font-medium leading-[1.06] text-ink">
             {t("sfaq.headingLead")} <span className="font-serif font-light italic text-champagne-soft">{t("sfaq.headingAccent")}</span>
           </h2>

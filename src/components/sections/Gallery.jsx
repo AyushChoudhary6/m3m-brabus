@@ -17,7 +17,6 @@ export default function Gallery() {
     <section className="py-24 md:py-32">
       <div className="container-lux">
         <Reveal className="mb-14 max-w-xl">
-          <p className="kicker mb-5">{t("sgallery.theVision")}</p>
           <h2 className="text-[clamp(2rem,5vw,3.4rem)] font-light leading-[1.06] text-ink">
             {t("sgallery.headingLead")} <span className="italic text-brass">{t("sgallery.headingAccent")}</span>
           </h2>

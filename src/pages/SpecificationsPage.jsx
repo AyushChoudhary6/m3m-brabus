@@ -216,7 +216,6 @@ export default function SpecificationsPage() {
       />
       <PageHeader
         compact
-        eyebrow={t("specs.eyebrow")}
         title={t("specs.heroTitle")}
         accent={t("specs.heroAccent")}
         lede={`${t("specs.ledeA")} ${PROJECT.configs} ${t("specs.ledeB")} ${PROJECT.name}${t("specs.ledeC")}`}
@@ -340,7 +339,6 @@ export default function SpecificationsPage() {
           <div className="relative overflow-hidden rounded-[1.5rem] border border-brass/25 bg-paper p-8 md:p-11">
             <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
             <div className="relative">
-              <p className="rise kicker">{t("specs.gatedKicker")}</p>
               <h2 className="rise mt-4 max-w-[17ch] font-display text-[clamp(1.9rem,3.6vw,2.7rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
                 {t("specs.gatedTitleA")}{" "}
                 <span className="font-serif italic text-brass">{t("specs.gatedTitleB")}</span>
@@ -413,7 +411,6 @@ export default function SpecificationsPage() {
         </div>
 
         <div className="mt-12 rounded-[1.25rem] border border-line bg-cream p-7 md:p-9">
-          <p className="kicker">{t("specs.writingKicker")}</p>
           <p className="mt-4 max-w-[62ch] leading-relaxed text-ink-soft">
             {t("specs.writingBodyA")} {PROJECT.name} {t("specs.writingBodyB")}
           </p>

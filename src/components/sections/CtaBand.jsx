@@ -35,7 +35,6 @@ export default function CtaBand({ title, accent, subject = "" }) {
     <section ref={root} className="relative overflow-hidden border-t border-line bg-cream">
       <div className="gold-glow pointer-events-none absolute left-1/2 top-0 h-[30rem] w-[30rem] -translate-x-1/2 rounded-full bg-brass/[0.08] blur-[130px]" />
       <div className="container-lux relative py-[clamp(4.5rem,12vh,8rem)] text-center">
-        <p className="cta-rise kicker">{t("enq.consultation")}</p>
         <h2 className="cta-rise mx-auto mt-5 max-w-[16ch] font-display text-[clamp(2.2rem,6vw,4.5rem)] font-light leading-[1] tracking-[-0.02em] text-ink">
           {heading} <span className="font-serif italic text-brass">{headingAccent}</span>
         </h2>

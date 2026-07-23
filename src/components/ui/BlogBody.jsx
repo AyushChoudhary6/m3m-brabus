@@ -82,7 +82,6 @@ function Quote({ children }) {
 function Note({ children }) {
   return (
     <aside className={`${MEASURE} mt-8 rounded-[1.15rem] border border-line bg-cream p-6 sm:p-7`}>
-      <p className="kicker">Please note</p>
       <p className="mt-3 text-[0.95rem] leading-[1.75] text-ink-soft">{children}</p>
     </aside>
   );

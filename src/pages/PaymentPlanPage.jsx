@@ -166,7 +166,6 @@ export default function PaymentPlanPage() {
         trail={[{ name: "Home", path: "/" }, { name: "Payment Plan", path: "/payment-plan" }]}
       />
       <PageHeader
-        eyebrow={t("payment.eyebrow")}
         title={t("payment.title")}
         accent={t("payment.accent")}
         lede={t("payment.lede").replace("{name}", PROJECT.name).replace("{price}", PROJECT.price.toLowerCase())}
@@ -257,7 +256,6 @@ export default function PaymentPlanPage() {
           <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(32%_32%_at_80%_0%,rgba(201,168,106,0.14),transparent_70%)]" />
           <div className="relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
             <div>
-              <p className="req kicker">{t("payment.requestOfficial")}</p>
               <h2 className="req mt-4 max-w-[16ch] font-display text-[clamp(1.9rem,4vw,3rem)] font-light leading-[1.03] tracking-[-0.02em] text-ink">
                 {t("payment.beFirst")}{" "}
                 <span className="font-serif italic text-brass">{t("payment.thePaymentPlan")}</span>
