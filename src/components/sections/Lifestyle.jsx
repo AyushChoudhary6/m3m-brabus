@@ -58,7 +58,7 @@ const PANELS = [
   // A renamed or retired category should surface as a build-time failure, not
   // as a silently empty plate in the tour.
   if (!c) throw new Error(`Lifestyle: no amenity category "${cat}"`);
-  return { n, nKey, d, dKey, img, icon: c.icon, items: c.items };
+  return { n, nKey, d, dKey, img, icon: c.icon };
 });
 
 const TOTAL = PANELS.length + 1; // the index card closes the sequence
@@ -192,18 +192,6 @@ export default function Lifestyle() {
                       />
                       <h3 className="font-display text-xl leading-tight text-ink md:text-2xl">{t(p.nKey)}</h3>
                       <p className="mt-2 max-w-[32ch] text-[0.82rem] leading-relaxed text-ink-soft">{t(p.dKey)}</p>
-
-                      <ul className="mt-5 border-t border-line-soft">
-                        {p.items.map((it) => (
-                          <li
-                            key={it.name}
-                            className="flex items-baseline gap-3 border-b border-line-soft py-2.5 text-[0.76rem] leading-snug text-ink-soft"
-                          >
-                            <span aria-hidden="true" className="mt-[0.5em] h-px w-3 shrink-0 bg-brass/60" />
-                            <span className="min-w-0">{it.name}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                   </div>
                 </article>
