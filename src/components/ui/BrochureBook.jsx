@@ -160,7 +160,11 @@ export default function BrochureBook({ open, onClose, pdfUrl, downloadName = "M3
         const portrait = window.innerWidth < 900;
         const vh = window.innerHeight;
         const vw = window.innerWidth;
-        const maxH = Math.min(vh * (portrait ? 0.68 : 0.76), 860);
+        /* The chrome row and the page indicator also occupy the column, so the
+           book gets what is left rather than a share of the whole window —
+           otherwise it overruns top and bottom. */
+        const CHROME = portrait ? 150 : 190;
+        const maxH = Math.min(Math.max(vh - CHROME, 240), 880);
         const maxW = Math.min(vw * 0.94, 1500);
         let ph = maxH;
         let pw = ph / ratio;
@@ -274,6 +278,14 @@ export default function BrochureBook({ open, onClose, pdfUrl, downloadName = "M3
 
   if (!open) return null;
 
+  /* With showCover the book opens closed: one board visible, the other half of
+     the spread empty. Centre the visible board instead of leaving it hanging to
+     one side, and hide the paper block, which has nothing to sit against yet. */
+  const landscape = typeof window !== "undefined" && window.innerWidth >= 900;
+  const atFront = page === 0;
+  const atBack = total > 1 && page >= total - 1;
+  const closed = landscape && (atFront || atBack);
+
   const spreads = Math.max(1, total);
   const pct = total ? Math.min(1, (page + 1) / spreads) : 0;
   const label = String(Math.min(page + 1, total || 1)).padStart(2, "0");
@@ -332,10 +344,14 @@ export default function BrochureBook({ open, onClose, pdfUrl, downloadName = "M3
         >
           <div ref={stage} className="bb-tilt">
             {/* the closed block of paper either side — this is the thickness */}
-            <span className="bb-stack bb-stack-l" style={{ "--fill": pct }} aria-hidden="true" />
-            <span className="bb-stack bb-stack-r" style={{ "--fill": 1 - pct }} aria-hidden="true" />
-            <div ref={holder} className="bb-book" />
-            <span className="bb-spine" aria-hidden="true" />
+            {!closed && <span className="bb-stack bb-stack-l" style={{ "--fill": pct }} aria-hidden="true" />}
+            {!closed && <span className="bb-stack bb-stack-r" style={{ "--fill": 1 - pct }} aria-hidden="true" />}
+            <div
+              ref={holder}
+              className="bb-book"
+              data-state={closed ? (atFront ? "front" : "back") : "open"}
+            />
+            {!closed && <span className="bb-spine" aria-hidden="true" />}
             <span className="bb-shadow" aria-hidden="true" />
           </div>
         </div>

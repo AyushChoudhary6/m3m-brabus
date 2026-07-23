@@ -252,7 +252,9 @@ h1, h2, h3, h4 {
 
 .bb-backdrop {
   position: absolute; inset: 0;
-  background: rgba(0, 0, 0, 0.88);
+  /* layered over an opaque base: at 0.88 alone the page behind ghosts through
+     and the reader stops feeling like a separate place */
+  background: linear-gradient(rgba(6, 5, 4, 0.94), rgba(6, 5, 4, 0.94)), var(--color-canvas);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -268,7 +270,10 @@ h1, h2, h3, h4 {
 .bb-tilt { position: relative; transform-style: preserve-3d; will-change: transform; }
 
 /* the leaves themselves */
-.bb-book { position: relative; z-index: 2; }
+.bb-book { position: relative; z-index: 2; transition: transform .8s var(--ease-lux); }
+/* a closed book shows one board; slide it under the centre line */
+.bb-book[data-state="front"] { transform: translateX(-25%); }
+.bb-book[data-state="back"]  { transform: translateX(25%); }
 .bb-leaf { background: #f4efe4; overflow: hidden; }
 .bb-face { position: relative; width: 100%; height: 100%; }
 .bb-face img { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; background: #f4efe4; }
