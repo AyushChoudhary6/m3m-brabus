@@ -212,11 +212,17 @@ h1, h2, h3, h4 {
   color: var(--color-brass);
 }
 
-/* Gold metallic text for accent words */
+/* Gold metallic text for accent words.
+   The glyphs are painted FROM this background, and a background stops at the
+   element's box — so with tight leading a descender (the italic g especially)
+   falls outside it, gets no paint, and reads as cut off. Vertical padding on an
+   INLINE element extends the painted area without touching the line box, so
+   this buys the tail room and still lets the phrase wrap normally. */
 @utility gold-text {
   color: transparent;
   background-image: linear-gradient(100deg, #a07c3f 0%, #c9a86a 40%, #f3e6c4 50%, #c9a86a 60%, #a07c3f 100%);
   background-size: 220% 100%;
+  padding-bottom: 0.3em;
   -webkit-background-clip: text;
   background-clip: text;
 }

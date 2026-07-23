@@ -259,6 +259,13 @@ export default function Hero() {
                       className="gold-sweep font-serif italic"
                       style={{
                         color: "transparent",
+                        /* The glyphs are painted FROM this background, and a
+                           background stops at the element's box. With the tight
+                           leading (0.94) the box ended above the italic g's
+                           descender, so the tail had no paint and read as cut
+                           off. Vertical padding on an inline element extends the
+                           painted area without affecting the line box. */
+                        paddingBottom: "0.3em",
                         backgroundImage: "linear-gradient(100deg,#a07c3f 0%,#c9a86a 42%,#f4e6c2 50%,#c9a86a 58%,#a07c3f 100%)",
                         backgroundSize: "250% 100%",
                         backgroundPositionX: "120%",
