@@ -116,19 +116,21 @@ export default function BrochurePage() {
 
       {/* what's inside */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="border-t border-line">
-          {CONTENTS.map((c, i) => (
+        {/* Two columns of stacked entries rather than six full-width rows. Read
+            end to end the list ran well past the fold, so the reader had to
+            scroll to learn what the book contains — which is the one thing this
+            section exists to answer. Paired and stacked, all six sit together. */}
+        <div className="grid border-t border-line md:grid-cols-2 md:gap-x-14">
+          {CONTENTS.map((c) => (
             <article
               key={c.id}
-              className="rise group grid grid-cols-1 gap-2 border-b border-line py-6 transition-colors duration-500 hover:bg-brass/[0.035] sm:grid-cols-[minmax(0,16rem)_1fr] sm:items-baseline sm:gap-8"
+              className="rise group border-b border-line py-5 transition-colors duration-500 hover:bg-brass/[0.035]"
             >
-              <h2 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">
+              <h2 className="font-display text-lg text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-xl">
                 {c.t}
               </h2>
-              <div>
-                <p className="max-w-[54ch] text-sm leading-relaxed text-ink-soft">{c.d}</p>
-                <p className="mono mt-2 text-[0.58rem] tracking-[0.2em] text-ink-faint">{c.n}</p>
-              </div>
+              <p className="mt-1.5 max-w-[46ch] text-sm leading-relaxed text-ink-soft">{c.d}</p>
+              <p className="mono mt-1.5 text-[0.56rem] tracking-[0.2em] text-ink-faint">{c.n}</p>
             </article>
           ))}
         </div>
