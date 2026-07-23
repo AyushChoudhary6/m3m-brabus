@@ -146,7 +146,7 @@ export default function PaymentPlanPage() {
   return (
     <div ref={root}>
       <Seo
-        title="M3M Brabus Payment Plan | Official Schedule On Request, Sector 58 Gurgaon"
+        title="M3M Brabus Payment Plan | Schedule On Request, Sector 58"
         description="M3M Brabus payment plan — no schedule is published yet. How construction-linked, possession-linked and down-payment structures work, and how to request it."
         path="/payment-plan"
         jsonLd={[

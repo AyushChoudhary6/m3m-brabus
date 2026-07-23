@@ -147,7 +147,7 @@ export default function ConstructionStatusPage() {
   return (
     <div ref={root} className="bg-canvas">
       <Seo
-        title="M3M Brabus Construction Status | Progress Update, Sector 58 Gurgaon"
+        title="M3M Brabus Construction Status | Progress Update"
         description="M3M Brabus construction status — no progress figure is published, so none is invented. What is confirmed, how to read HARERA filings, and the latest update."
         path="/construction-status"
         jsonLd={[

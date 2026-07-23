@@ -173,7 +173,7 @@ export default function Gallery() {
     <div ref={root} className="bg-canvas">
       <Seo
         title="M3M Brabus Gallery | Official Tower, Arrival & Lobby Renders, Gurgaon"
-        description="The three official M3M Brabus renders in full — the towers at dusk, the BRABUS porte-cochère arrival and the marble lobby. Interiors and amenity imagery are not yet released; request them directly."
+        description="The three official M3M Brabus renders in full — the towers at dusk, the BRABUS porte-cochère arrival and the marble lobby. Interiors and amenity imagery."
         path="/gallery"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Gallery", path: "/gallery" }])}
       />

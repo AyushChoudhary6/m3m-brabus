@@ -367,7 +367,7 @@ export default function FaqsPage() {
   return (
     <div ref={root} className="bg-canvas">
       <Seo
-        title="M3M Brabus FAQs | Price, Floor Plans, RERA & Possession Answered"
+        title="M3M Brabus FAQs | Price, Plans, RERA & Possession"
         description="M3M Brabus FAQs — configurations, sizes and carpet area, pricing status, Sector 58 connectivity, amenities, RERA, possession and the buying process."
         path="/faqs"
         jsonLd={[

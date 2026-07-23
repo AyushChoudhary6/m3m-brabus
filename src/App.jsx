@@ -72,7 +72,10 @@ export default function App() {
         <ScrollProgress />
         <CustomCursor />
         <Navbar />
-        <main className="noise overflow-x-clip">
+        {/* First tab stop on every page: keyboard and screen-reader users
+            were made to walk the whole header before reaching content. */}
+        <a href="#main" className="skip-link">Skip to content</a>
+        <main id="main" className="noise overflow-x-clip">
           {/* A render error in one page must not blank the whole site.
               resetKey={pathname} clears the crash screen on navigation (BUG-014). */}
           <ErrorBoundary resetKey={pathname}>

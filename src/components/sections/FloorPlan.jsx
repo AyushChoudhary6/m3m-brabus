@@ -46,6 +46,7 @@ const PLANS = [
     tagKey: "sfloorplan.tagSignature",
     // Gated drawing — blurred until the visitor gives their details.
     image: "/renders/floor-plan-4bhk.jpg",
+    preview: "/renders/floor-plan-4bhk-preview.jpg",
     composition: "Four bedrooms · living & dining · kitchen · foyer · balcony",
     compKey: "sfloorplan.comp4bhk",
     rooms: [
@@ -66,6 +67,7 @@ const PLANS = [
     tag: "The Grand",
     tagKey: "sfloorplan.tagGrand",
     image: "/renders/floor-plan-5bhk.jpg",
+    preview: "/renders/floor-plan-5bhk-preview.jpg",
     composition: "Five bedrooms · living & dining · family lounge · study · sky lounge",
     compKey: "sfloorplan.comp5bhk",
     rooms: [
@@ -213,7 +215,12 @@ function GatedPlan({ plan, unlocked, onEnlarge }) {
         <div className="aspect-[4/3] w-full bg-ink-900/50" />
       ) : (
         <img
-          src={plan.image}
+          /* Locked visitors receive a 400px preview (~100 kB), never the
+             drawing. The full file used to be fetched regardless and hidden
+             behind a CSS blur, so anyone could read it straight out of the
+             network panel — the gate was decorative, and every visitor paid
+             3.2 MB for artwork most never unlock. */
+          src={unlocked ? plan.image : plan.preview || plan.image}
           alt={unlocked ? `${plan.label} — ${t("sfloorplan.kicker")}` : ""}
           aria-hidden={unlocked ? undefined : "true"}
           onError={() => setFailed(true)}

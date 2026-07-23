@@ -198,7 +198,7 @@ export default function SpecificationsPage() {
   return (
     <div className="bg-canvas" ref={root}>
       <Seo
-        title="M3M Brabus Specifications | Finishes, Fittings & Systems, Sector 58"
+        title="M3M Brabus Specifications | Finishes & Fittings"
         description="M3M Brabus specifications system by system — structure, flooring, kitchen, bathrooms, smart home, climate control, lifts, safety and sustainability."
         path="/specifications"
         jsonLd={breadcrumbLd([

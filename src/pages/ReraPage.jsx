@@ -122,7 +122,7 @@ export default function ReraPage() {
   return (
     <div ref={root}>
       <Seo
-        title="M3M Brabus RERA | Registration Status & How to Verify on HARERA"
+        title="M3M Brabus RERA | Status & How to Verify on HARERA"
         description="M3M Brabus RERA status — no registration number is published on the official listing. What HARERA is, how to verify a Gurugram project, and what to ask for."
         path="/rera"
         jsonLd={[

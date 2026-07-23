@@ -130,7 +130,7 @@ export default function LocationPage() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Location | Sector 58, Golf Course Extension Road, Gurgaon"
-        description="M3M Brabus is on Golf Course Extension Road, Sector 58 Gurugram — what the address means for the commute, the metro, the airport, schools, hospitals and the everyday week."
+        description="M3M Brabus is on Golf Course Extension Road, Sector 58 Gurugram — what the address means for the commute, the metro, the airport, schools, hospitals and."
         path="/location"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Location", path: "/location" }])}
       />

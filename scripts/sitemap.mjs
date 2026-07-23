@@ -3,7 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { ROUTES } from "./routes.mjs";
 
-const SITE = (process.env.SITE_URL || "https://m3m-brabus.com").replace(/\/$/, "");
+const SITE = (process.env.SITE_URL || process.env.VITE_SITE_URL || "https://m3m-brabus.vercel.app").replace(/\/$/, "");
 const today = new Date().toISOString().slice(0, 10);
 
 const urls = ROUTES.map(

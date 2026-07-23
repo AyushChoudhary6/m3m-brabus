@@ -7,12 +7,17 @@
  * canonical, Open Graph tags and JSON-LD — readable by Google *and* by AI
  * crawlers that don't execute JavaScript.
  */
-// BUG-006: prefer the build-time domain so canonicals/OG match the live host.
-// scripts/prerender.mjs is passed VITE_SITE_URL; set it in the Vercel env.
-// The literal is the fallback — update it if the live domain is not this.
+/* Canonical/OG host. Set VITE_SITE_URL in the Vercel env the moment a custom
+   domain goes live and everything below follows it.
+
+   The fallback is the host that ACTUALLY SERVES the site. It used to be
+   m3m-brabus.com, which does not resolve — so every page was telling search
+   engines its authoritative copy lived somewhere unreachable, on all 30 routes.
+   A canonical must always point at a fetchable URL; an aspirational domain is
+   worse than none. */
 export const SITE_URL =
   (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_SITE_URL) ||
-  "https://m3m-brabus.com";
+  "https://m3m-brabus.vercel.app";
 
 /**
  * Serialise data for a <script type="application/ld+json"> block.

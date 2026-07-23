@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import Seo from "../components/ui/Seo.jsx";
+import Seo, { SITE_URL } from "../components/ui/Seo.jsx";
 import Hero from "../components/sections/Hero.jsx";
 import Manifesto from "../components/sections/Manifesto.jsx";
 import Ticker from "../components/sections/Ticker.jsx";
@@ -35,8 +35,8 @@ export default function Home() {
           name: "M3M Brabus",
           description:
             "Ultra-luxury 4 & 5 BHK branded residences (approx. 5,000–7,000 sq.ft) at Sector 58, Golf Course Extension Road, Gurugram — by M3M India, inspired by BRABUS.",
-          url: "https://m3m-brabus.com",
-          image: "https://m3m-brabus.com/renders/tower.jpg",
+          url: SITE_URL,
+          image: `${SITE_URL}/renders/tower.jpg`,
           address: {
             "@type": "PostalAddress",
             streetAddress: "Golf Course Extension Road, Sector 58",

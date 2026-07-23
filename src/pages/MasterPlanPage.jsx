@@ -126,7 +126,7 @@ export default function MasterPlanPage() {
   return (
     <div ref={root} className="bg-canvas">
       <Seo
-        title="M3M Brabus Master Plan | Site Layout, Orientation & Spacing, Sector 58 Gurgaon"
+        title="M3M Brabus Master Plan | Site Layout & Spacing, Sector 58"
         description="M3M Brabus master plan — the site layout is not publicly released. How to read a master plan, what is confirmed at Sector 58, and how to request it."
         path="/master-plan"
         jsonLd={breadcrumbLd([
