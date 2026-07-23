@@ -37,14 +37,14 @@ async function brochureExists() {
   }
 }
 
-
-async function downloadBrochure() {
+/** Save the brochure as a real file, alongside opening the reader. */
+async function saveBrochure() {
   try {
     const res = await fetch(BROCHURE_URL, { cache: "no-store" });
     const type = res.headers.get("content-type") || "";
     if (!res.ok || !type.includes("pdf")) return false;
     const blob = await res.blob();
-    if (blob.size < 1024) return false; // too small to be a real brochure
+    if (blob.size < 1024) return false;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -58,6 +58,7 @@ async function downloadBrochure() {
     return false;
   }
 }
+
 const KEY_LEAD = "mb-lead"; // submitted a real enquiry — don't auto-invite on future visits
 
 const ls = {
@@ -256,6 +257,12 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
     if (!isClean(errs)) { setErrors(errs); return; }
     setSending(true);
     setError("");
+    /* Captured means "we have their details", which includes the queued case:
+       leads.js stores the lead and retries later. The brochure must NOT be
+       withheld because our endpoint happened to be down — the visitor paid the
+       price of the form either way. This is why delivery sits after the
+       try/catch rather than on the success path only. */
+    let captured = false;
     try {
       const source = isVisit ? `Site visit · ${subject}` : isBrochure ? `Brochure · ${subject}` : auto ? "Timed invite" : subject ? `Modal · ${subject}` : "Modal";
       // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
@@ -263,23 +270,27 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
       markLeadCaptured(); // never auto-invite again
       trackLead(source, form.config);
       setSent(true);
-      if (isBrochure) {
-        trackBrochure(subject || "modal");
-        /* Open the book rather than firing a download: the visitor asked to
-           read the brochure, and the reader carries its own download button.
-           A quick HEAD-style check keeps the old "we'll email it" fallback for
-           the case where the file genuinely is not there. */
-        const ok = await brochureExists();
-        setGotFile(ok);
-        if (ok) { onBrochureReady?.(); return; }
-      }
+      captured = true;
     } catch (err) {
       // Already queued for retry (leads.js LeadError{queued:true}) — reassure,
       // don't show a failure that invites a give-up or double-submit.
-      if (err && err.queued) { markLeadCaptured(); setSent(true); }
+      if (err && err.queued) { markLeadCaptured(); setSent(true); captured = true; }
       else setError("err.send");
     } finally {
       setSending(false);
+    }
+
+    if (captured && isBrochure) {
+      trackBrochure(subject || "modal");
+      /* Open the book rather than firing a download: the visitor asked to read
+         the brochure, and the reader carries its own download button. If the
+         file genuinely is not there, fall back to "we'll email it". */
+      const ok = await brochureExists();
+      setGotFile(ok);
+      if (ok) {
+        onBrochureReady?.();   // read it on screen…
+        saveBrochure();        // …and keep the file, as the form promises
+      }
     }
   };
 
