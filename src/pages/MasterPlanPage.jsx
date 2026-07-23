@@ -261,7 +261,7 @@ export default function MasterPlanPage() {
           {READ.map((r, i) => (
             <div
               key={r.tKey}
-              className="read-row grid grid-cols-1 gap-2 border-b border-line py-6 lg:grid-cols-[minmax(0,3rem)_minmax(0,17rem)_1fr] lg:gap-8"
+              className="read-row grid grid-cols-1 gap-2 border-b border-line py-6 lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-8"
             >
               <dt className="font-display text-xl leading-snug text-ink">{t(r.tKey)}</dt>
               <dd className="max-w-[64ch] text-sm leading-relaxed text-ink-soft">{t(r.dKey)}</dd>

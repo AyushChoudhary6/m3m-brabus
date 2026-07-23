@@ -120,7 +120,7 @@ export default function BrochurePage() {
           {CONTENTS.map((c, i) => (
             <article
               key={c.id}
-              className="rise group grid grid-cols-1 gap-2 border-b border-line py-6 transition-colors duration-500 hover:bg-brass/[0.035] sm:grid-cols-[3rem_minmax(0,16rem)_1fr] sm:items-baseline sm:gap-8"
+              className="rise group grid grid-cols-1 gap-2 border-b border-line py-6 transition-colors duration-500 hover:bg-brass/[0.035] sm:grid-cols-[minmax(0,16rem)_1fr] sm:items-baseline sm:gap-8"
             >
               <h2 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">
                 {c.t}
