@@ -613,7 +613,7 @@ export default function FloorPlan() {
   );
 
   return (
-    <section id="floor-plan" ref={root} className="container-lux py-[clamp(5rem,13vh,9rem)]">
+    <section id="floor-plan" ref={root} className="container-lux py-[clamp(5rem,13vh,9rem)] max-md:pb-10">
       {/* header */}
       <div className="mb-[clamp(2.5rem,6vh,4.5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
         <h2 className="max-w-[20ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">

@@ -110,14 +110,15 @@ export default function Lifestyle() {
       <div className="flex flex-col md:sticky md:top-0 md:h-svh md:overflow-hidden">
         {/* header — kept compact on desktop so the cards below have room to fit
             the sticky viewport without their bottoms being clipped. */}
-        <div className="container-lux pt-[clamp(4rem,11vh,7rem)] md:pt-[9vh]">
+        <div className="container-lux pt-[clamp(2rem,6vh,3.5rem)] md:pt-[9vh]">
           <div className="grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
             <h2 className="max-w-[20ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
               {t("slifestyle.headingLead")} <span className="font-serif italic text-brass">{t("slifestyle.headingAccent")}</span>
             </h2>
           </div>
 
-          <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-4">
+          {/* desktop-only rule; no margin on mobile where it isn't rendered */}
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-4 md:mt-7">
             <div className="hidden h-px w-full max-w-40 origin-left bg-line md:block">
               <div className="life-bar h-px w-full origin-left scale-x-0 bg-brass" />
             </div>
