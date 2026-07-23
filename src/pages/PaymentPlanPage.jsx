@@ -210,7 +210,6 @@ export default function PaymentPlanPage() {
               className="pt group grid gap-6 border-b border-line py-[clamp(2rem,5vh,3rem)] md:grid-cols-[minmax(0,20rem)_1fr] md:gap-14"
             >
               <div>
-                <span className="idx">{p.k}</span>
                 <h2 className="mt-3 font-display text-2xl font-light leading-tight text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-3xl">
                   {t(p.tKeyT)}
                 </h2>

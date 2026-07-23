@@ -319,7 +319,6 @@ export default function PricePage() {
               className="sheet-row grid grid-cols-1 gap-x-10 gap-y-2 border-b border-line py-5 sm:grid-cols-[minmax(0,15rem)_1fr_auto]"
             >
               <dt className="flex items-baseline gap-3 font-display text-lg font-light leading-snug text-ink">
-                <span className="idx shrink-0">{String(i + 1).padStart(2, "0")}</span>
                 {t(l.tKeyT)}
               </dt>
               <dd className="max-w-[58ch] text-sm leading-relaxed text-ink-soft">{t(l.tKeyD)}</dd>
@@ -338,7 +337,6 @@ export default function PricePage() {
               className="sheet-row grid grid-cols-1 gap-x-10 gap-y-2 border-b border-line py-5 sm:grid-cols-[minmax(0,15rem)_1fr_auto]"
             >
               <dt className="flex items-baseline gap-3 font-display text-lg font-light leading-snug text-ink">
-                <span className="idx shrink-0">{String(DEVELOPER_LINES.length + i + 1).padStart(2, "0")}</span>
                 {t(l.tKeyT)}
               </dt>
               <dd className="max-w-[58ch] text-sm leading-relaxed text-ink-soft">{t(l.tKeyD)}</dd>

@@ -230,7 +230,6 @@ export default function AboutPage() {
           <ul className="mt-10 grid gap-x-14 gap-y-0 border-t border-line md:grid-cols-2">
             {DUE_DILIGENCE.map((c) => (
               <li key={c.k} className="dd group flex gap-6 border-b border-line py-6">
-                <span className="idx pt-1.5">{c.k}</span>
                 <div>
                   <h3 className="font-display text-lg text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-xl">
                     {t(c.tKey)}
@@ -310,7 +309,6 @@ export default function AboutPage() {
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {ENQUIRY_FLOW.map((f) => (
             <article key={f.n} className="flw group border-b border-line py-7">
-              <span className="idx">{f.n}</span>
               <h3 className="mt-3 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">
                 {t(f.tKey)}
               </h3>

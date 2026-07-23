@@ -347,7 +347,6 @@ export default function GuidesPage() {
               >
                 <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
                   <div className="stage-part lg:sticky lg:top-28 lg:self-start">
-                    <span className="idx">{t("guides.stageLabel")} {String(i + 1).padStart(2, "0")}</span>
                     <h2 className="mt-3 font-display text-[clamp(1.9rem,4vw,2.9rem)] font-light leading-[1.03] tracking-[-0.02em] text-ink">
                       {t(s.nameKey)}
                     </h2>

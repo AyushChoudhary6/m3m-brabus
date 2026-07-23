@@ -225,7 +225,6 @@ export default function ReraPage() {
               key={v.n}
               className="sec-rise group grid grid-cols-1 gap-2 border-b border-line py-6 transition-colors duration-500 hover:bg-brass/[0.035] sm:grid-cols-[minmax(0,3rem)_1fr] sm:gap-8"
             >
-              <span className="idx">{v.n}</span>
               <div>
                 <h3 className="font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
                   {t(v.tKey)}

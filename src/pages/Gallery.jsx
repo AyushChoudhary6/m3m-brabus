@@ -221,7 +221,6 @@ export default function Gallery() {
 
               <figcaption className="mt-[clamp(1.75rem,4vh,2.75rem)] grid gap-6 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-16">
                 <div>
-                  <span className="rise idx block">{p.no}</span>
                   <h2 className="rise mt-4 font-display text-[clamp(1.9rem,3.6vw,3rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
                     {t(p.nameKey)}
                   </h2>

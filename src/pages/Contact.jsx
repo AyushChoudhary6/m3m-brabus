@@ -258,7 +258,6 @@ export default function Contact() {
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-3">
           {VISIT.map((v) => (
             <article key={v.k} className="vs border-t border-line py-7">
-              <span className="idx">{v.k}</span>
               <h3 className="mt-3 font-display text-2xl text-ink">{t(v.tKey)}</h3>
               <p className="mt-2.5 max-w-[38ch] leading-relaxed text-ink-soft">{t(v.dKey)}</p>
             </article>

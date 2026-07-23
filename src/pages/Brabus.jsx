@@ -99,7 +99,6 @@ export default function Brabus() {
         <div className="border-t border-line">
           {ETHOS.map((m) => (
             <div key={m.key} className="mq group grid gap-4 border-b border-line py-8 md:grid-cols-[5rem_1fr_1.3fr] md:gap-10">
-              <span className="idx pt-2">{m.k}</span>
               <h2 className="font-display text-2xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-3xl">{t(`brabus.ethos.${m.key}.t`)}</h2>
               <p className="max-w-[46ch] leading-relaxed text-ink-soft">{t(`brabus.ethos.${m.key}.d`)}</p>
             </div>

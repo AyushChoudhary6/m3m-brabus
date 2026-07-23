@@ -212,8 +212,7 @@ export default function DisclaimerPage() {
         </p>
         <ol className="rise max-w-[70ch] border-t border-line">
           {VERIFY.map((v, i) => (
-            <li key={v} className="grid grid-cols-[2.5rem_1fr] gap-4 border-b border-line py-5">
-              <span className="idx pt-1">{String(i + 1).padStart(2, "0")}</span>
+            <li key={v} className="gap-4 border-b border-line py-5">
               <span className="text-sm leading-relaxed text-ink-soft">{t(v)}</span>
             </li>
           ))}

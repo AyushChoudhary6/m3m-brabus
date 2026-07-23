@@ -148,7 +148,6 @@ export default function ThankYou() {
               className="step grid grid-cols-1 gap-x-10 gap-y-3 border-b border-line py-7 sm:grid-cols-[minmax(0,16rem)_1fr_auto]"
             >
               <h2 className="flex items-baseline gap-3 font-display text-xl font-light leading-snug text-ink">
-                <span className="idx shrink-0">{String(i + 1).padStart(2, "0")}</span>
                 {s.k}
               </h2>
               <p className="max-w-[58ch] leading-relaxed text-ink-soft">{s.d}</p>

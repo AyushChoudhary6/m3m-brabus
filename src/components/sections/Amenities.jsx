@@ -132,7 +132,6 @@ export default function Amenities() {
                     data-cursor={isOpen ? "CLOSE" : "OPEN"}
                     className="group flex w-full items-center gap-4 py-6 text-left transition-colors duration-500 hover:bg-brass/[0.03] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass sm:gap-6"
                   >
-                    <span className="idx shrink-0">{String(i + 1).padStart(2, "0")}</span>
                     <span
                       className={`shrink-0 transition-colors duration-500 ${isOpen ? "text-brass" : "text-ink-faint group-hover:text-brass-soft"}`}
                       aria-hidden="true"

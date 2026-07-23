@@ -119,7 +119,6 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
                   data-label={t("sconfig.configuration")}
                   className={`${CELL} font-normal`}
                 >
-                  <span className="idx block">{String(i + 1).padStart(2, "0")}</span>
                   <span className="mt-2 block font-display text-[clamp(1.5rem,2.6vw,2rem)] font-light leading-none tracking-[-0.01em] text-ink transition-colors duration-500 md:group-hover:text-brass-soft">
                     {c.config}
                   </span>

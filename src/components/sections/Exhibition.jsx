@@ -71,7 +71,6 @@ export default function Exhibition() {
               <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
             </div>
             <figcaption>
-              <span className="rise idx block">{p.no}</span>
               <h3 className="rise mt-4 font-display text-[clamp(1.8rem,3.4vw,2.8rem)] font-light tracking-[-0.01em] text-ink">{t(p.labelKey)}</h3>
               <p className="rise mt-4 max-w-[38ch] text-lg leading-relaxed text-ink-soft">{t(p.noteKey)}</p>
             </figcaption>
