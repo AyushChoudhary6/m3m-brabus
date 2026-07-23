@@ -188,10 +188,10 @@ function useLeadUnlocked() {
  */
 function GatedPlan({ plan, unlocked, onEnlarge }) {
   const { t } = useI18n();
-  const { openEnquiry } = useEnquiry();
   const [failed, setFailed] = useState(false);
 
-  const act = () => (unlocked ? onEnlarge() : openEnquiry(`Floor plan · ${plan.label}`));
+  // onEnlarge is already gated by the parent, so this is just "activate".
+  const act = () => onEnlarge();
 
   return (
     <div
@@ -674,7 +674,11 @@ export default function FloorPlan() {
           const cfg = CONFIG_BY_ID[plan.id];
           const active = hover && hover.id === plan.id ? hover.i : null;
           const room = active != null ? plan.rooms[active] : null;
-          const enlarge = () => setOpenAt(idx);
+          /* The single gate. Every route to the enlarged drawing goes through
+             here — the card, the "Enlarged view" button, anything added later —
+             so none of them can hand a locked visitor the clear plan. */
+          const enlarge = () =>
+            unlocked ? setOpenAt(idx) : openEnquiry(`Floor plan · ${plan.label}`);
           return (
             <div key={plan.id} className="relative rounded-[1.25rem] border border-line bg-cream/40 p-5 md:p-7">
               <div className="gold-glow pointer-events-none absolute -inset-8 [background:radial-gradient(42%_42%_at_50%_42%,rgba(201,168,106,0.09),transparent_70%)]" />
