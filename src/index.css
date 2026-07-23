@@ -226,22 +226,15 @@ h1, h2, h3, h4 {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   .reveal-hidden { opacity: 1 !important; }
   .ed-line > span { transform: none !important; }
-  /* No reveal runs, so nothing ever clears the mask — unclip it up front or the
-     headline's descenders stay cut. This also covers the prerenderer, which
-     drives Chrome with --force-prefers-reduced-motion. */
-  .ed-line { overflow: visible !important; }
 }
 
-/* Line-clip heading reveal.
-   overflow:hidden masks the slide-up, but with the heading's tight leading
-   (0.94) the glyph box is shorter than the letters, so descenders (g, y — worst
-   on the italic serif accent) were being clipped. Add bottom room for them and
-   pull it back with an equal negative margin so line spacing is unchanged. */
-/* The mask exists ONLY for the slide-up entrance. Hero clears it on completion
-   (see the onComplete in Hero.jsx), so a settled headline is never clipped — the
-   previous approach padded the mask by a fixed em guess, which broke the moment
-   the font changed: Bodoni's italic `g` descends far deeper than Fraunces'. */
-.ed-line { display: block; overflow: hidden; }
+/* Line-clip heading reveal — NO overflow rule here, on purpose: this fails OPEN.
+   Hero applies the clip only while the slide-up is actually running and drops it
+   the instant it ends, so every path that skips the animation (reduced motion,
+   the prerenderer, a JS error) leaves the headline unclipped rather than
+   beheaded. Padding the mask by a fixed em was the old approach; it broke each
+   time the font's descender depth changed. */
+.ed-line { display: block; }
 .ed-line > span { display: block; will-change: transform; }
 
 /* Slow ambient breath on framed imagery */

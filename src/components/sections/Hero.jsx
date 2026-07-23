@@ -5,7 +5,6 @@ import { useGSAP } from "@gsap/react";
 import { Download } from "lucide-react";
 import { useEnquiry } from "../ui/Enquiry.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
-import { PROJECT } from "../../lib/site.js";
 import { PRICE } from "../../lib/facts.js";
 import { IMG } from "../../lib/images.js";
 import { RENDERS } from "../../lib/renders.generated.js";
@@ -127,6 +126,9 @@ export default function Hero() {
 
           // ---- entrance ----
           gsap.set(videoWrap.current, { autoAlpha: 0, scale: 1.12, filter: "blur(16px)" });
+          // Clip only for the duration of the reveal — the stylesheet leaves
+          // .ed-line unclipped so a skipped animation can never behead the type.
+          gsap.set(q(".ed-line"), { overflow: "hidden" });
           // >100% so the line starts fully below its mask before the reveal.
           gsap.set(q(".ed-line > span"), { yPercent: 115 });
           gsap.set(q(".hero-fade"), { autoAlpha: 0, y: 20 });
@@ -269,13 +271,7 @@ export default function Hero() {
                   </span>
                 </h1>
 
-                {/* name + value proposition, kept to one breath */}
-                <p className="hero-fade mt-4 max-w-[40ch] text-sm leading-relaxed sm:mt-5 sm:text-[0.95rem]">
-                  <span className="text-bone">{PROJECT.name}</span>
-                  <span className="text-bone/55"> — {PROJECT.tagline}.</span>
-                </p>
-
-                <div className="hero-fade mt-6 h-px w-full max-w-xs bg-gradient-to-r from-brass/70 via-line to-transparent md:mt-8" />
+                <div className="hero-fade mt-8 h-px w-full max-w-xs bg-gradient-to-r from-brass/70 via-line to-transparent md:mt-10" />
 
                 <div className="hero-fade mt-6 flex flex-wrap items-center gap-4 md:mt-8">
                   <button
