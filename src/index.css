@@ -243,6 +243,35 @@ h1, h2, h3, h4 {
 .ed-line { display: block; }
 .ed-line > span { display: block; will-change: transform; }
 
+/* ── Mobile action bar ──────────────────────────────────────────────────────
+   A fixed bottom bar has two failure modes on phones, and both look like a
+   layout bug rather than a browser one:
+
+   1. iOS Safari animates its toolbar in and out as you scroll. During that
+      transition a `position:fixed; bottom:0` element can detach from the bottom
+      of the VISUAL viewport, leaving a strip of page visible underneath it.
+      Promoting the bar to its own compositing layer keeps it pinned throughout.
+   2. Because the bar floats above the flow, whatever ends the page sits behind
+      it. Reserving its height at the end of the document — safe-area included —
+      means the last row of content can always be reached.
+
+   Height is expressed once, here, so the bar and the reserved space cannot
+   drift apart. */
+@media (max-width: 1023px) {
+  :root { --mobile-bar-h: calc(3.9rem + env(safe-area-inset-bottom)); }
+
+  .mobile-bar {
+    transform: translateZ(0);      /* own layer: survives the toolbar animation */
+    will-change: transform;
+    /* belt and braces where dvh is supported: pin to the *visual* bottom */
+    bottom: 0;
+    padding-bottom: max(0.25rem, env(safe-area-inset-bottom));
+  }
+
+  /* the page ends above the bar, not behind it */
+  body { padding-bottom: var(--mobile-bar-h); }
+}
+
 /* ── Brochure book ──────────────────────────────────────────────────────────
    A hardcover, not a PDF frame. StPageFlip owns the fold; everything here is
    the object around it: boards, spine, the block of paper either side, paper

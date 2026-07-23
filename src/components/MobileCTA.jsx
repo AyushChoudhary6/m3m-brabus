@@ -38,10 +38,15 @@ export default function MobileCTA() {
     "font-sans text-[0.58rem] font-medium uppercase leading-none tracking-[0.1em] " +
     "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-brass";
 
+  /* The `mobile-bar` class carries what utilities cannot: the compositing hint
+     that keeps a fixed bar pinned while iOS Safari animates its toolbar (without
+     it the bar detaches mid-transition and page content shows beneath), and the
+     shared height the page uses to reserve room rather than hiding its last rows
+     behind the bar. */
   return (
     <nav
       aria-label={t("nav.salesEnquiries")}
-      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-canvas/95 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden"
+      className="mobile-bar fixed inset-x-0 bottom-0 z-40 grid w-full grid-cols-3 border-t border-line bg-canvas/95 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden"
     >
       <a
         href={`tel:${PROJECT.phone}`}
