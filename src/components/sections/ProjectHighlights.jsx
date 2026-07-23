@@ -64,10 +64,6 @@ export default function ProjectHighlights() {
       className="border-t border-line py-[clamp(3.5rem,10vh,6.5rem)]"
     >
       <div className="container-lux">
-        <div className="ph-rise mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("shighlights.keyFacts")}</span>
-        </div>
 
         <div className="mb-[clamp(2rem,5vh,3rem)] grid gap-x-16 gap-y-5 lg:grid-cols-[1fr_0.9fr] lg:items-end">
           <h2

@@ -51,10 +51,6 @@ export default function Exhibition() {
   return (
     <section id="gallery" ref={root} className="container-lux py-[clamp(5rem,13vh,9rem)]">
       <div className="mb-[clamp(2.5rem,7vh,5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
-        <div className="flex items-baseline gap-5">
-          <span className="idx">07</span>
-          <span className="kicker">{t("sexhibition.theExhibition")}</span>
-        </div>
         <h2 className="max-w-[16ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
           {t("sexhibition.headingLead")} <span className="font-serif italic text-brass">{t("sexhibition.headingAccent")}</span>
         </h2>

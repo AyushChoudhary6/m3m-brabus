@@ -61,10 +61,6 @@ export default function Manifesto() {
     <section id="philosophy" ref={root} className="container-lux py-[clamp(5rem,13vh,9rem)]">
       {/* statement */}
       <div className="stmt grid gap-8 lg:grid-cols-[auto_1fr] lg:gap-16">
-        <div className="flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("smanifesto.thePhilosophy")}</span>
-        </div>
         <h2 className="flex max-w-[24ch] flex-wrap font-display text-[clamp(1.9rem,4.6vw,3.9rem)] font-light leading-[1.14] tracking-[-0.02em] text-ink">
           {t("smanifesto.statementLead").split(" ").map((w, i) => (
             <span key={i} className="stmt-word mr-[0.28em]">{w}</span>
@@ -93,11 +89,7 @@ export default function Manifesto() {
 
         {/* text */}
         <div>
-          <div className="rise flex items-baseline gap-5">
-            <span className="idx">02</span>
-            <span className="kicker">{t("smanifesto.theEngineering")}</span>
-          </div>
-          <h3 className="rise mt-6 max-w-[18ch] font-display text-[clamp(1.8rem,3.8vw,3.1rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
+          <h3 className="rise max-w-[18ch] font-display text-[clamp(1.8rem,3.8vw,3.1rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
             {t("smanifesto.engLead")} <span className="font-serif italic text-brass">{t("smanifesto.engAccent")}</span>
           </h3>
 

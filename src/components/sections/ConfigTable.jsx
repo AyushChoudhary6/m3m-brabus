@@ -80,10 +80,6 @@ export default function ConfigTable({ index = "02", kicker = "Side by side" }) {
   return (
     <section id="configuration" ref={root} className="container-lux py-[clamp(3rem,9vh,6rem)]">
       <div className="mb-[clamp(2rem,5vh,3.5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
-        <div className="cfg-rise flex items-baseline gap-5">
-          <span className="idx">{index}</span>
-          <span className="kicker">{kicker === "Side by side" ? t("sconfig.sideBySide") : kicker}</span>
-        </div>
         <h2 className="cfg-rise max-w-[24ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
           {t("sconfig.headingLead")} <span className="font-serif italic text-brass">{t("sconfig.headingAccent")}</span>
         </h2>

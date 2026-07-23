@@ -112,10 +112,6 @@ export default function Lifestyle() {
             the sticky viewport without their bottoms being clipped. */}
         <div className="container-lux pt-[clamp(4rem,11vh,7rem)] md:pt-[9vh]">
           <div className="grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
-            <div className="flex items-baseline gap-5">
-              <span className="idx">05</span>
-              <span className="kicker">{t("slifestyle.kicker")}</span>
-            </div>
             <h2 className="max-w-[20ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
               {t("slifestyle.headingLead")} <span className="font-serif italic text-brass">{t("slifestyle.headingAccent")}</span>
             </h2>

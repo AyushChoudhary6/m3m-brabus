@@ -568,10 +568,6 @@ export default function FloorPlan() {
     <section id="floor-plan" ref={root} className="container-lux py-[clamp(5rem,13vh,9rem)]">
       {/* header */}
       <div className="mb-[clamp(2.5rem,6vh,4.5rem)] grid gap-6 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
-        <div className="flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("sfloorplan.kicker")}</span>
-        </div>
         <h2 className="max-w-[20ch] font-display text-[clamp(1.9rem,4.4vw,3.6rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
           {t("sfloorplan.headingLead")} <span className="font-serif italic text-brass">{t("sfloorplan.headingAccent")}</span>
         </h2>

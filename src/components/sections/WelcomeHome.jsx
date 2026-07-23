@@ -92,10 +92,6 @@ export default function WelcomeHome() {
         ) : (
           <div className="grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-20">
             <div>
-              <div className="flex items-baseline gap-5">
-                <span className="idx">08</span>
-                <span className="kicker">{t("swelcome.welcomeHome")}</span>
-              </div>
               <h2 className="mt-7 max-w-[14ch] font-display text-[clamp(2.6rem,8vw,6.5rem)] font-light leading-[0.98] tracking-[-0.02em] text-ink">
                 {t("swelcome.residenceLead")} <span className="font-serif italic text-brass">{t("swelcome.awaits")}</span>
               </h2>
