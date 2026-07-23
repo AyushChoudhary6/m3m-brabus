@@ -96,10 +96,6 @@ export default function Brabus() {
 
       {/* the ethos */}
       <section className="container-lux py-[clamp(3rem,9vh,6rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("brabus.ethosKicker")}</span>
-        </div>
         <div className="border-t border-line">
           {ETHOS.map((m) => (
             <div key={m.key} className="mq group grid gap-4 border-b border-line py-8 md:grid-cols-[5rem_1fr_1.3fr] md:gap-10">
@@ -125,10 +121,6 @@ export default function Brabus() {
 
       {/* what a branded residence means */}
       <section className="mn-grid container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("brabus.meaningKicker")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {MEANING.map((m) => (
             <article key={m.key} className="mn group border-b border-line py-7">

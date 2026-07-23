@@ -135,10 +135,6 @@ export default function AboutPage() {
 
       {/* what this site is, and what it is not */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("about.whatIsKicker")}</span>
-        </div>
 
         <p className="rise max-w-[62ch] text-lg leading-relaxed text-ink-soft">
           {t("about.introP1")}
@@ -173,10 +169,6 @@ export default function AboutPage() {
 
       {/* the developer and the marque */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("about.developerKicker")}</span>
-        </div>
 
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
           <div>
@@ -231,10 +223,6 @@ export default function AboutPage() {
             checks a buyer should run for themselves — on this promoter or any
             other. Unnumbered because it continues 02 rather than opening 03. */}
         <div className="dd-grid mt-[clamp(3.5rem,9vh,6rem)]">
-          <div className="dd flex items-baseline gap-5">
-            <span className="idx">—</span>
-            <span className="kicker">{t("about.verifyDevKicker")}</span>
-          </div>
           <p className="dd mt-6 max-w-[58ch] leading-relaxed text-ink-soft">
             {t("about.verifyDevIntro")}
           </p>
@@ -271,10 +259,6 @@ export default function AboutPage() {
       {/* the transparency statement — the heart of the page */}
       <section className="pri-grid border-y border-line bg-cream">
         <div className="container-lux py-[clamp(4rem,11vh,7rem)]">
-          <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-            <span className="idx">03</span>
-            <span className="kicker">{t("about.handleKicker")}</span>
-          </div>
 
           <h2 className="pri max-w-[20ch] font-display text-[clamp(2rem,4.4vw,3.2rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
             {t("about.principlesTitle")} <span className="font-serif italic text-brass">{t("about.principlesAccent")}</span>
@@ -297,10 +281,6 @@ export default function AboutPage() {
 
       {/* the rule, demonstrated on this project's own numbers */}
       <section className="led-grid container-lux py-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("about.ruleKicker")}</span>
-        </div>
         <p className="max-w-[62ch] leading-relaxed text-ink-soft">
           {t("about.ledgerIntro")}
         </p>
@@ -327,10 +307,6 @@ export default function AboutPage() {
 
       {/* what happens when you enquire */}
       <section className="flw-grid container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">05</span>
-          <span className="kicker">{t("about.enquireKicker")}</span>
-        </div>
 
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {ENQUIRY_FLOW.map((f) => (

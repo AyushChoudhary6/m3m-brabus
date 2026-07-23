@@ -188,13 +188,6 @@ export default function Gallery() {
 
       {/* ── 01 · the three plates ─────────────────────────────────── */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex flex-wrap items-baseline gap-5 border-b border-line pb-6">
-          <span className="idx">01</span>
-          <span className="kicker">{t("gallery.rendersKicker")}</span>
-          <span className="mono ml-auto text-[0.6rem] tracking-[0.2em] text-ink-faint">
-            03 {t("gallery.platesComplete")}
-          </span>
-        </div>
 
         <div className="flex flex-col gap-[clamp(4rem,11vh,8rem)]">
           {PLATES.map((p, i) => (
@@ -253,10 +246,6 @@ export default function Gallery() {
 
       {/* ── 02 · what is not on the wall ──────────────────────────── */}
       <section className="absent container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5 border-t border-line pt-[clamp(3rem,8vh,5rem)]">
-          <span className="idx">02</span>
-          <span className="kicker">{t("gallery.absentKicker")}</span>
-        </div>
 
         <p className="ab-row mb-10 max-w-[62ch] leading-relaxed text-ink-soft">
           {t("gallery.absentIntroA")} {PROJECT.developer} {t("gallery.absentIntroB")}

@@ -394,10 +394,6 @@ export default function FaqsPage() {
 
       {/* how these answers are sourced + category jump links */}
       <section className="container-lux pb-[clamp(3.5rem,10vh,6rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("faqs.kicker01")}</span>
-        </div>
 
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
           <div>
@@ -468,10 +464,6 @@ export default function FaqsPage() {
 
       {/* the accordion, grouped by category */}
       <section className="container-lux pb-[clamp(3rem,9vh,5rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("faqs.kicker02")}</span>
-        </div>
 
         {grouped.map((cat, ci) => (
           <div
@@ -556,10 +548,6 @@ export default function FaqsPage() {
 
       {/* the figures that do not exist publicly — gathered, not hidden */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("faqs.kicker03")}</span>
-        </div>
         <p className="rise mb-9 max-w-[58ch] leading-relaxed text-ink-soft">
           {t("faqs.gatedIntroA")} {PROJECT.developer} {t("faqs.gatedIntroB")} {PROJECT.name}{t("faqs.gatedIntroC")}
         </p>

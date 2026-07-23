@@ -116,10 +116,6 @@ export default function BrochurePage() {
 
       {/* what's inside */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("brochure.insideKicker")}</span>
-        </div>
         <div className="border-t border-line">
           {CONTENTS.map((c, i) => (
             <article

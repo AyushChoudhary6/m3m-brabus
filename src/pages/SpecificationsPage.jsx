@@ -224,10 +224,6 @@ export default function SpecificationsPage() {
 
       {/* how this page is built — the legend, stated before the table */}
       <section className="container-lux pb-[clamp(3.5rem,10vh,6rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("specs.kicker01")}</span>
-        </div>
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
           <div>
             <p className="rise max-w-[52ch] leading-relaxed text-ink-soft">
@@ -266,10 +262,6 @@ export default function SpecificationsPage() {
 
       {/* the schedule itself */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("specs.kicker02")}</span>
-        </div>
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[46rem] border-collapse text-left">
@@ -405,10 +397,6 @@ export default function SpecificationsPage() {
 
       {/* the education — how to read any specification sheet */}
       <section className="read-grid container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("specs.kicker03")}</span>
-        </div>
 
         <p className="mb-10 max-w-[58ch] leading-relaxed text-ink-soft">
           {t("specs.read03intro")}

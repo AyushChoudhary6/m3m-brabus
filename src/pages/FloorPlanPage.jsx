@@ -153,10 +153,6 @@ export default function FloorPlanPage() {
 
       {/* how to read the plans */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("floorplan.kickerHowRead")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {HOW_TO_READ.map((h, i) => (
             <div key={h.tKeyT} className="rise group border-b border-line py-6">
@@ -175,10 +171,6 @@ export default function FloorPlanPage() {
 
       {/* open-core, explained */}
       <section className="container-lux py-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("floorplan.kickerThreeSides")}</span>
-        </div>
 
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div>
@@ -217,10 +209,6 @@ export default function FloorPlanPage() {
 
       {/* 4 vs 5 BHK in plain language */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("floorplan.kickerDifference")}</span>
-        </div>
 
         <div className="overflow-x-auto">
           <div className="min-w-[600px]">
@@ -255,10 +243,6 @@ export default function FloorPlanPage() {
 
       {/* what is drawn, what is issued on request */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("floorplan.kickerDimensioned")}</span>
-        </div>
         <div className="grid gap-10 border-t border-line pt-8 lg:grid-cols-2 lg:gap-16">
           <p className="rise-b max-w-[52ch] leading-relaxed text-ink-soft">
             {t("floorplan.dimensionedBody")}
@@ -290,10 +274,6 @@ export default function FloorPlanPage() {
 
       {/* plan questions */}
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">05</span>
-          <span className="kicker">{t("floorplan.kickerPlanQ")}</span>
-        </div>
         <dl className="border-t border-line">
           {PLAN_FAQS.map((f) => (
             <div key={f.q} className="rise-b border-b border-line py-6">

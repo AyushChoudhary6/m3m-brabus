@@ -134,10 +134,6 @@ export default function ThankYou() {
 
       {/* what happens next */}
       <section className="steps container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("thankyou.whatNextKicker")}</span>
-        </div>
 
         {firstName && (
           <p className="mb-9 max-w-[52ch] font-display text-[clamp(1.5rem,3.2vw,2.1rem)] font-light leading-snug text-ink">
@@ -255,10 +251,6 @@ export default function ThankYou() {
 
       {/* where to go from here */}
       <section className="nxt-grid container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("thankyou.whileWaitKicker")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {READ_NEXT.map((p, i) => (
             <Link

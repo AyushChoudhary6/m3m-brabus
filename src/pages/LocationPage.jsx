@@ -148,10 +148,6 @@ export default function LocationPage() {
 
       {/* why the address matters — the argument the ledger above cannot make */}
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="rise mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("location.whyHere")}</span>
-        </div>
 
         <div className="grid gap-x-16 gap-y-6 lg:grid-cols-[1fr_0.92fr] lg:items-end">
           <h2 className="rise max-w-[17ch] font-display text-[clamp(2rem,5vw,3.4rem)] font-light leading-[1.03] tracking-[-0.025em] text-ink">

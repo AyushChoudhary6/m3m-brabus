@@ -148,10 +148,6 @@ export default function ReraPage() {
 
       {/* status */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("rera.k01")}</span>
-        </div>
         <dl className="border-t border-line">
           {STATUS.map((s) => (
             <div
@@ -170,10 +166,6 @@ export default function ReraPage() {
 
       {/* what HARERA is */}
       <section className="sec container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("rera.k02")}</span>
-        </div>
         <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div>
             <h2 className="sec-rise max-w-[18ch] font-display text-[clamp(1.9rem,4vw,3rem)] font-light leading-[1.04] tracking-[-0.02em] text-ink">
@@ -210,10 +202,6 @@ export default function ReraPage() {
 
       {/* protections */}
       <section className="sec container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("rera.k03")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {PROTECTIONS.map((p) => (
             <div key={p.tKey} className="sec-rise group border-b border-line py-6">
@@ -231,10 +219,6 @@ export default function ReraPage() {
 
       {/* how to verify */}
       <section className="sec container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("rera.k04")}</span>
-        </div>
         <ol className="border-t border-line">
           {VERIFY.map((v) => (
             <li
@@ -258,10 +242,6 @@ export default function ReraPage() {
 
       {/* documents checklist */}
       <section className="sec container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">05</span>
-          <span className="kicker">{t("rera.k05")}</span>
-        </div>
         <ul className="border-t border-line">
           {DOCUMENTS.map((d) => (
             <li
@@ -280,10 +260,6 @@ export default function ReraPage() {
 
       {/* faqs */}
       <section className="sec container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">06</span>
-          <span className="kicker">{t("rera.k06")}</span>
-        </div>
         <dl className="border-t border-line">
           {FAQ_ITEMS.map((f) => (
             <div key={f.q} className="sec-rise border-b border-line py-6">

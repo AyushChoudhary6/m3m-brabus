@@ -147,10 +147,6 @@ export default function MasterPlanPage() {
 
       {/* how to read the sheet */}
       <section className="read container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("masterplan.readKicker")}</span>
-        </div>
 
         <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
           <div>
@@ -277,10 +273,6 @@ export default function MasterPlanPage() {
 
       {/* the facts layer, stated as-is */}
       <section className="facts container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("masterplan.factsKicker")}</span>
-        </div>
         <p className="mb-10 max-w-[58ch] leading-relaxed text-ink-soft">
           {t("masterplan.factsIntro")}
         </p>
@@ -380,10 +372,6 @@ export default function MasterPlanPage() {
 
       {/* the open-core claim, tested against planning */}
       <section className="core container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("masterplan.coreKicker")}</span>
-        </div>
 
         <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
           <div>
@@ -424,10 +412,6 @@ export default function MasterPlanPage() {
 
       {/* sanctioned vs marketing */}
       <section className="verify container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("masterplan.verifyKicker")}</span>
-        </div>
 
         <div className="mb-10 grid gap-8 md:grid-cols-2 md:gap-14">
           <div className="rounded-[1.25rem] border border-line bg-paper p-7">

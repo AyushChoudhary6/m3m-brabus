@@ -131,10 +131,6 @@ export default function PrivacyPolicyPage() {
 
       {/* 01 — scope */}
       <section className="pv-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("privacy.k01")}</span>
-        </div>
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {t("privacy.scopeP1a")}{PROJECT.name}{t("privacy.scopeP1b")}{PROJECT.address}
@@ -149,10 +145,6 @@ export default function PrivacyPolicyPage() {
 
       {/* 02 — what is collected */}
       <section className="pv-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("privacy.k02")}</span>
-        </div>
         <p className="rise mb-8 max-w-[70ch] leading-relaxed text-ink-soft">
           {t("privacy.collectIntro")}
         </p>
@@ -209,10 +201,6 @@ export default function PrivacyPolicyPage() {
 
       {/* 03 — where it goes */}
       <section className="pv-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("privacy.k03")}</span>
-        </div>
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {t("privacy.goesP1")}
@@ -239,10 +227,6 @@ export default function PrivacyPolicyPage() {
 
       {/* 04 — purpose & basis */}
       <section className="pv-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("privacy.k04")}</span>
-        </div>
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {t("privacy.purposeP1")}
@@ -258,10 +242,6 @@ export default function PrivacyPolicyPage() {
 
       {/* 05 — browser storage */}
       <section className="pv-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">05</span>
-          <span className="kicker">{t("privacy.k05")}</span>
-        </div>
         <p className="rise mb-8 max-w-[70ch] leading-relaxed text-ink-soft">
           {t("privacy.browserIntro")}
         </p>
@@ -280,10 +260,6 @@ export default function PrivacyPolicyPage() {
 
       {/* 06 — analytics */}
       <section className="pv-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">06</span>
-          <span className="kicker">{t("privacy.k06")}</span>
-        </div>
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {t("privacy.analyticsP1a")}<span className="text-ink">{t("privacy.analyticsP1span")}</span>{t("privacy.analyticsP1b")}
@@ -307,10 +283,6 @@ export default function PrivacyPolicyPage() {
 
       {/* 07 — third parties */}
       <section className="pv-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">07</span>
-          <span className="kicker">{t("privacy.k07")}</span>
-        </div>
         <dl className="rise max-w-[70ch] border-t border-line">
           {THIRD_PARTIES.map((p) => (
             <div key={p.k} className="grid grid-cols-1 gap-2 border-b border-line py-5 sm:grid-cols-[minmax(0,14rem)_1fr] sm:gap-8">
@@ -326,10 +298,6 @@ export default function PrivacyPolicyPage() {
 
       {/* 08 — retention */}
       <section className="pv-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">08</span>
-          <span className="kicker">{t("privacy.k08")}</span>
-        </div>
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {t("privacy.retentionP1")}
@@ -342,10 +310,6 @@ export default function PrivacyPolicyPage() {
 
       {/* 09 — your rights */}
       <section className="pv-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">09</span>
-          <span className="kicker">{t("privacy.k09")}</span>
-        </div>
         <dl className="rise max-w-[70ch] border-t border-line">
           {RIGHTS.map((r) => (
             <div key={r.kKey} className="grid grid-cols-1 gap-2 border-b border-line py-5 sm:grid-cols-[minmax(0,10rem)_1fr] sm:gap-8">
@@ -361,10 +325,6 @@ export default function PrivacyPolicyPage() {
 
       {/* 10 — changes + contact line (deliberately quiet: no CtaBand here) */}
       <section className="pv-sec container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">10</span>
-          <span className="kicker">{t("privacy.k10")}</span>
-        </div>
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {t("privacy.changesP1")}

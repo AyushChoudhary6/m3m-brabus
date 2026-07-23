@@ -182,10 +182,6 @@ export default function ConstructionStatusPage() {
 
       {/* the position, stated without decoration */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("construction.kicker01")}</span>
-        </div>
 
         <div className="mb-10 grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div>
@@ -268,10 +264,6 @@ export default function ConstructionStatusPage() {
 
       {/* verify it yourself */}
       <section className="sec container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("construction.kicker02")}</span>
-        </div>
         <p className="sec-rise mb-8 max-w-[62ch] leading-relaxed text-ink-soft">
           {t("construction.verifyIntro")}
         </p>
@@ -385,10 +377,6 @@ export default function ConstructionStatusPage() {
 
       {/* stage primer */}
       <section className="stg container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("construction.kicker03")}</span>
-        </div>
         <p className="mb-8 max-w-[62ch] leading-relaxed text-ink-soft">
           {t("construction.stagesIntro")}
         </p>
@@ -438,10 +426,6 @@ export default function ConstructionStatusPage() {
 
       {/* optics */}
       <section className="sec container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("construction.kicker04")}</span>
-        </div>
         <p className="sec-rise mb-8 max-w-[62ch] leading-relaxed text-ink-soft">
           {t("construction.opticsIntro")}
         </p>
@@ -459,10 +443,6 @@ export default function ConstructionStatusPage() {
 
       {/* faqs */}
       <section className="sec container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">05</span>
-          <span className="kicker">{t("construction.kicker05")}</span>
-        </div>
         <dl className="border-t border-line">
           {FAQ_ITEMS.map((f) => (
             <div key={f.qKey} className="sec-rise border-b border-line py-7">

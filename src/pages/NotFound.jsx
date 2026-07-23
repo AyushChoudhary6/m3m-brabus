@@ -166,10 +166,6 @@ export default function NotFound() {
 
       {/* the primary destinations */}
       <section className="container-lux pb-[clamp(3.5rem,10vh,6rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("notfound.destinationsKicker")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {DESTINATIONS.map((p, i) => (
             <Link
@@ -194,10 +190,6 @@ export default function NotFound() {
 
       {/* search by intent */}
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("notfound.intentsKicker")}</span>
-        </div>
         <div className="flex flex-wrap gap-3">
           {INTENTS.map((s) => (
             <Link

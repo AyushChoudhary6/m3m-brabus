@@ -302,10 +302,6 @@ export default function GuidesPage() {
 
       {/* how this differs from the blog, plus the jump rail */}
       <section className="rail container-lux pb-[clamp(3.5rem,10vh,6rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("guides.kicker01")}</span>
-        </div>
 
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
           <div>
@@ -340,10 +336,6 @@ export default function GuidesPage() {
 
       {/* the seven stages */}
       <section className="container-lux pb-[clamp(3rem,8vh,5rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("guides.kicker02")}</span>
-        </div>
 
         <div className="border-t border-line">
           {STAGES.map((s, i) => {
@@ -452,10 +444,6 @@ export default function GuidesPage() {
 
       {/* where this particular project sits on the path today */}
       <section className="gate container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("guides.kicker03a")}{PROJECT.name}{t("guides.kicker03b")}</span>
-        </div>
 
         <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
           <div>

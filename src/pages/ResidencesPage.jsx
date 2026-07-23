@@ -206,10 +206,6 @@ export default function ResidencesPage() {
 
       {/* specification schedule */}
       <section className="spec-grid container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("residences.specKicker")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {SPEC_SCHEDULE.map((s) => (
             <div key={s.key} className="spec group border-b border-line py-6">

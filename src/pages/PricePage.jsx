@@ -156,10 +156,6 @@ export default function PricePage() {
 
       {/* the status, stated plainly */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("price.kickerStatus")}</span>
-        </div>
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
           <div>
             <p className="rise mono text-[0.6rem] tracking-[0.24em] text-ink-faint">{t("price.currentStatus")}</p>
@@ -197,10 +193,6 @@ export default function PricePage() {
 
       {/* what will determine the price */}
       <section className="drv-grid container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("price.kickerDetermine")}</span>
-        </div>
 
         <div className="mb-10 overflow-x-auto">
           <div className="min-w-[520px]">
@@ -316,10 +308,6 @@ export default function PricePage() {
 
       {/* what the price sheet will cover */}
       <section className="sheet container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("price.kickerSheetCarries")}</span>
-        </div>
         <p className="mb-10 max-w-[62ch] leading-relaxed text-ink-soft">
           {t("price.sheetIntro")}
         </p>
@@ -390,10 +378,6 @@ export default function PricePage() {
 
       {/* pricing FAQ */}
       <section className="faq container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("price.kickerFaq")}</span>
-        </div>
         <div className="border-t border-line">
           {FAQ.map((f) => (
             <div key={f.q} className="faq-row grid grid-cols-1 gap-3 border-b border-line py-7 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">

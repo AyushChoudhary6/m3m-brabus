@@ -105,10 +105,6 @@ export default function DisclaimerPage() {
 
       {/* 01 — not an offer */}
       <section className="dc-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("disclaimer.k01")}</span>
-        </div>
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {t("disclaimer.offerP1")}
@@ -124,10 +120,6 @@ export default function DisclaimerPage() {
 
       {/* 02 — not the official site */}
       <section className="dc-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("disclaimer.k02")}</span>
-        </div>
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {t("disclaimer.officialP1a")}{PROJECT.developer}{t("disclaimer.officialP1b")}{PROJECT.developer}{t("disclaimer.officialP1c")}{PROJECT.partner}{t("disclaimer.officialP1d")}
@@ -146,10 +138,6 @@ export default function DisclaimerPage() {
 
       {/* 03 — imagery */}
       <section className="dc-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("disclaimer.k03")}</span>
-        </div>
         <dl className="rise max-w-[70ch] border-t border-line">
           {IMAGERY.map((i) => (
             <div key={i.kKey} className="grid grid-cols-1 gap-2 border-b border-line py-5 sm:grid-cols-[minmax(0,15rem)_1fr] sm:gap-8">
@@ -162,10 +150,6 @@ export default function DisclaimerPage() {
 
       {/* 04 — areas & plans */}
       <section className="dc-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("disclaimer.k04")}</span>
-        </div>
         <dl className="rise max-w-[70ch] border-t border-line">
           {AREAS.map((a) => (
             <div key={a.kKey} className="grid grid-cols-1 gap-2 border-b border-line py-5 sm:grid-cols-[minmax(0,15rem)_1fr] sm:gap-8">
@@ -178,10 +162,6 @@ export default function DisclaimerPage() {
 
       {/* 05 — the figures this site does not publish */}
       <section className="dc-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">05</span>
-          <span className="kicker">{t("disclaimer.k05")}</span>
-        </div>
         <p className="rise mb-8 max-w-[70ch] leading-relaxed text-ink-soft">
           {t("disclaimer.unpubIntro")}
         </p>
@@ -200,10 +180,6 @@ export default function DisclaimerPage() {
 
       {/* 06 — trademarks */}
       <section className="dc-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">06</span>
-          <span className="kicker">{t("disclaimer.k06")}</span>
-        </div>
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {PROJECT.partner}{t("disclaimer.trademarksP1a")}{PROJECT.developer}{t("disclaimer.trademarksP1b")}
@@ -216,10 +192,6 @@ export default function DisclaimerPage() {
 
       {/* 07 — editorial content */}
       <section className="dc-sec container-lux pb-[clamp(3.5rem,9vh,5.5rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">07</span>
-          <span className="kicker">{t("disclaimer.k07")}</span>
-        </div>
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {t("disclaimer.editorialP1")}
@@ -235,10 +207,6 @@ export default function DisclaimerPage() {
 
       {/* 08 — verify before you transact */}
       <section className="dc-sec container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(1.75rem,4vh,2.75rem)] flex items-baseline gap-5">
-          <span className="idx">08</span>
-          <span className="kicker">{t("disclaimer.k08")}</span>
-        </div>
         <p className="rise mb-8 max-w-[70ch] leading-relaxed text-ink-soft">
           {t("disclaimer.verifyIntro")}
         </p>

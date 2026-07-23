@@ -174,10 +174,6 @@ export default function PaymentPlanPage() {
 
       {/* published status */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("payment.kickerPublished")}</span>
-        </div>
         <dl className="border-t border-line">
           {STATUS.map((s) => (
             <div
@@ -197,10 +193,6 @@ export default function PaymentPlanPage() {
 
       {/* general industry context */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("payment.kickerIndustry")}</span>
-        </div>
 
         <div className="mb-[clamp(2.5rem,6vh,4rem)] max-w-3xl border-l border-brass/40 py-1 pl-6">
           <p className="font-serif text-lg italic leading-relaxed text-brass">
@@ -245,10 +237,6 @@ export default function PaymentPlanPage() {
 
       {/* cost heads */}
       <section className="ch-grid container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("payment.kickerItemises")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {COST_HEADS.map((c) => (
             <div key={c.tKeyT} className="ch group border-b border-line py-6">
@@ -326,10 +314,6 @@ export default function PaymentPlanPage() {
 
       {/* faqs */}
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("payment.kickerFaq")}</span>
-        </div>
         {/* Same rule as the homepage FAQ: the answers back the FAQPage JSON-LD
             above, so they are collapsed by height and never unmounted. */}
         <Accordion items={payFaqsLocalized} />

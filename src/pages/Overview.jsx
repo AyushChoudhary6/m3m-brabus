@@ -91,10 +91,6 @@ export default function Overview() {
           The three-side plan and the density belong to 02, which explains
           them rather than merely asserting them again. */}
       <section className="brief container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="br-rise mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("overview.briefKicker")}</span>
-        </div>
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
           <h2 className="br-rise max-w-[14ch] font-display text-[clamp(1.9rem,4.4vw,3.2rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
             {t("overview.briefTitle1")} <span className="font-serif italic text-brass">{t("overview.briefTitle2")}</span>
@@ -114,10 +110,6 @@ export default function Overview() {
 
       {/* highlights */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("overview.apartKicker")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-10 md:grid-cols-2">
           {HIGHLIGHTS.map((h, i) => (
             <article key={h.title} className="hl group border-t border-line pt-6">

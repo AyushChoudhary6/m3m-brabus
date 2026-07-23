@@ -255,10 +255,6 @@ export default function Contact() {
 
       {/* plan a visit */}
       <section className="vs-grid container-lux pb-[clamp(5rem,13vh,9rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("contact.planVisitKicker")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-3">
           {VISIT.map((v) => (
             <article key={v.k} className="vs border-t border-line py-7">

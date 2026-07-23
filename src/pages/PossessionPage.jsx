@@ -151,10 +151,6 @@ export default function PossessionPage() {
 
       {/* current status */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("possession.currentStatusKicker")}</span>
-        </div>
         <dl className="border-t border-line">
           {STATUS.map((s) => (
             <div
@@ -174,10 +170,6 @@ export default function PossessionPage() {
 
       {/* what possession means */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("possession.meaningKicker")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {MEANING.map((m) => (
             <article key={m.k} className="mn group border-b border-line py-7">
@@ -207,10 +199,6 @@ export default function PossessionPage() {
 
       {/* what governs the timeline */}
       <section className="gv-grid container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("possession.governsKicker")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {GOVERNS.map((g) => (
             <div key={g.tKey} className="gv group border-b border-line py-6">
@@ -223,10 +211,6 @@ export default function PossessionPage() {
 
       {/* what to ask */}
       <section className="ask container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("possession.askKicker")}</span>
-        </div>
         <ul className="border-t border-line">
           {ASK.map((a) => (
             <li
@@ -242,10 +226,6 @@ export default function PossessionPage() {
 
       {/* faqs */}
       <section className="fq-list container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">05</span>
-          <span className="kicker">{t("possession.faqKicker")}</span>
-        </div>
         <div className="border-t border-line">
           {FAQ_ROWS.map((f) => (
             <article key={f.qKey} className="fq grid grid-cols-1 gap-2 border-b border-line py-7 md:grid-cols-[0.9fr_1.1fr] md:gap-12">

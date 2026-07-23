@@ -155,10 +155,6 @@ export default function ReviewsPage() {
 
       {/* the assessment */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">01</span>
-          <span className="kicker">{t("reviews.assessmentKicker")}</span>
-        </div>
         <dl className="border-t border-line">
           {ASSESSED.map((a) => (
             <div
@@ -188,10 +184,6 @@ export default function ReviewsPage() {
 
       {/* what stands up */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">02</span>
-          <span className="kicker">{t("reviews.strengthsKicker")}</span>
-        </div>
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {STRENGTHS.map((s, i) => (
             <article key={s.id} className="blk group border-b border-line py-6">
@@ -207,10 +199,6 @@ export default function ReviewsPage() {
 
       {/* not yet published */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">03</span>
-          <span className="kicker">{t("reviews.unpubKicker")}</span>
-        </div>
         <p className="blk mb-8 max-w-[62ch] leading-relaxed text-ink-soft">
           {t("reviews.unpubIntroA")} {PROJECT.developer} {t("reviews.unpubIntroB")}
         </p>
@@ -256,10 +244,6 @@ export default function ReviewsPage() {
 
       {/* what to verify */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">04</span>
-          <span className="kicker">{t("reviews.verifyKicker")}</span>
-        </div>
         <p className="blk mb-8 max-w-[62ch] leading-relaxed text-ink-soft">
           {t("reviews.verifyIntro")}
         </p>
@@ -281,10 +265,6 @@ export default function ReviewsPage() {
 
       {/* suits / reconsider */}
       <section className="container-lux pb-[clamp(4rem,12vh,8rem)]">
-        <div className="mb-[clamp(2rem,5vh,3.5rem)] flex items-baseline gap-5">
-          <span className="idx">05</span>
-          <span className="kicker">{t("reviews.suitsKicker")}</span>
-        </div>
 
         {/* the resale question is the one buyers ask last and worry about first;
             with no pricing published it can only be answered structurally, and
