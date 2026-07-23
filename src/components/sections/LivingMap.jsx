@@ -33,7 +33,7 @@ export default function LivingMap({ bare = false }) {
     });
     mapRef.current = map;
 
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
       subdomains: "abcd",
       maxZoom: 20,
       attribution: "&copy; OpenStreetMap &copy; CARTO",
@@ -120,11 +120,13 @@ export default function LivingMap({ bare = false }) {
         {/* real map */}
         <div className="map-frame relative overflow-hidden rounded-[1.25rem] border border-line">
           <div ref={mapEl} className="h-[clamp(360px,60vh,640px)] w-full" />
-          {/* subtle framing overlays (do not block map interaction) */}
+          {/* subtle framing overlay (does not block map interaction). The dark
+              top scrim is gone: over light tiles it read as a grey smudge. */}
           <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-16 [background:linear-gradient(180deg,rgba(8,6,5,0.5),transparent)]" />
           <div className="pointer-events-none absolute bottom-4 left-4 z-[500]">
-            <p className="mono text-[0.58rem] tracking-[0.2em] text-brass-soft [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
+            {/* dark type on a light plate — the pale gold used for the dark map
+                is unreadable against light tiles */}
+            <p className="mono rounded-full bg-white/85 px-3 py-1.5 text-[0.58rem] tracking-[0.2em] text-[#3d3729] shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
               {PROJECT.location} · {t("smap.gceRoad")}
             </p>
           </div>
