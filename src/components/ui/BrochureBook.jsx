@@ -53,17 +53,21 @@ export default function BrochureBook({ open, onClose, pdfUrl, downloadName = "M3
 
     (async () => {
       try {
-        const [{ PageFlip }, pdfjs] = await Promise.all([
-          import("page-flip"),
+        /* page-flip's package `main` is a UMD bundle that exports under `St`,
+           so the named import is not dependable through interop — take the ESM
+           build directly. The worker URL must come from a ?url import: Vite does
+           not resolve a bare package specifier inside new URL(..., import.meta.url),
+           which silently yields a 404 and takes pdf.js down with it. */
+        const [flipMod, pdfjs, workerMod] = await Promise.all([
+          import("page-flip/dist/js/page-flip.module.js"),
           import("pdfjs-dist"),
+          import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
         ]);
         if (cancelled) return;
 
+        const PageFlip = flipMod.PageFlip || flipMod.default?.PageFlip || flipMod.default;
         // Bundled worker — same origin, so worker-src 'self' is satisfied.
-        pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-          "pdfjs-dist/build/pdf.worker.min.mjs",
-          import.meta.url,
-        ).href;
+        pdfjs.GlobalWorkerOptions.workerSrc = workerMod.default;
 
         const doc = await pdfjs.getDocument({
           url: pdfUrl,

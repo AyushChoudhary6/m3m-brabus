@@ -20,6 +20,23 @@ const AUTO_DELAY = 40000; // 40 seconds
 // NOTE: public/ is served case-sensitively — this must match the filename exactly.
 const BROCHURE_URL = "/brochure/M3M-Brabus-Brochure.pdf";
 
+/**
+ * Is the brochure actually there?
+ *
+ * A missing path on an SPA is served index.html with a 200, so the status alone
+ * proves nothing — the content type is what distinguishes a real PDF from the
+ * app shell. Guards the "we'll email it" fallback.
+ */
+async function brochureExists() {
+  try {
+    const res = await fetch(BROCHURE_URL, { cache: "no-store" });
+    const type = res.headers.get("content-type") || "";
+    return res.ok && type.includes("pdf");
+  } catch {
+    return false;
+  }
+}
+
 
 async function downloadBrochure() {
   try {
