@@ -75,7 +75,7 @@ export default function ProjectHighlights() {
             return (
               <li
                 key={fact.key}
-                className={`ph-cell group/cell relative overflow-hidden p-6 md:p-7 ${
+                className={`ph-cell group/cell relative flex min-h-[9.5rem] flex-col overflow-hidden p-5 sm:p-6 md:min-h-[10.5rem] md:p-7 ${
                   known ? "bg-canvas" : "bg-cream"
                 } [&_button:focus-visible]:outline [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-4 [&_button:focus-visible]:outline-brass`}
               >
