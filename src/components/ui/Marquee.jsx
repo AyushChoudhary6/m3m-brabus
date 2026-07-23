@@ -21,13 +21,16 @@ export default function Marquee({ items, speed = 26, className = "" }) {
     { scope: wrap, dependencies: [speed] },
   );
 
+  /* Outlined type: the stroke used to be --color-line (#2c2418), which is
+     effectively invisible against the dark canvas. Brass reads clearly and
+     matches the ◆ separator, keeping the ghost-outline look. */
   return (
     <div ref={wrap} className={`overflow-hidden ${className}`}>
       <div ref={row} className="flex w-max gap-16 whitespace-nowrap">
         {[...items, ...items].map((it, i) => (
           <span
             key={i}
-            className="flex items-center gap-16 font-display text-[clamp(2rem,7vw,5rem)] italic tracking-tight text-transparent [-webkit-text-stroke:1px_var(--color-line)]"
+            className="flex items-center gap-16 font-display text-[clamp(2rem,7vw,5rem)] italic tracking-tight text-transparent [-webkit-text-stroke:1px_var(--color-brass)]"
           >
             {it}
             <span className="text-[0.4em] not-italic text-brass [-webkit-text-stroke:0]">◆</span>
