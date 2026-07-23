@@ -394,12 +394,34 @@ export async function submitLeadResult(data = {}) {
   }
 }
 
-/** Marks the visitor as an existing lead so the timed invite stops nagging. */
+/** localStorage flag + event name marking "this visitor has given us details". */
+export const LEAD_KEY = "mb-lead";
+export const LEAD_EVENT = "mb:lead";
+
+/** True once the visitor has submitted a real enquiry. */
+export function hasLeadCaptured() {
+  try {
+    return localStorage.getItem(LEAD_KEY) === "1";
+  } catch {
+    return false; // private mode — treat as not captured
+  }
+}
+
+/**
+ * Marks the visitor as an existing lead so the timed invite stops nagging, and
+ * broadcasts it so gated content (e.g. the floor plans) can unlock immediately
+ * rather than only on the next page load.
+ */
 export function markLeadCaptured() {
   try {
-    localStorage.setItem("mb-lead", "1");
+    localStorage.setItem(LEAD_KEY, "1");
   } catch {
     /* private mode — ignore */
+  }
+  try {
+    window.dispatchEvent(new Event(LEAD_EVENT));
+  } catch {
+    /* non-browser — ignore */
   }
 }
 

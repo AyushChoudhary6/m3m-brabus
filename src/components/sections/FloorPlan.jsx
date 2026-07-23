@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import {
-  ArrowUpRight, ChevronLeft, ChevronRight, Expand, Maximize2,
+  ArrowUpRight, ChevronLeft, ChevronRight, Expand, Lock, Maximize2,
   Minus, Plus, RotateCcw, Shrink, X,
 } from "lucide-react";
 import Magnetic from "../ui/Magnetic.jsx";
@@ -11,6 +11,7 @@ import { useEnquiry } from "../ui/Enquiry.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 import usePresence from "../../lib/usePresence.js";
 import { CONFIGURATIONS } from "../../lib/facts.js";
+import { hasLeadCaptured, LEAD_EVENT } from "../../lib/leads.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -44,6 +45,8 @@ const PLANS = [
     label: "4 BHK",
     tag: "The Signature",
     tagKey: "sfloorplan.tagSignature",
+    // Gated drawing — blurred until the visitor gives their details.
+    image: "/renders/floor-plan-4bhk.jpg",
     composition: "Four bedrooms · living & dining · kitchen · foyer · balcony",
     compKey: "sfloorplan.comp4bhk",
     rooms: [
@@ -63,6 +66,7 @@ const PLANS = [
     label: "5 BHK",
     tag: "The Grand",
     tagKey: "sfloorplan.tagGrand",
+    image: "/renders/floor-plan-5bhk.jpg",
     composition: "Five bedrooms · living & dining · family lounge · study · sky lounge",
     compKey: "sfloorplan.comp5bhk",
     rooms: [
@@ -154,6 +158,94 @@ function PlanSvg({ plan, active, onRoom, animated = false, className = "" }) {
 /* ── the "we don't publish that" line ───────────────────────────────
    Carpet area and orientation are not on the official listing. Rather than
    print a guess or leave a blank, each becomes a one-tap request. */
+/**
+ * Unlocked once the visitor has submitted an enquiry. Read after mount, never
+ * during render, so the prerendered HTML is always the LOCKED state — otherwise
+ * the static snapshot and the hydrated view would disagree.
+ */
+function useLeadUnlocked() {
+  const [unlocked, setUnlocked] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setUnlocked(hasLeadCaptured());
+    sync();
+    window.addEventListener(LEAD_EVENT, sync); // same tab, the moment the form succeeds
+    window.addEventListener("storage", sync); // another tab captured the lead
+    return () => {
+      window.removeEventListener(LEAD_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+
+  return unlocked;
+}
+
+/**
+ * The drawing. Locked, it renders blurred under a lock plate and the whole
+ * plate opens the enquiry form; once details are given it un-blurs and becomes
+ * the enlarge control. The blur is applied to the image itself (not an overlay)
+ * so the un-gated drawing is never sitting in the DOM at full clarity.
+ */
+function GatedPlan({ plan, unlocked, onEnlarge }) {
+  const { t } = useI18n();
+  const { openEnquiry } = useEnquiry();
+  const [failed, setFailed] = useState(false);
+
+  const act = () => (unlocked ? onEnlarge() : openEnquiry(`Floor plan · ${plan.label}`));
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={
+        unlocked
+          ? `${t("sfloorplan.enlargeThe")} ${plan.label}`
+          : `${t("sfloorplan.unlockAria")} ${plan.label}`
+      }
+      data-cursor={unlocked ? "ENLARGE" : "UNLOCK"}
+      onClick={act}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); }
+      }}
+      className="group/plan relative block w-full cursor-pointer overflow-hidden rounded-lg border border-line focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-4 focus-visible:ring-offset-canvas"
+    >
+      {failed ? (
+        // Drawing not supplied yet — hold the frame rather than show a broken image.
+        <div className="aspect-[4/3] w-full bg-ink-900/50" />
+      ) : (
+        <img
+          src={plan.image}
+          alt={unlocked ? `${plan.label} — ${t("sfloorplan.kicker")}` : ""}
+          aria-hidden={unlocked ? undefined : "true"}
+          onError={() => setFailed(true)}
+          draggable="false"
+          loading="lazy"
+          className={`block w-full select-none transition-[filter,transform] duration-700 ease-lux ${
+            unlocked ? "" : "scale-105 blur-[14px]"
+          }`}
+        />
+      )}
+
+      {unlocked ? (
+        <span className="mono pointer-events-none absolute right-2 top-2 inline-flex items-center gap-1.5 rounded-full border border-line bg-paper/80 px-3 py-1.5 text-[0.55rem] tracking-[0.18em] text-ink-soft opacity-0 backdrop-blur transition-opacity duration-500 group-hover/plan:opacity-100 group-focus-visible/plan:opacity-100">
+          <Maximize2 size={12} className="text-brass" />
+          {t("sfloorplan.enlarge")}
+        </span>
+      ) : (
+        <div className="pointer-events-none absolute inset-0 grid place-items-center bg-obsidian/45 p-6 text-center">
+          <div>
+            <span className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-brass/40 bg-obsidian/70 text-brass">
+              <Lock size={18} />
+            </span>
+            <p className="mt-4 font-display text-lg font-light text-bone">{t("sfloorplan.lockedTitle")}</p>
+            <p className="mono mt-2 text-[0.58rem] tracking-[0.18em] text-brass">{t("sfloorplan.lockedCta")}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function OnRequest({ label, subject, note }) {
   const { openEnquiry } = useEnquiry();
   const { t } = useI18n();
@@ -426,11 +518,13 @@ function PlanLightbox({ rootRef, index, onIndex, onClose }) {
                 willChange: "transform",
               }}
             >
-              <PlanSvg
-                plan={plan}
-                active={hover}
-                onRoom={setHover}
-                className="max-h-full w-full"
+              {/* The lightbox is only reachable once unlocked, so the drawing
+                  shows at full clarity here. */}
+              <img
+                src={plan.image}
+                alt={`${plan.label} — ${t("sfloorplan.kicker")}`}
+                draggable="false"
+                className="max-h-full w-full select-none object-contain"
               />
             </div>
           </div>
@@ -518,6 +612,7 @@ export default function FloorPlan() {
   const [openAt, setOpenAt] = useState(null); // index of the enlarged plan
   const { openEnquiry } = useEnquiry();
   const { t } = useI18n();
+  const unlocked = useLeadUnlocked(); // drawings stay blurred until details are given
 
   /* Leaving: the panel settles back down as the backdrop lifts. The lightbox
      stays mounted for the duration, which is also what keeps its scroll lock,
@@ -598,38 +693,8 @@ export default function FloorPlan() {
                 </div>
               </div>
 
-              {/* interactive plan — the whole drawing is the enlarge control */}
-              <div
-                role="button"
-                tabIndex={0}
-                aria-label={`${t("sfloorplan.enlargeThe")} ${plan.label}`}
-                data-cursor="ENLARGE"
-                onClick={enlarge}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); enlarge(); }
-                }}
-                className="group/plan relative block w-full cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-4 focus-visible:ring-offset-canvas"
-              >
-                <PlanSvg plan={plan} active={active} onRoom={(i) => setHover(i == null ? null : { id: plan.id, i })} animated className="relative w-full" />
-                <span className="mono pointer-events-none absolute right-2 top-2 inline-flex items-center gap-1.5 rounded-full border border-line bg-paper/80 px-3 py-1.5 text-[0.55rem] tracking-[0.18em] text-ink-soft opacity-0 backdrop-blur transition-opacity duration-500 group-hover/plan:opacity-100 group-focus-visible/plan:opacity-100">
-                  <Maximize2 size={12} className="text-brass" />
-                  {t("sfloorplan.enlarge")}
-                </span>
-              </div>
-
-              {/* zone legend — what the gold weights mean */}
-              <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
-                {ZONE_KEYS.map((k) => (
-                  <li key={k} className="mono flex items-center gap-1.5 text-[0.52rem] tracking-[0.16em] text-ink-faint">
-                    <span
-                      aria-hidden="true"
-                      className="h-2.5 w-2.5 rounded-[2px] border border-brass/30"
-                      style={{ background: brass(ZONES[k].fill + 0.03) }}
-                    />
-                    {t(ZONES[k].tKey)}
-                  </li>
-                ))}
-              </ul>
+              {/* the drawing — blurred until the visitor gives their details */}
+              <GatedPlan plan={plan} unlocked={unlocked} onEnlarge={enlarge} />
 
               {/* the published figure, and the two that are not */}
               <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-5 sm:grid-cols-3">

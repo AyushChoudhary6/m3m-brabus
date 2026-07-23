@@ -97,6 +97,11 @@ const BASE = {
     "foot.explore": "Explore",
     "foot.sales": "Sales Enquiry",
     "foot.rights": "All rights reserved.",
+
+    // gated floor plan
+    "sfloorplan.lockedTitle": "Floor plan locked",
+    "sfloorplan.lockedCta": "Click to unlock",
+    "sfloorplan.unlockAria": "Unlock the floor plan for",
   },
 
   ar: {
@@ -185,6 +190,11 @@ const BASE = {
     "foot.explore": "استكشف",
     "foot.sales": "استفسارات المبيعات",
     "foot.rights": "جميع الحقوق محفوظة.",
+
+    // gated floor plan
+    "sfloorplan.lockedTitle": "المخطط مقفل",
+    "sfloorplan.lockedCta": "اضغط لفتح المخطط",
+    "sfloorplan.unlockAria": "افتح مخطط",
   },
 };
 
