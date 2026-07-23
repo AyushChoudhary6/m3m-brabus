@@ -127,16 +127,22 @@ export default function Hero() {
 
           // ---- entrance ----
           gsap.set(videoWrap.current, { autoAlpha: 0, scale: 1.12, filter: "blur(16px)" });
-          // 150% (not just >100%) so the slide-up start stays fully below the
-          // mask even with the descender padding on .ed-line (else a sliver of
-          // the letter-tops would peek at the bottom before the reveal).
-          gsap.set(q(".ed-line > span"), { yPercent: 150 });
+          // >100% so the line starts fully below its mask before the reveal.
+          gsap.set(q(".ed-line > span"), { yPercent: 115 });
           gsap.set(q(".hero-fade"), { autoAlpha: 0, y: 20 });
 
           gsap
             .timeline({ defaults: { ease: "power4.out" } })
             .to(videoWrap.current, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 2, ease: "expo.out" }, 0)
-            .to(q(".ed-line > span"), { yPercent: 0, duration: 1.3, stagger: 0.14 }, 0.5)
+            .to(q(".ed-line > span"), {
+              yPercent: 0,
+              duration: 1.3,
+              stagger: 0.14,
+              // The mask has done its job once the type has settled. Clearing it
+              // means descenders are never clipped, whatever the font's metrics —
+              // no per-font padding guess to keep in sync.
+              onComplete: () => gsap.set(q(".ed-line"), { overflow: "visible" }),
+            }, 0.5)
             .fromTo(q(".gold-sweep"), { backgroundPositionX: "120%" }, { backgroundPositionX: "-20%", duration: 1.3, ease: "power2.inOut" }, 1.3)
             .to(q(".hero-fade"), { autoAlpha: 1, y: 0, duration: 1, stagger: 0.09 }, 1.4);
 
