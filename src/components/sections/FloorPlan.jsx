@@ -3,10 +3,9 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import {
-  ArrowUpRight, ChevronLeft, ChevronRight, Expand, Lock, Maximize2,
+  ChevronLeft, ChevronRight, Expand, Lock, Maximize2,
   Minus, Plus, RotateCcw, Shrink, X,
 } from "lucide-react";
-import Magnetic from "../ui/Magnetic.jsx";
 import { useEnquiry } from "../ui/Enquiry.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 import usePresence from "../../lib/usePresence.js";
@@ -246,27 +245,6 @@ function GatedPlan({ plan, unlocked, onEnlarge }) {
   );
 }
 
-function OnRequest({ label, subject, note }) {
-  const { openEnquiry } = useEnquiry();
-  const { t } = useI18n();
-  return (
-    <div className="min-w-0">
-      <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{label}</p>
-      <button
-        type="button"
-        onClick={() => openEnquiry(subject)}
-        data-cursor="REQUEST"
-        aria-label={`${t("sfloorplan.onRequest")} — ${label} ${t("sfloorplan.privateClientTeam")}`}
-        className="group/or mt-1 inline-flex items-center gap-1.5 rounded-sm font-serif text-sm italic text-brass transition-colors hover:text-brass-soft focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-4 focus-visible:ring-offset-canvas md:text-base"
-      >
-        {t("sfloorplan.onRequest")}
-        <ArrowUpRight size={13} className="transition-transform duration-500 group-hover/or:translate-x-0.5" />
-      </button>
-      {note && <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-faint">{note}</p>}
-    </div>
-  );
-}
-
 /* ── enlarged view ──────────────────────────────────────────────────
    Dark backdrop · aria-modal · focus trapped · Escape closes · body scroll
    restored and every listener detached on unmount. `data-lenis-prevent`
@@ -441,7 +419,6 @@ function PlanLightbox({ rootRef, index, onIndex, onClose }) {
   };
   const canFs = typeof document !== "undefined" && Boolean(document.documentElement.requestFullscreen);
 
-  const requestHd = () => { onClose(); openEnquiry("HD floor plan"); };
 
   const ctl =
     "grid h-9 w-9 place-items-center rounded-full border border-line text-ink-soft transition-colors hover:border-brass hover:text-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass disabled:opacity-35 disabled:hover:border-line disabled:hover:text-ink-soft";
@@ -561,41 +538,17 @@ function PlanLightbox({ rootRef, index, onIndex, onClose }) {
           </div>
         </div>
 
-        {/* what is known, and what is only known on request */}
-        <div className="grid gap-6 px-5 py-6 md:grid-cols-[1.1fr_auto] md:items-end md:px-8 md:py-7">
-          <div>
-            <div className="grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-4">
-              <div className="min-w-0">
-                <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{t("sfloorplan.superArea")}</p>
-                <p className="mt-1 font-serif text-sm italic text-brass md:text-base">{cfg.size}</p>
-                <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-faint">{t("sfloorplan.totalPublished")}</p>
-              </div>
-              <OnRequest label={t("sfloorplan.carpetArea")} subject={`Carpet area · ${plan.label}`} note={t("sfloorplan.notPublishedDev")} />
-              <OnRequest label={t("sfloorplan.orientation")} subject={`Orientation · ${plan.label}`} note={t("sfloorplan.orientationNote")} />
-              <div className="min-w-0">
-                <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{room ? t("sfloorplan.room") : t("sfloorplan.roomLayout")}</p>
-                <p className="mt-1 text-sm leading-relaxed text-ink">
-                  {room ? `${t(room.tKey)} · ${t(ZONES[room.z].tKey)}` : t(plan.compKey)}
-                </p>
-              </div>
-            </div>
-            <p className="mono mt-6 text-[0.55rem] leading-relaxed tracking-[0.18em] text-ink-faint">
-              {t("sfloorplan.indicativeFull")}
+        {/* the layout, and the standing caveat */}
+        <div className="px-5 py-6 md:px-8 md:py-7">
+          <div className="min-w-0">
+            <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{room ? t("sfloorplan.room") : t("sfloorplan.roomLayout")}</p>
+            <p className="mt-1 text-sm leading-relaxed text-ink">
+              {room ? `${t(room.tKey)} · ${t(ZONES[room.z].tKey)}` : t(plan.compKey)}
             </p>
           </div>
-
-          <button
-            type="button"
-            onClick={requestHd}
-            data-cursor="REQUEST"
-            className="group/cta relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full border border-brass/50 px-6 py-3.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
-          >
-            <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
-            <span className="relative z-10 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-              {t("sfloorplan.requestHd")}
-            </span>
-            <ArrowUpRight size={14} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
-          </button>
+          <p className="mono mt-6 text-[0.55rem] leading-relaxed tracking-[0.18em] text-ink-faint">
+            {t("sfloorplan.indicativeFull")}
+          </p>
         </div>
 
         <p className="mono border-t border-line px-5 py-3 text-center text-[0.54rem] tracking-[0.18em] text-ink-faint md:px-8">
@@ -719,25 +672,11 @@ export default function FloorPlan() {
         })}
       </div>
 
-      {/* shared CTA */}
-      <div className="mt-10 flex flex-wrap items-center justify-between gap-6 border-t border-line pt-8">
+      {/* shared note */}
+      <div className="mt-10 border-t border-line pt-8">
         <p className="max-w-md text-sm leading-relaxed text-ink-soft">
           {t("sfloorplan.sharedPrivately")}
         </p>
-        <Magnetic>
-          <button
-            type="button"
-            onClick={() => openEnquiry("HD floor plan")}
-            data-cursor="REQUEST"
-            className="group/cta relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-brass/50 px-6 py-3.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-4 focus-visible:ring-offset-canvas"
-          >
-            <span className="absolute inset-0 origin-left scale-x-0 bg-brass transition-transform duration-500 ease-lux group-hover/cta:scale-x-100" />
-            <span className="relative z-10 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors duration-500 group-hover/cta:text-obsidian">
-              {t("sfloorplan.requestHd")}
-            </span>
-            <ArrowUpRight size={14} className="relative z-10 text-brass transition-colors duration-500 group-hover/cta:text-obsidian" />
-          </button>
-        </Magnetic>
       </div>
 
       {lightboxMounted && (
