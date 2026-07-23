@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, useLayoutE
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { X, ArrowRight } from "lucide-react";
+import BrochureBook from "./BrochureBook.jsx";
 import { submitLead, markLeadCaptured } from "../../lib/leads.js";
 import { startTimer, resetTimer } from "../../lib/spam.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../../lib/validate.js";
@@ -19,14 +20,7 @@ const AUTO_DELAY = 40000; // 40 seconds
 // NOTE: public/ is served case-sensitively — this must match the filename exactly.
 const BROCHURE_URL = "/brochure/M3M-Brabus-Brochure.pdf";
 
-/**
- * Fetch the brochure and save it as a real file.
- *
- * A plain <a download> on a missing path silently saves the SPA's index.html
- * with a .pdf extension ("Failed to load PDF document"). Fetching first lets us
- * verify it's actually a PDF and fall back to "we'll email it" instead.
- * @returns {Promise<boolean>} true if a real PDF was delivered
- */
+
 async function downloadBrochure() {
   try {
     const res = await fetch(BROCHURE_URL, { cache: "no-store" });
@@ -94,6 +88,10 @@ export function EnquiryProvider({ children }) {
     setOpen(true);
   }, []);
 
+  /* The book the brochure opens into once the form is submitted. It lives here,
+     not in the modal, so closing the modal does not unmount the reader. */
+  const [book, setBook] = useState(false);
+
   const close = useCallback(() => setOpen(false), []);
 
   // timed invitation — fires once, ~40s after load
@@ -112,7 +110,15 @@ export function EnquiryProvider({ children }) {
   return (
     <EnquiryCtx.Provider value={{ openEnquiry, openBrochure, openVisit }}>
       {children}
-      <EnquiryModal open={open} subject={subject} auto={auto} intent={intent} onClose={close} />
+      <EnquiryModal
+        open={open}
+        subject={subject}
+        auto={auto}
+        intent={intent}
+        onClose={close}
+        onBrochureReady={() => { setOpen(false); setBook(true); }}
+      />
+      <BrochureBook open={book} onClose={() => setBook(false)} pdfUrl={BROCHURE_URL} />
     </EnquiryCtx.Provider>
   );
 }
@@ -127,7 +133,7 @@ const FIELD =
    literal, so spam.js reads back the clock this form actually started. */
 const FORM_KEY = "enquiry-modal";
 
-function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
+function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBrochureReady }) {
   const isBrochure = intent === "brochure";
   const isVisit = intent === "visit";
   const { t } = useI18n();
@@ -242,7 +248,13 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose }) {
       setSent(true);
       if (isBrochure) {
         trackBrochure(subject || "modal");
-        setGotFile(await downloadBrochure());
+        /* Open the book rather than firing a download: the visitor asked to
+           read the brochure, and the reader carries its own download button.
+           A quick HEAD-style check keeps the old "we'll email it" fallback for
+           the case where the file genuinely is not there. */
+        const ok = await brochureExists();
+        setGotFile(ok);
+        if (ok) { onBrochureReady?.(); return; }
       }
     } catch (err) {
       // Already queued for retry (leads.js LeadError{queued:true}) — reassure,
