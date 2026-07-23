@@ -40,20 +40,25 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    `smart-living` is deliberately absent: what is published under it (smart
    home, VRV) sits inside the residence, not in the private world outside it,
    and it is carried by the Residences chapter instead. */
+/* `img` names the plate in /public/renders/lifestyle. It is explicit rather than
+   derived from `cat` so a panel can point at whichever render actually shows its
+   subject — the drawings are named for what is IN them, not for the category. */
 const PANELS = [
-  { cat: "clubhouse", n: "The Club", nKey: "slifestyle.clubName", d: "A multi-level club and lounge, with the gym inside it.", dKey: "slifestyle.clubDesc" },
-  { cat: "wellness", n: "The Water", nKey: "slifestyle.waterName", d: "A pool held at temperature through the year, and the still rooms beside it.", dKey: "slifestyle.waterDesc" },
-  { cat: "lifestyle", n: "The Table", nKey: "slifestyle.tableName", d: "A restaurant within the gates, and a hall for the evening the house cannot hold.", dKey: "slifestyle.tableDesc" },
-  { cat: "outdoor", n: "The Grounds", nKey: "slifestyle.groundsName", d: "Gardens and green courts held between the towers, not squeezed around them.", dKey: "slifestyle.groundsDesc" },
-  { cat: "sports", n: "The Court", nKey: "slifestyle.courtName", d: "Games indoors and out, and a run laid through the landscape.", dKey: "slifestyle.courtDesc" },
-  { cat: "kids", n: "The Children's Ground", nKey: "slifestyle.kidsName", d: "Play kept inside the security line rather than beyond it.", dKey: "slifestyle.kidsDesc" },
-  { cat: "security", n: "The Gate", nKey: "slifestyle.gateName", d: "Manned gates, cameras throughout, and covered parking to each residence.", dKey: "slifestyle.gateDesc" },
-].map(({ cat, n, nKey, d, dKey }) => {
+  { cat: "clubhouse", img: "clubhouse-lounge", n: "The Club", nKey: "slifestyle.clubName", d: "A multi-level club and lounge, with the gym inside it.", dKey: "slifestyle.clubDesc" },
+  { cat: "wellness", img: "rooftop-pool-dusk", n: "The Water", nKey: "slifestyle.waterName", d: "A pool held at temperature through the year, and the still rooms beside it.", dKey: "slifestyle.waterDesc" },
+  { cat: "lifestyle", img: "private-dining-room", n: "The Table", nKey: "slifestyle.tableName", d: "A restaurant within the gates, and a hall for the evening the house cannot hold.", dKey: "slifestyle.tableDesc" },
+  { cat: "outdoor", img: "private-garden-terrace", n: "The Grounds", nKey: "slifestyle.groundsName", d: "Gardens and green courts held between the towers, not squeezed around them.", dKey: "slifestyle.groundsDesc" },
+  { cat: "sports", img: "billiards-games-room", n: "The Court", nKey: "slifestyle.courtName", d: "Games indoors and out, and a run laid through the landscape.", dKey: "slifestyle.courtDesc" },
+  // No render of a children's ground exists yet — this plate still carries the
+  // old stock image. Swap `img` the moment a real one lands.
+  { cat: "kids", img: "kids", n: "The Children's Ground", nKey: "slifestyle.kidsName", d: "Play kept inside the security line rather than beyond it.", dKey: "slifestyle.kidsDesc" },
+  { cat: "security", img: "entrance-signage-wall", n: "The Gate", nKey: "slifestyle.gateName", d: "Manned gates, cameras throughout, and covered parking to each residence.", dKey: "slifestyle.gateDesc" },
+].map(({ cat, img, n, nKey, d, dKey }) => {
   const c = AMENITY_CATEGORY[cat];
   // A renamed or retired category should surface as a build-time failure, not
   // as a silently empty plate in the tour.
   if (!c) throw new Error(`Lifestyle: no amenity category "${cat}"`);
-  return { n, nKey, d, dKey, img: cat, icon: c.icon, items: c.items };
+  return { n, nKey, d, dKey, img, icon: c.icon, items: c.items };
 });
 
 const TOTAL = PANELS.length + 1; // the index card closes the sequence

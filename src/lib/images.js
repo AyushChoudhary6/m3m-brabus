@@ -41,6 +41,13 @@ const LOBBY = "/renders/lobby.jpg";     // the double-height marble lobby and it
  */
 export const px = (src, _width) => (typeof src === "string" && src ? src : null);
 
+// ---- Commissioned interior/amenity visualisations ----
+// These are project visualisations, not photographs of a finished building, and
+// not official M3M renders either. They exist so a section that asks for a
+// bedroom shows a bedroom rather than the lobby again. Anything shown from here
+// is indicative — see the disclaimer copy that accompanies these sections.
+const L = (name) => `/renders/lifestyle/${name}.jpg`;
+
 export const IMG = {
   // ---- The three official renders ----
   tower: TOWER,
@@ -50,17 +57,20 @@ export const IMG = {
   lobby: LOBBY,
   lobbyWarm: LOBBY,
 
-  // ---- Subjects M3M has not released a render of ----
-  // Kept as named keys so call sites still read as what they are asking for,
-  // and so the day a real spa or bedroom render arrives it is one line here.
-  // Until then they resolve to the lobby: the only published interior, and an
-  // honest one. A caption that names a room we cannot show is doing more work
-  // than the picture is — those sections should drop the image entirely.
-  livingRoom: LOBBY,
-  duplexLiving: LOBBY,
-  bedroom: LOBBY,
-  bedroomDecor: LOBBY,
-  spa: LOBBY,
-  pool: LOBBY,
-  gym: LOBBY,
+  // ---- Now covered by a visualisation of the actual subject ----
+  livingRoom: L("living-room"),
+  duplexLiving: L("sky-terrace-sunset"),
+  bedroom: L("master-bedroom"),
+  bedroomDecor: L("walk-in-wardrobe"),
+  spa: L("master-bathroom"),
+  pool: L("rooftop-pool-dusk"),
+  gym: L("gym"),
+  kitchen: L("kitchen"),
+  dining: L("dining-room"),
+  clubhouse: L("clubhouse-lounge"),
+  theatre: L("home-theatre"),
+  games: L("billiards-games-room"),
+  garden: L("private-garden-terrace"),
+  privateDining: L("private-dining-room"),
+  entrance: L("entrance-signage-wall"),
 };
