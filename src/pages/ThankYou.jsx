@@ -242,7 +242,7 @@ export default function ThankYou() {
               data-cursor="DOWNLOAD"
               className="rise group mt-4 inline-flex items-center gap-2.5 border-b border-brass/50 pb-1 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors hover:border-brass"
             >
-              <Download size={14} />
+              <Download size={14} className="animate-bounce group-hover:animate-none" />
               {t("contact.downloadBrochure")}
               <ArrowUpRight size={13} className="transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </button>

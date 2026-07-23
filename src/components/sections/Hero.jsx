@@ -292,7 +292,7 @@ export default function Hero() {
                     data-cursor="DOWNLOAD"
                     className="group inline-flex items-center gap-2.5 rounded-full bg-brass px-7 py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-obsidian transition-colors duration-500 hover:bg-brass-soft focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-brass"
                   >
-                    <Download size={14} className="transition-transform duration-500 group-hover:translate-y-0.5" />
+                    <Download size={14} className="animate-bounce transition-transform duration-500 group-hover:translate-y-0.5 group-hover:animate-none" />
                     {t("cta.downloadBrochure")}
                   </button>
                 </div>

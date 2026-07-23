@@ -281,7 +281,7 @@ export default function PricePage() {
                   data-cursor="DOWNLOAD"
                   className="group inline-flex items-center gap-2.5 rounded-full border border-line px-7 py-4 font-sans text-[0.74rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors duration-500 hover:border-brass/50 hover:text-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
                 >
-                  <Download size={14} className="text-brass" />
+                  <Download size={14} className="animate-bounce text-brass group-hover:animate-none" />
                   {t("price.brochureFloorPlans")}
                 </button>
                 <a

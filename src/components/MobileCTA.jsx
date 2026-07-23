@@ -71,7 +71,7 @@ export default function MobileCTA() {
         aria-label={t("cta.downloadBrochure")}
         className={`${cell} bg-brass text-obsidian`}
       >
-        <Download size={17} aria-hidden="true" />
+        <Download size={17} aria-hidden="true" className="animate-bounce" />
         <span>{t("nav.brochure")}</span>
       </button>
     </nav>

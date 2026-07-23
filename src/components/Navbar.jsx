@@ -172,7 +172,7 @@ export default function Navbar() {
               data-cursor="DOWNLOAD"
               className="group hidden items-center gap-2 rounded-full bg-brass px-4 py-2 font-sans text-[0.72rem] font-medium uppercase tracking-[0.12em] text-obsidian transition-colors hover:bg-brass-soft sm:inline-flex"
             >
-              <Download size={13} className="transition-transform duration-500 group-hover:translate-y-0.5" />
+              <Download size={13} className="animate-bounce transition-transform duration-500 group-hover:translate-y-0.5 group-hover:animate-none" />
               {t("nav.brochure")}
             </button>
             {/* Hidden from 1180px up — the exact width the inline links appear at.
