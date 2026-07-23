@@ -106,7 +106,10 @@ export default function BlogPost() {
   return (
     <div ref={root}>
       <Seo
-        title={`${post.title} | M3M Brabus`}
+        /* Keep the brand suffix only when the whole title still fits the ~60
+           character SERP limit; past that it is the first thing truncated, so
+           it costs the article's own words for no gain. */
+        title={post.title.length > 46 ? post.title : `${post.title} | M3M Brabus`}
         description={post.description}
         path={`/blogs/${post.slug}`}
         image={post.hero}

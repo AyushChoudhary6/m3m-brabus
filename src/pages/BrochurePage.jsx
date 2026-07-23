@@ -101,7 +101,7 @@ export default function BrochurePage() {
   return (
     <div ref={root}>
       <Seo
-        title="M3M Brabus Brochure | Download Floor Plans, Specifications & Price List"
+        title="M3M Brabus Brochure | Plans, Specs & Price List"
         description="Download the M3M Brabus brochure — 4 & 5 BHK residences of approx. 5,000–7,000 sq.ft at Sector 58, Gurugram. Floor plans, specifications and amenities."
         path="/brochure"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Brochure", path: "/brochure" }])}

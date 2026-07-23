@@ -106,7 +106,7 @@
   /* Ink — warm bone */
   --color-ink: #f1ead9;
   --color-ink-soft: #a99d86;
-  --color-ink-faint: #9d9179; /* QA: 11 nodes measured below AA at #8a8069; raised to ~6.3:1 on canvas */
+  --color-ink-faint: #8a8069; /* BUG-016: was #6f6551 (3.4:1); now 5.0:1 AA on dark */
 
   /* Lines — warm gold-tinted hairlines */
   --color-line: #2c2418;

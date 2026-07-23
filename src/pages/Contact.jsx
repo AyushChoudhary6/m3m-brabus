@@ -133,7 +133,7 @@ export default function Contact() {
   return (
     <div ref={root}>
       <Seo
-        title="Contact M3M Brabus | Price List, Brochure & Site Visit, Sector 58"
+        title="Contact M3M Brabus | Price, Brochure & Site Visit"
         description="Speak to the M3M Brabus private client team for the brochure, price list, floor plans and a site visit at Sector 58, Golf Course Extension Road, Gurugram."
         path="/contact"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }])}
