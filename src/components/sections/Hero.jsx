@@ -12,7 +12,21 @@ import { track } from "../../lib/analytics.js";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+/* Two encodes of the same film. The desktop master is 1600x900 at 7.1 MB; the
+   mobile cut is 960x540 / 24fps / H.264 Main L3.1 at 1.5 MB — a 4.7x saving,
+   which is the difference between the film arriving and a phone on two bars
+   sitting on the poster long enough that it reads as broken. Main/L3.1 rather
+   than High/L4.0 so older handsets decode it too. */
 const HERO_VIDEO = "/hero-brabus.mp4";
+const HERO_VIDEO_MOBILE = "/hero-brabus-mobile.mp4";
+
+/** The light cut for phones, and for any connection that reports itself slow. */
+function pickHeroVideo() {
+  if (typeof window === "undefined") return HERO_VIDEO;
+  const small = window.matchMedia("(max-width: 900px)").matches;
+  const slowish = /(^|-)(2g|3g)$/.test(navigator.connection?.effectiveType || "");
+  return small || slowish ? HERO_VIDEO_MOBILE : HERO_VIDEO;
+}
 const prefersReduced =
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -119,7 +133,7 @@ export default function Hero() {
 
     const attach = () => {
       if (cancelled || el.src) return;
-      el.src = HERO_VIDEO;
+      el.src = pickHeroVideo();
       tryPlay();
     };
 
