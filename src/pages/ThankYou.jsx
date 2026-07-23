@@ -260,7 +260,6 @@ export default function ThankYou() {
               className="nxt group block border-b border-line py-6"
               data-cursor="VIEW"
             >
-              <span className="idx">{String(i + 1).padStart(2, "0")}</span>
               <h2 className="mt-3 flex items-center gap-2 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
                 {p.name}
                 <ArrowUpRight

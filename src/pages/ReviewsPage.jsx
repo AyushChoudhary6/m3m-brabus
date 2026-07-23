@@ -187,7 +187,6 @@ export default function ReviewsPage() {
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {STRENGTHS.map((s, i) => (
             <article key={s.id} className="blk group border-b border-line py-6">
-              <span className="idx">{String(i + 1).padStart(2, "0")}</span>
               <h2 className="mt-3 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">
                 {s.t}
               </h2>
@@ -253,7 +252,6 @@ export default function ReviewsPage() {
               key={v.id}
               className="blk grid grid-cols-1 gap-2 border-b border-line py-6 sm:grid-cols-[minmax(0,3rem)_1fr] sm:gap-8"
             >
-              <span className="idx">{String(i + 1).padStart(2, "0")}</span>
               <div>
                 <h2 className="font-display text-xl text-ink md:text-2xl">{v.t}</h2>
                 <p className="mt-2.5 max-w-[62ch] text-sm leading-relaxed text-ink-soft">{v.d}</p>

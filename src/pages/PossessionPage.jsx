@@ -173,8 +173,7 @@ export default function PossessionPage() {
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {MEANING.map((m) => (
             <article key={m.k} className="mn group border-b border-line py-7">
-              <span className="idx">{m.k}</span>
-              <h2 className="mt-3 font-display text-2xl font-light text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-[1.75rem]">
+              <h2 className="font-display text-2xl font-light text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-[1.75rem]">
                 {t(m.tKey)}
               </h2>
               <p className="mt-2 max-w-[46ch] leading-relaxed text-ink-soft">{t(m.dKey)}</p>

@@ -286,7 +286,6 @@ export default function SpecificationsPage() {
               <tbody key={s.id} className="sys">
                 <tr>
                   <th scope="colgroup" colSpan={3} className="pb-3 pt-9 text-left align-bottom">
-                    <span className="idx">{String(i + 1).padStart(2, "0")}</span>
                     <span className="ml-4 font-display text-xl font-light text-ink">{t(s.nameKey)}</span>
                     <span className="mt-1.5 block max-w-[54ch] text-sm font-normal leading-relaxed text-ink-soft">
                       {t(s.introKey)}
@@ -405,7 +404,6 @@ export default function SpecificationsPage() {
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {READING.map((r, i) => (
             <div key={r.titleKey} className="read-card group border-b border-line py-6">
-              <span className="idx">{String(i + 1).padStart(2, "0")}</span>
               <h3 className="mt-3 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
                 {t(r.titleKey)}
               </h3>

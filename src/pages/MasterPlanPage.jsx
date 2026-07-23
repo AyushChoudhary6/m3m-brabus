@@ -263,7 +263,6 @@ export default function MasterPlanPage() {
               key={r.tKey}
               className="read-row grid grid-cols-1 gap-2 border-b border-line py-6 lg:grid-cols-[minmax(0,3rem)_minmax(0,17rem)_1fr] lg:gap-8"
             >
-              <span className="idx">{String(i + 1).padStart(2, "0")}</span>
               <dt className="font-display text-xl leading-snug text-ink">{t(r.tKey)}</dt>
               <dd className="max-w-[64ch] text-sm leading-relaxed text-ink-soft">{t(r.dKey)}</dd>
             </div>

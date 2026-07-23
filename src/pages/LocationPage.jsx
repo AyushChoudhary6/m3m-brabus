@@ -167,7 +167,6 @@ export default function LocationPage() {
                 <div className="grid gap-x-16 gap-y-5 lg:grid-cols-[0.8fr_1.2fr]">
                   <div>
                     <div className="flex items-baseline gap-4">
-                      <span className="idx">{String(i + 1).padStart(2, "0")}</span>
                       <span className="shrink-0 self-center text-brass" aria-hidden="true">
                         <Icon size={18} strokeWidth={1.4} />
                       </span>

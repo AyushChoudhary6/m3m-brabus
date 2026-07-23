@@ -113,7 +113,6 @@ export default function Overview() {
         <div className="grid gap-x-14 gap-y-10 md:grid-cols-2">
           {HIGHLIGHTS.map((h, i) => (
             <article key={h.title} className="hl group border-t border-line pt-6">
-              <span className="idx">{String(i + 1).padStart(2, "0")}</span>
               <h3 className="mt-3 font-display text-2xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-3xl">
                 {h.title}
               </h3>

@@ -429,7 +429,6 @@ export default function FaqsPage() {
                     className="group flex items-baseline justify-between gap-4 py-3.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass"
                   >
                     <span className="flex items-baseline gap-4">
-                      <span className="idx">{String(i + 1).padStart(2, "0")}</span>
                       <span className="font-display text-base text-ink transition-colors group-hover:text-brass-soft">
                         {t(c.labelKey)}
                       </span>
@@ -472,7 +471,6 @@ export default function FaqsPage() {
             className="faq-block scroll-mt-28 pb-[clamp(2.5rem,7vh,4rem)]"
           >
             <div className="flex items-baseline gap-5 border-t border-line pt-7">
-              <span className="idx">{String(ci + 1).padStart(2, "0")}</span>
               <h2 className="font-display text-[clamp(1.4rem,2.6vw,2rem)] font-light leading-tight tracking-[-0.02em] text-ink">
                 {t(cat.labelKey)}
               </h2>

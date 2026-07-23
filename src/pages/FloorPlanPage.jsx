@@ -156,7 +156,6 @@ export default function FloorPlanPage() {
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {HOW_TO_READ.map((h, i) => (
             <div key={h.tKeyT} className="rise group border-b border-line py-6">
-              <span className="idx">{String(i + 1).padStart(2, "0")}</span>
               <h2 className="mt-3 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft md:text-2xl">
                 {t(h.tKeyT)}
               </h2>

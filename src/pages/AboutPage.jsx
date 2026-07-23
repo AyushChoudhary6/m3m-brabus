@@ -268,9 +268,8 @@ export default function AboutPage() {
             {PRINCIPLES.map((p) => (
               <div
                 key={p.n}
-                className="pri grid grid-cols-1 gap-3 border-b border-line py-7 lg:grid-cols-[auto_minmax(0,18rem)_1fr] lg:gap-10"
+                className="pri grid grid-cols-1 gap-3 border-b border-line py-7 lg:grid-cols-[minmax(0,18rem)_1fr] lg:gap-10"
               >
-                <span className="idx">{p.n}</span>
                 <dt className="font-display text-xl leading-snug text-ink md:text-2xl">{t(p.tKey)}</dt>
                 <dd className="max-w-[62ch] leading-relaxed text-ink-soft">{t(p.dKey)}</dd>
               </div>

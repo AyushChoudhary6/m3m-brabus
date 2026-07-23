@@ -226,7 +226,6 @@ export default function PricePage() {
         <div className="grid gap-x-14 gap-y-0 md:grid-cols-2">
           {DRIVERS.map((d, i) => (
             <div key={d.tKeyK} className="drv group border-b border-line py-6">
-              <span className="idx">{String(i + 1).padStart(2, "0")}</span>
               <h2 className="mt-3 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
                 {t(d.tKeyK)}
               </h2>

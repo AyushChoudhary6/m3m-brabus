@@ -321,7 +321,6 @@ export default function GuidesPage() {
                 data-cursor="VIEW"
                 className="rail-item group flex items-baseline gap-6 border-b border-line py-4 transition-colors duration-500 hover:bg-brass/[0.035] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
               >
-                <span className="idx">{String(i + 1).padStart(2, "0")}</span>
                 <span className="font-display text-lg text-ink transition-colors duration-300 group-hover:text-brass-soft">
                   {t(s.nameKey)}
                 </span>
@@ -517,7 +516,6 @@ export default function GuidesPage() {
                   key={s.id}
                   className="flex items-baseline gap-5 border-b border-line py-3.5 text-sm text-ink-soft"
                 >
-                  <span className="idx">{String(i + 1).padStart(2, "0")}</span>
                   <span className="text-ink">{t(s.nameKey)}</span>
                   <span className="mono ml-auto text-[0.55rem] tracking-[0.16em] text-ink-faint">
                     {s.ask.length + s.docs.length} {t("guides.items")}
