@@ -87,13 +87,40 @@ export default function Hero() {
     if (slow) return undefined;
 
     let cancelled = false;
+    let disarm = null;
+
+    /* muted + playsInline satisfies the autoplay policy on paper, but a phone
+       can still refuse — iOS Low Power Mode blocks autoplay outright, and it is
+       on for most people most of the time once the battery dips. Swallowing the
+       rejection leaves the poster up forever, which is what "the video doesn't
+       play on mobile" actually is. So if we are refused, wait for the first
+       thing the visitor does — any gesture re-permits playback — and start then. */
+    const armGesture = () => {
+      if (cancelled || disarm) return;
+      const events = ["touchstart", "pointerdown", "click", "keydown", "scroll"];
+      const go = () => {
+        disarm?.();
+        if (!cancelled) el.play?.().catch(() => {});
+      };
+      disarm = () => {
+        events.forEach((t) => window.removeEventListener(t, go));
+        disarm = null;
+      };
+      events.forEach((t) => window.addEventListener(t, go, { passive: true }));
+    };
+
+    const tryPlay = () => {
+      // set the property too: the attribute alone is not always enough to
+      // qualify as muted at the moment play() is called.
+      el.muted = true;
+      const p = el.play?.();
+      if (p && typeof p.catch === "function") p.catch(armGesture);
+    };
 
     const attach = () => {
       if (cancelled || el.src) return;
       el.src = HERO_VIDEO;
-      // muted + playsInline satisfies every autoplay policy; where it is still
-      // refused the promise rejects quietly and the poster simply stays.
-      el.play?.().catch(() => {});
+      tryPlay();
     };
 
     const schedule = () => {
@@ -101,11 +128,19 @@ export default function Hero() {
       idle(attach, { timeout: 2000 });
     };
 
+    /* Waiting for `load` means waiting for every image on the page. On a phone
+       on a weak connection that can be many seconds, and the film — which is
+       7 MB and needs a head start of its own — would not even begin fetching
+       until then, which reads as "the video doesn't play". Cap the wait: start
+       at 2.5s regardless, whichever comes first. The poster still carries LCP. */
+    const cap = window.setTimeout(schedule, 2500);
     if (document.readyState === "complete") schedule();
     else window.addEventListener("load", schedule, { once: true });
 
     return () => {
       cancelled = true;
+      disarm?.();
+      window.clearTimeout(cap);
       window.removeEventListener("load", schedule);
     };
   }, []);
