@@ -700,17 +700,6 @@ export default function FloorPlan() {
               {/* the drawing — blurred until the visitor gives their details */}
               <GatedPlan plan={plan} unlocked={unlocked} onEnlarge={enlarge} />
 
-              {/* the published figure, and the two that are not */}
-              <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-5 sm:grid-cols-3">
-                <div className="min-w-0">
-                  <p className="mono text-[0.55rem] tracking-[0.2em] text-ink-faint">{t("sfloorplan.superArea")}</p>
-                  <p className="mt-1 font-serif text-sm italic text-brass md:text-base">{cfg.size}</p>
-                  <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-faint">{t("sfloorplan.totalPublished")}</p>
-                </div>
-                <OnRequest label={t("sfloorplan.carpetArea")} subject={`Carpet area · ${plan.label}`} note={t("sfloorplan.notPublishedDev")} />
-                <OnRequest label={t("sfloorplan.orientation")} subject={`Orientation · ${plan.label}`} note={t("sfloorplan.orientationNote")} />
-              </div>
-
               <p className="mt-5 text-sm leading-relaxed text-ink-soft">{t(plan.compKey)}</p>
 
               <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
