@@ -10,7 +10,6 @@ import RelatedPages from "../components/sections/RelatedPages.jsx";
 import LivingMap from "../components/sections/LivingMap.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import { PROJECT } from "../lib/site.js";
-import { OFFICIAL_SOURCE } from "../lib/facts.js";
 import { useI18n } from "../lib/i18n.jsx";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -221,14 +220,7 @@ export default function LocationPage() {
 
         <p className="rise mono mt-[clamp(2rem,6vh,3.5rem)] border-t border-line pt-8 text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
           {t("location.noDrivePrefix")} {PROJECT.name} ·{" "}
-          <a
-            href={OFFICIAL_SOURCE}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-colors hover:text-ink-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
-          >
-            {t("location.factsBy")} {PROJECT.developer}
-          </a>
+          <span>{t("location.factsBy")} {PROJECT.developer}</span>
         </p>
       </section>
 

@@ -9,7 +9,6 @@ import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
 import RelatedPages from "../components/sections/RelatedPages.jsx";
 import { PROJECT } from "../lib/site.js";
-import { OFFICIAL_SOURCE } from "../lib/facts.js";
 import { useI18n } from "../lib/i18n.jsx";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -122,15 +121,6 @@ export default function DisclaimerPage() {
         <div className="max-w-[70ch] space-y-5 leading-relaxed text-ink-soft">
           <p className="rise">
             {t("disclaimer.officialP1a")}{PROJECT.developer}{t("disclaimer.officialP1b")}{PROJECT.developer}{t("disclaimer.officialP1c")}{PROJECT.partner}{t("disclaimer.officialP1d")}
-          </p>
-          <p className="rise">
-            {t("disclaimer.officialP2")}
-          </p>
-          <p className="rise">
-            <a href={OFFICIAL_SOURCE} target="_blank" rel="noopener noreferrer" className={linkCls}>
-              {t("disclaimer.officialLinkA")}{PROJECT.name}{t("disclaimer.officialLinkB")}
-              <ArrowUpRight size={14} className="transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </a>
           </p>
         </div>
       </section>

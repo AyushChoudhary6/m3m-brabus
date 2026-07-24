@@ -2,7 +2,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { Mail, Phone, ArrowUpRight } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
@@ -209,17 +209,6 @@ export default function PrivacyPolicyPage() {
           </p>
           <p className="rise">
             {t("privacy.goesP3")}
-          </p>
-          <p className="rise">
-            <a
-              href="https://policies.google.com/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center gap-1.5 rounded-sm border-b border-brass/40 pb-0.5 text-brass transition-colors hover:border-brass hover:text-brass-soft focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-brass"
-            >
-              {t("privacy.readGoogle")}
-              <ArrowUpRight size={14} className="transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </a>
           </p>
         </div>
       </section>

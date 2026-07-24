@@ -2,7 +2,6 @@ import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { ArrowUpRight } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useI18n } from "../../lib/i18n.jsx";
@@ -52,6 +51,11 @@ export default function LivingMap({ bare = false }) {
       });
       L.marker(COORDS, { icon, keyboard: false }).addTo(map);
       L.control.zoom({ position: "bottomright" }).addTo(map);
+
+      // Leaflet's default attribution prefix is a clickable link to leafletjs.com.
+      // Drop it — no off-site links from our pages. The OSM/CARTO credit stays as
+      // plain (unlinked) text, which satisfies the tile licence.
+      map.attributionControl.setPrefix(false);
 
       // Named to avoid shadowing the translation function `t` above — a stray
       // t("…") added inside this effect would otherwise resolve to a timeout id.
@@ -111,8 +115,6 @@ export default function LivingMap({ bare = false }) {
     { scope: root },
   );
 
-  const mapsHref = `https://www.google.com/maps/search/?api=1&query=${COORDS[0]},${COORDS[1]}`;
-
   return (
     <section
       id="location"
@@ -141,16 +143,6 @@ export default function LivingMap({ bare = false }) {
               </div>
             ))}
           </div>
-          <a
-            href={mapsHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-cursor="VIEW"
-            className="group mt-8 inline-flex items-center gap-2.5 self-start border-b border-brass/50 pb-1 font-sans text-[0.72rem] font-medium uppercase tracking-[0.14em] text-brass transition-colors hover:border-brass"
-          >
-            {t("smap.openInMaps")}
-            <ArrowUpRight size={14} className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-0.5" />
-          </a>
         </div>
 
         {/* real map */}
