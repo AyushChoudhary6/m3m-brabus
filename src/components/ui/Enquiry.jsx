@@ -384,7 +384,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
 
         {sent ? (
           <div className="relative py-6 text-center">
-            <h3 id={titleId} className="mt-4 font-display text-[clamp(2rem,7vw,3rem)] font-light leading-[0.95] text-ink">
+            <h3 id={titleId} className="mt-4 px-10 font-display text-[clamp(2rem,7vw,3rem)] font-light leading-[0.95] text-ink">
               {t("enq.thankYou")} <span className="font-serif italic text-brass">{form.name.split(" ")[0] || "friend"}.</span>
             </h3>
             <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-ink-soft">
@@ -409,7 +409,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
           </div>
         ) : (
           <div className="relative">
-            <h3 id={titleId} className="mt-3 font-display text-[clamp(1.9rem,6vw,2.6rem)] font-light leading-[1.02] tracking-[-0.01em] text-ink">
+            <h3 id={titleId} className="mt-3 pr-12 font-display text-[clamp(1.9rem,6vw,2.6rem)] font-light leading-[1.02] tracking-[-0.01em] text-ink">
               {isVisit ? (
                 <>Book your <span className="font-serif italic text-brass">site visit.</span></>
               ) : isBrochure ? (
