@@ -30,7 +30,6 @@ export default function WelcomeHome() {
   const { t } = useI18n();
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
   // `company` is the honeypot (spam.js HONEYPOT_NAME); it has to live in state,
   // because only what is in `form` reaches submitLead.
   const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", company: "" });
@@ -50,23 +49,17 @@ export default function WelcomeHome() {
     if (sending) return;
     const errs = validateLead(form);
     if (!isClean(errs)) { setErrors(errs); return; }
+    /* Optimistic submit: setSent replaces the form with the confirmation in the
+       same render, so the visitor sees "sent" the instant they click — no wait
+       on the Neon + Sheets write. leads.js queues and retries on any failure, so
+       delivering in the background can't lose the lead; setSending guards a
+       double-tap. ...form carries `company` (honeypot); formKey pins the timer
+       spam.js reads. */
     setSending(true);
-    setError("");
-    try {
-      // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
-      await submitLead({ ...form, source: "Welcome Home section", formKey: FORM_KEY });
-      markLeadCaptured();
-      trackLead("Welcome Home section", form.config); // BUG-002: was untracked
-      setSent(true);
-    } catch (err) {
-      // A network/endpoint failure has already queued the lead for retry
-      // (leads.js throws LeadError{queued:true}); tell the visitor it is safe
-      // rather than inviting a give-up or a double-submit.
-      if (err && err.queued) { markLeadCaptured(); setSent(true); }
-      else setError("err.send");
-    } finally {
-      setSending(false);
-    }
+    markLeadCaptured();
+    trackLead("Welcome Home section", form.config); // BUG-002: was untracked
+    setSent(true);
+    submitLead({ ...form, source: "Welcome Home section", formKey: FORM_KEY }).catch(() => {});
   };
 
   useGSAP(
@@ -159,7 +152,6 @@ export default function WelcomeHome() {
               >
                 {sending ? t("cta.sending") : t("cta.registerInterest")}
               </button>
-              {error && <p className="text-center text-[0.74rem] text-oxblood">{t(error)}</p>}
             </form>
           </div>
         )}

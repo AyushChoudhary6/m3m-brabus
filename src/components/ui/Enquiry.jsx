@@ -292,47 +292,39 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
     };
   }, [open, subject, onClose]);
 
-  const submit = async (e) => {
+  const submit = (e) => {
     e.preventDefault();
     if (sending) return;
     const errs = validateLead(form);
     if (!isClean(errs)) { setErrors(errs); return; }
-    setSending(true);
-    setError("");
-    /* Captured means "we have their details", which includes the queued case:
-       leads.js stores the lead and retries later. The brochure must NOT be
-       withheld because our endpoint happened to be down — the visitor paid the
-       price of the form either way. This is why delivery sits after the
-       try/catch rather than on the success path only. */
-    let captured = false;
-    try {
-      const source = isVisit ? `Site visit · ${subject}` : isBrochure ? `Brochure · ${subject}` : auto ? "Timed invite" : subject ? `Modal · ${subject}` : "Modal";
-      // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
-      await submitLead({ ...form, source, formKey: FORM_KEY, message: form.visitDate ? `Preferred visit date: ${form.visitDate}` : "" });
-      markLeadCaptured(); // never auto-invite again
-      trackLead(source, form.config);
-      setSent(true);
-      captured = true;
-    } catch (err) {
-      // Already queued for retry (leads.js LeadError{queued:true}) — reassure,
-      // don't show a failure that invites a give-up or double-submit.
-      if (err && err.queued) { markLeadCaptured(); setSent(true); captured = true; }
-      else setError("err.send");
-    } finally {
-      setSending(false);
-    }
 
-    if (captured && isBrochure) {
+    const source = isVisit ? `Site visit · ${subject}` : isBrochure ? `Brochure · ${subject}` : auto ? "Timed invite" : subject ? `Modal · ${subject}` : "Modal";
+
+    /* Optimistic submit. setSending guards a double-tap; setSent replaces the
+       form with the confirmation in the same render, so the visitor sees "sent"
+       the instant they click — no waiting on the Neon + Sheets write. The lead
+       is delivered in the background: leads.js queues and retries on any
+       failure, so not awaiting can't lose it, and a rejected promise is already
+       handled there — nothing to surface here. */
+    setSending(true);
+    markLeadCaptured(); // never auto-invite again
+    trackLead(source, form.config);
+    setSent(true);
+    // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
+    submitLead({ ...form, source, formKey: FORM_KEY, message: form.visitDate ? `Preferred visit date: ${form.visitDate}` : "" }).catch(() => {});
+
+    if (isBrochure) {
       trackBrochure(subject || "modal");
-      /* Open the book rather than firing a download: the visitor asked to read
-         the brochure, and the reader carries its own download button. If the
-         file genuinely is not there, fall back to "we'll email it". */
-      const ok = await brochureExists();
-      setGotFile(ok);
-      if (ok) {
-        onBrochureReady?.();   // read it on screen…
-        saveBrochure();        // …and keep the file, as the form promises
-      }
+      /* Delivery is independent of the lead POST — the visitor asked to read the
+         brochure, so open the book (its reader carries its own download button).
+         If the file genuinely is not there, fall back to "we'll email it". */
+      brochureExists().then((ok) => {
+        setGotFile(ok);
+        if (ok) {
+          onBrochureReady?.();   // read it on screen…
+          saveBrochure();        // …and keep the file, as the form promises
+        }
+      });
     }
   };
 

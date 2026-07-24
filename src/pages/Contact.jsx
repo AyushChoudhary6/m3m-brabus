@@ -41,7 +41,6 @@ export default function Contact() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", message: "", company: "" });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
   const set = (k) => (e) => {
     const v = sanitizeField(k, e.target.value);
@@ -58,23 +57,17 @@ export default function Contact() {
     if (sending) return;
     const errs = validateLead(form);
     if (!isClean(errs)) { setErrors(errs); return; }
+    /* Optimistic submit: setSent swaps the form for the confirmation in the same
+       render, so the visitor sees "sent" the instant they click — no wait on the
+       Neon + Sheets write. The lead delivers in the background; leads.js queues
+       and retries on any failure, so not awaiting can't lose it. setSending
+       guards a double-tap. ...form carries `company` (honeypot); formKey pins
+       the timer spam.js reads. */
     setSending(true);
-    setError("");
-    try {
-      // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
-      await submitLead({ ...form, source: "Contact page", formKey: FORM_KEY });
-      markLeadCaptured();
-      trackLead("Contact page", form.config); // BUG-002: was untracked
-      setSent(true);
-    } catch (err) {
-      // A network/endpoint failure has already queued the lead for retry
-      // (leads.js throws LeadError{queued:true}); tell the visitor it is safe
-      // rather than inviting a give-up or a double-submit.
-      if (err && err.queued) { markLeadCaptured(); setSent(true); }
-      else setError("err.send"); // key resolved by t() in the error paragraph
-    } finally {
-      setSending(false);
-    }
+    markLeadCaptured();
+    trackLead("Contact page", form.config); // BUG-002: was untracked
+    setSent(true);
+    submitLead({ ...form, source: "Contact page", formKey: FORM_KEY }).catch(() => {});
   };
 
   useGSAP(
@@ -259,7 +252,6 @@ export default function Contact() {
                     <span className="relative z-10">{sending ? t("cta.sending") : t("cta.sendEnquiry")}</span>
                     {!sending && <ArrowRight size={15} className="relative z-10 transition-transform duration-500 group-hover/cta:translate-x-1" />}
                   </button>
-                  {error && <p className="text-center text-[0.74rem] text-oxblood">{t(error)}</p>}
                 </form>
               </div>
             )}

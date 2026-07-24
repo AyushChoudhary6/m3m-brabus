@@ -27,7 +27,6 @@ export default function SideEnquiry() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", config: "", company: "" });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
   const cardRef = useRef(null);
   const manual = useRef(false);
@@ -66,20 +65,16 @@ export default function SideEnquiry() {
     if (sending) return;
     const errs = validateLead(form);
     if (!isClean(errs)) { setErrors(errs); return; }
+    /* Optimistic submit: setSent swaps the form for the confirmation in the same
+       render, so it reads as sent the instant they click — no wait on the Neon +
+       Sheets write. leads.js queues and retries on any failure, so delivering in
+       the background can't lose the lead; setSending guards a double-tap.
+       ...form carries `company` (honeypot); formKey pins the timer spam.js reads. */
     setSending(true);
-    setError("");
-    try {
-      // ...form carries `company` (honeypot); formKey pins the timer spam.js reads.
-      await submitLead({ ...form, source: "Side panel", formKey: FORM_KEY });
-      markLeadCaptured();
-      trackLead("Side panel", form.config);
-      setSent(true);
-    } catch (err) {
-      if (err && err.queued) { markLeadCaptured(); setSent(true); }
-      else setError("err.send");
-    } finally {
-      setSending(false);
-    }
+    markLeadCaptured();
+    trackLead("Side panel", form.config);
+    setSent(true);
+    submitLead({ ...form, source: "Side panel", formKey: FORM_KEY }).catch(() => {});
   };
 
   return (
@@ -167,7 +162,6 @@ export default function SideEnquiry() {
                   <span className="relative z-10">{sending ? t("cta.sending") : t("cta.registerInterest")}</span>
                   {!sending && <ArrowRight size={14} className="relative z-10 transition-transform duration-500 group-hover/cta:translate-x-1" />}
                 </button>
-                {error && <p className="text-center text-[0.7rem] text-oxblood">{t(error)}</p>}
               </form>
             </div>
           )}
