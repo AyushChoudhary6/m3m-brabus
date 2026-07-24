@@ -6,6 +6,16 @@
 
 ---
 
+## ✅ Update — fixes applied (24 July 2026)
+
+Everything fixable in code has been fixed, verified (build + prerender + headless-browser check), and pushed (`cf8d66f`, `530fa42`). Resolved: **C3, H4, H5, M1, M2, M3, M4, M5, M7, M8, M9, M10, M11, L1, L4–L11, L13, L14, L15, L17**. The findings below are kept as originally written for the record; see the checklist at the end for per-item status.
+
+Headline results: the eager `vendor` chunk dropped **469 KB → 0.4 KB** (pdfjs now lazy, ~135 KB gzip off every first load); the 16 lifestyle images gained **98 AVIF/WebP derivatives** and now serve responsively; the enquiry modal and nav menu are now proper focus-trapped dialogs; the lead backend rejects spoofed-IP throttle bypass, silent-drops spam, and defangs spreadsheet-formula injection.
+
+**Still open — not fixable in code (needs client assets / infra):** C1, C2 (real floor plans), H1 (real brochure PDF), H2 (real contact details), H3 (rotate Neon password), H6 (format the real plans once supplied), H7 (further app-chunk splitting), H8 (host-level 404), M6 (CSS split — marginal), L2/L3/L12/L16 (accepted / judgment).
+
+---
+
 ## Executive summary
 
 The engineering is, on the whole, disciplined: the lead-capture and gating flow is correct, the site deliberately refuses to invent unpublished figures, SEO is strong per-page, the hero-video loading strategy is excellent, and the OAuth relay is properly hardened. **No critical *code* defect was found.** The real risks cluster in three places:
@@ -188,25 +198,28 @@ These were checked and found correct, worth recording so they aren't re-litigate
 
 ## Owner action checklist
 
-**Blocking launch (client-supplied):**
+**Blocking launch (client-supplied) — STILL OPEN:**
 - [ ] Replace both floor-plan drawings with genuine M3M Brabus 4 & 5 BHK plans **(C1, C2 — legal exposure)**
 - [ ] Replace the brochure PDF with the real designed brochure **(H1)**
 - [ ] Set the real phone, WhatsApp and email in `site.js` + `contact.md` **(H2)**
 
 **Backend / infra:**
-- [ ] Rotate the Neon password; keep it only in the Render dashboard **(H3)**
-- [ ] Set `CORS_ORIGIN` (multi-origin) and confirm `NODE_ENV=production` in Render **(M1)**
-- [ ] Key the rate limiter on `req.ip`; add a server-side honeypot check **(H4, M2)**
-- [ ] Allow-list forwarded Sheet fields + defang leading `= + - @` **(M3)**
+- [ ] Rotate the Neon password; keep it only in the Render dashboard **(H3 — infra, still open)**
+- [ ] Set `CORS_ORIGIN` (now multi-origin) and confirm `NODE_ENV=production` in Render **(infra step; the code side of M1 is done)**
+- [x] ~~Key the rate limiter on `req.ip`; add a server-side honeypot check~~ **(H4, M2 — done)**
+- [x] ~~Allow-list forwarded Sheet fields + defang leading `= + - @`~~ **(M3 — done)**
 
-**Code (developer, low-risk quick wins):**
-- [ ] Split `pdfjs-dist` + `page-flip` out of the eager `vendor` chunk **(C3 — biggest perf win)**
-- [ ] Generate AVIF/WebP responsive derivatives for the 16 lifestyle renders **(H5)**
-- [ ] Gate the map mount behind an IntersectionObserver **(M5)**
-- [ ] Drop the click-time `trackBrochure` in MobileCTA **(M4)**
-- [ ] Add focus management to the enquiry modal and nav overlay **(M8, M9)**
-- [ ] Trim the four over-length / dangling meta descriptions **(M10, M11)**
-- [ ] Clear the Low-severity dead code and stale comments **(L4–L10)**
+**Code (developer) — DONE:**
+- [x] ~~Split `pdfjs-dist` + `page-flip` out of the eager `vendor` chunk~~ **(C3 — vendor 469 KB → 0.4 KB)**
+- [x] ~~Generate AVIF/WebP responsive derivatives for the lifestyle renders~~ **(H5 — 98 files + wired the Lifestyle section)**
+- [x] ~~Gate the map init behind an IntersectionObserver~~ **(M5)**
+- [x] ~~Drop the click-time `trackBrochure` in MobileCTA~~ **(M4)**
+- [x] ~~Add focus management to the enquiry modal and nav overlay~~ **(M8, M9)**
+- [x] ~~Trim the over-length / dangling meta descriptions~~ **(M10, M11)**
+- [x] ~~Clear the Low-severity dead code and stale comments~~ **(L4–L11, L13, L14, L15, L17)**
+- [x] ~~Move the 103 MB master video out of `public/`~~ **(M7)**
+
+**Deferred (marginal / accepted):** H7 (further app-chunk splitting), M6 (single CSS entry), L2/L3 (Apps Script design), L12 (indicative qualifier — content), L16 (per-surface contrast — needs design sign-off), H8 (soft-404 — needs host-level 404 support).
 
 ---
 
