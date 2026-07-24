@@ -216,31 +216,43 @@ export default function FloorPlanPage() {
       {/* 4 vs 5 BHK in plain language */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
 
-        <div className="overflow-x-auto">
-          <div className="min-w-[600px]">
-            <div className="grid grid-cols-[0.9fr_1fr_1fr] gap-6 border-b border-line pb-4">
-              <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{t("floorplan.inThePlan")}</span>
-              {RESIDENCES.map((r) => (
-                <span key={r.id} className="font-display text-lg text-ink">
-                  {r.name.replace(" Residence", "")}
-                  <span className="mono ml-2 text-[0.58rem] tracking-[0.16em] text-ink-faint">{r.area}</span>
-                </span>
-              ))}
-            </div>
-            {DIFFERENCE.map((d) => (
-              <div key={d.id} className="rise-b border-b border-line-soft py-5">
-                <div className="grid grid-cols-[0.9fr_1fr_1fr] items-baseline gap-6">
-                  <span className="mono text-[0.62rem] tracking-[0.14em] text-ink-faint">{t(d.tKeyK)}</span>
-                  <span className="text-sm text-ink">{d.tKeyA ? t(d.tKeyA) : d.a}</span>
-                  <span className="text-sm text-ink">{d.tKeyB ? t(d.tKeyB) : d.b}</span>
-                </div>
-                {d.note && (
-                  <p className="mt-2 max-w-[70ch] text-sm leading-relaxed text-ink-soft">{t(d.tKeyNote)}</p>
-                )}
-              </div>
-            ))}
-          </div>
+        {/* Column headers only make sense in the side-by-side grid, so they are
+            hidden once the rows stack on mobile (each value carries its own
+            config tag there instead). No horizontal scroll — the old fixed
+            600px min-width clipped both columns on a phone. */}
+        <div className="hidden gap-6 border-b border-line pb-4 sm:grid sm:grid-cols-[0.9fr_1fr_1fr]">
+          <span className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{t("floorplan.inThePlan")}</span>
+          {RESIDENCES.map((r) => (
+            <span key={r.id} className="font-display text-lg text-ink">
+              {r.name.replace(" Residence", "")}
+              <span className="mono ml-2 text-[0.58rem] tracking-[0.16em] text-ink-faint">{r.area}</span>
+            </span>
+          ))}
         </div>
+        {DIFFERENCE.map((d) => (
+          <div key={d.id} className="rise-b border-b border-line-soft py-5">
+            {/* stacks on mobile (label, then each value tagged 4/5 BHK); three
+                columns aligned to the header from sm up */}
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-[0.9fr_1fr_1fr] sm:items-baseline sm:gap-6">
+              <span className="mono text-[0.62rem] tracking-[0.14em] text-ink-faint">{t(d.tKeyK)}</span>
+              <span className="text-sm text-ink">
+                <span className="mono mr-2 text-[0.56rem] tracking-[0.16em] text-brass sm:hidden">
+                  {RESIDENCES[0].name.replace(" Residence", "")}
+                </span>
+                {d.tKeyA ? t(d.tKeyA) : d.a}
+              </span>
+              <span className="text-sm text-ink">
+                <span className="mono mr-2 text-[0.56rem] tracking-[0.16em] text-brass sm:hidden">
+                  {RESIDENCES[1].name.replace(" Residence", "")}
+                </span>
+                {d.tKeyB ? t(d.tKeyB) : d.b}
+              </span>
+            </div>
+            {d.note && (
+              <p className="mt-2 max-w-[70ch] text-sm leading-relaxed text-ink-soft">{t(d.tKeyNote)}</p>
+            )}
+          </div>
+        ))}
 
       </section>
 
