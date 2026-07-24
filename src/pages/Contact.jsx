@@ -150,13 +150,15 @@ export default function Contact() {
       {/* channels + form */}
       <section className="container-lux pb-[clamp(4rem,11vh,7rem)]">
         <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
-          {/* channels */}
-          <div className="ct-grid">
+          {/* channels — flex column at lg so the list fills the same height as
+              the form card beside it (the grid stretches both, but the four
+              channels would otherwise sit packed at the top). */}
+          <div className="ct-grid lg:flex lg:flex-col">
             <p className="mono mb-6 text-[0.6rem] tracking-[0.24em] text-ink-faint">{t("contact.directLines")}</p>
-            <div className="border-t border-line">
+            <div className="border-t border-line lg:flex lg:flex-1 lg:flex-col">
               {CHANNELS.map((c) => {
                 const cls =
-                  "ct group flex items-start gap-5 border-b border-line py-5 transition-colors duration-500 hover:bg-brass/[0.035]";
+                  "ct group flex items-start gap-5 border-b border-line py-5 transition-colors duration-500 hover:bg-brass/[0.035] lg:flex-1 lg:items-center";
                 const inner = (
                   <>
                     <span className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-full border border-brass/30 text-brass transition-colors duration-300 group-hover:bg-brass group-hover:text-obsidian">
