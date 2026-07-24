@@ -48,7 +48,7 @@ export const NAV_LINKS = [
   { label: "Location", to: "/location", tKey: "nav.location", inline: true },
   { label: "Gallery", to: "/gallery", tKey: "nav.gallery", inline: true },
   { label: "Brochure", to: "/brochure", tKey: "nav.brochure" },
-  { label: "Blogs", to: "/blogs", tKey: "nav.blogs" },
+  // Blogs hidden for now — restore this entry to re-list it in the menu.
   { label: "Contact", to: "/contact", tKey: "nav.contact", inline: true },
 ];
 
@@ -89,7 +89,7 @@ export const FOOTER_NAV = [
     heading: "Resources",
     headingKey: "data.footer.head.resources",
     links: [
-      { label: "Blogs", to: "/blogs", labelKey: "data.footer.link.blogs" },
+      // Blogs hidden for now — restore this entry to re-list it in the footer.
       { label: "FAQs", to: "/faqs", labelKey: "data.footer.link.faqs" },
       { label: "Guides", to: "/guides", labelKey: "data.footer.link.guides" },
       { label: "Reviews", to: "/reviews", labelKey: "data.footer.link.reviews" },

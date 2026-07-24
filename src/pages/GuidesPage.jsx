@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { ArrowUpRight, BookOpen, FileText, HelpCircle, Phone } from "lucide-react";
+import { ArrowUpRight, FileText, HelpCircle, Phone } from "lucide-react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import Seo, { breadcrumbLd, SITE_URL } from "../components/ui/Seo.jsx";
 import Breadcrumbs from "../components/ui/Breadcrumbs.jsx";
@@ -11,7 +11,6 @@ import RelatedPages from "../components/sections/RelatedPages.jsx";
 import CtaBand from "../components/sections/CtaBand.jsx";
 import Fact from "../components/ui/Fact.jsx";
 import { useEnquiry } from "../components/ui/Enquiry.jsx";
-import { POSTS } from "../lib/blog.js";
 import { PROJECT } from "../lib/site.js";
 import { PROJECT_FACT, PRICE } from "../lib/facts.js";
 import { useI18n } from "../lib/i18n.jsx";
@@ -43,10 +42,6 @@ const PAGE = {
   "/possession": "guides.pagePossession",
   "/contact": "guides.pageContact",
 };
-
-/* Articles are addressed by slug and resolved against POSTS at render time.
-   If a slug is ever renamed the link disappears rather than 404s. */
-const post = (slug) => POSTS.find((p) => p.slug === slug) || null;
 
 const STAGES = [
   {
@@ -299,13 +294,13 @@ export default function GuidesPage() {
         lede={t("guides.lede")}
       />
 
-      {/* how this differs from the blog, plus the jump rail */}
+      {/* the sequence intro, plus the jump rail */}
       <section className="rail container-lux pb-[clamp(3.5rem,10vh,6rem)]">
 
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
           <div>
             <p className="rise max-w-[52ch] leading-relaxed text-ink-soft">
-              {t("guides.intro1a")}<Link to="/blogs" className="text-brass underline decoration-brass/40 underline-offset-4 transition-colors hover:text-brass-soft">{t("guides.linkBlogs")}</Link>{t("guides.intro1b")}
+              A purchase of this size fails in a predictable way — the diligence that should have happened at stage three gets attempted at stage six, when the booking amount is already paid and the leverage has gone. Work the stages in order and each one narrows the decision before the next one costs you anything.
             </p>
             <p className="rise mt-5 max-w-[52ch] leading-relaxed text-ink-soft">
               {t("guides.intro2")}
@@ -337,7 +332,6 @@ export default function GuidesPage() {
 
         <div className="border-t border-line">
           {STAGES.map((s, i) => {
-            const articles = s.posts.map(post).filter(Boolean);
             return (
               <article
                 key={s.id}
@@ -402,20 +396,6 @@ export default function GuidesPage() {
                         >
                           {PAGE[p] ? t(PAGE[p]) : p}
                           <ArrowUpRight size={13} className="text-brass transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                        </Link>
-                      ))}
-                      {articles.map((a) => (
-                        <Link
-                          key={a.slug}
-                          to={`/blogs/${a.slug}`}
-                          data-cursor="READ"
-                          className="group inline-flex items-center gap-1.5 rounded-full border border-brass/25 bg-brass/[0.05] px-4 py-2 font-sans text-[0.68rem] tracking-[0.06em] text-brass-soft transition-colors duration-500 hover:border-brass/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
-                        >
-                          <BookOpen size={13} className="text-brass" aria-hidden="true" />
-                          {a.title}
-                          <span className="mono text-[0.55rem] tracking-[0.14em] text-ink-faint">
-                            {a.readMins} {t("guides.min")}
-                          </span>
                         </Link>
                       ))}
                     </div>
@@ -528,7 +508,7 @@ export default function GuidesPage() {
         </div>
       </section>
 
-      <RelatedPages links={["/blogs", "/faqs", "/rera"]} />
+      <RelatedPages links={["/faqs", "/rera"]} />
       <CtaBand title={t("guides.ctaTitle")} accent={t("guides.ctaAccent")} subject="Guides" />
     </div>
   );

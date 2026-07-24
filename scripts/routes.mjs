@@ -41,13 +41,10 @@ export const ROUTES = [
   { path: "/privacy-policy", priority: "0.3", changefreq: "yearly" },
   { path: "/disclaimer", priority: "0.3", changefreq: "yearly" },
 
-  // Blog
-  { path: "/blogs", priority: "0.7", changefreq: "weekly" },
-  ...BLOG_SLUGS.map((slug) => ({
-    path: `/blogs/${slug}`,
-    priority: "0.6",
-    changefreq: "monthly",
-  })),
+  // Blog — hidden for now: not prerendered, not in the sitemap. Restore this
+  // block (and the nav/footer entries in site.js) to re-publish it.
+  // { path: "/blogs", priority: "0.7", changefreq: "weekly" },
+  // ...BLOG_SLUGS.map((slug) => ({ path: `/blogs/${slug}`, priority: "0.6", changefreq: "monthly" })),
 ];
 
 export const ROUTE_PATHS = ROUTES.map((r) => r.path);
