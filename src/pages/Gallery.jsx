@@ -331,7 +331,6 @@ export default function Gallery() {
                   ["shown", t("gallery.ledgerShown"), "03"],
                   ["interior", t("gallery.ledgerInterior"), t("gallery.ledgerLobbyVal")],
                   ["amenity", t("gallery.ledgerAmenity"), t("gallery.ledgerNone")],
-                  ["stock", t("gallery.ledgerStock"), t("gallery.ledgerNone")],
                 ].map(([id, k, v]) => (
                   <div
                     key={id}
@@ -342,9 +341,6 @@ export default function Gallery() {
                   </div>
                 ))}
               </dl>
-              <p className="mono mt-5 text-[0.54rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-                {t("gallery.noStock")}
-              </p>
             </div>
           </div>
         </div>
