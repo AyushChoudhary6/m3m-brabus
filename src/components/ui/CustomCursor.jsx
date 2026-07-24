@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Editorial custom cursor: a small brass dot + a lagging outline ring.
- * Ring grows and labels when hovering elements marked `data-cursor`
- * (optionally `data-cursor="View"` to show a caption). Desktop only.
+ * Editorial custom cursor: a small brass dot + an outline ring that tracks the
+ * pointer directly (no trailing lag). Ring grows and labels when hovering
+ * elements marked `data-cursor` (optionally `data-cursor="View"` to show a
+ * caption). Desktop only.
  */
 export default function CustomCursor() {
   const dot = useRef(null);
@@ -17,27 +18,13 @@ export default function CustomCursor() {
     if (window.matchMedia("(pointer: coarse)").matches) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    const rpos = { ...mouse };
-    let raf;
-
     const move = (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-      if (dot.current) {
-        dot.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
-      }
+      // Dot and ring share the pointer position — the ring used to lerp toward
+      // it in a rAF loop, which read as a trailing tail; it now tracks 1:1.
+      const transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+      if (dot.current) dot.current.style.transform = transform;
+      if (ring.current) ring.current.style.transform = transform;
     };
-
-    const loop = () => {
-      rpos.x += (mouse.x - rpos.x) * 0.15;
-      rpos.y += (mouse.y - rpos.y) * 0.15;
-      if (ring.current) {
-        ring.current.style.transform = `translate3d(${rpos.x}px, ${rpos.y}px, 0)`;
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    loop();
 
     const over = (e) => {
       const t = e.target.closest("[data-cursor], a, button");
@@ -63,7 +50,6 @@ export default function CustomCursor() {
     document.addEventListener("mouseleave", leave);
 
     return () => {
-      cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", move);
       document.removeEventListener("mouseover", over);
       document.removeEventListener("mouseout", out);
