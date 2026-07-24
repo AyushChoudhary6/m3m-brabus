@@ -351,7 +351,11 @@ export default function BrochureBook({ open, onClose, pdfUrl, downloadName = "M3
               className="bb-book"
               data-state={closed ? (atFront ? "front" : "back") : "open"}
             />
-            {!closed && <span className="bb-spine" aria-hidden="true" />}
+            {/* The spine is the fold between two facing pages — it only belongs
+                on the desktop spread. In portrait (phone) StPageFlip shows a
+                single page, so drawing it would run a bar straight down the
+                middle of the content and read as a broken two-page spread. */}
+            {!closed && landscape && <span className="bb-spine" aria-hidden="true" />}
             <span className="bb-shadow" aria-hidden="true" />
           </div>
         </div>
