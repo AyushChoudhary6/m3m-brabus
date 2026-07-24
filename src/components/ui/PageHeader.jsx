@@ -34,11 +34,17 @@ export default function PageHeader({ title, accent, lede, compact = false }) {
           compact ? "pt-[clamp(1.5rem,4vh,3rem)]" : "pt-[clamp(9rem,20vh,13rem)]"
         }`}
       >
+        {/* Each line is masked by overflow-hidden for the slide-up reveal. With
+            leading-[0.98] the mask box ends above the glyph descenders, so an
+            italic "y"/"g"/"p" (the gold accent especially) was clipped flat.
+            pb on the inner span drops the mask's bottom edge below the descender;
+            the matching -mb on the mask cancels that height so the lede and rule
+            don't move. */}
         <h1 className="max-w-[15ch] font-display text-[clamp(2.6rem,7vw,6rem)] font-light leading-[0.98] tracking-[-0.03em] text-ink">
-          <span className="ph-line block overflow-hidden"><span className="block">{title}</span></span>
+          <span className="ph-line -mb-[0.2em] block overflow-hidden"><span className="block pb-[0.2em]">{title}</span></span>
           {accent && (
-            <span className="ph-line block overflow-hidden">
-              <span className="block font-serif italic text-brass">{accent}</span>
+            <span className="ph-line -mb-[0.2em] block overflow-hidden">
+              <span className="block pb-[0.2em] font-serif italic text-brass">{accent}</span>
             </span>
           )}
         </h1>
