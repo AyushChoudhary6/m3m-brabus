@@ -11,6 +11,7 @@
 "use strict";
 
 const { config } = require("../config/env");
+const { cleanText, defangFormula } = require("../utils/sanitize");
 
 // Node's built-in fetch (Node 18+) is used instead of axios here on purpose:
 // Apps Script answers a POST with a 302 to script.googleusercontent.com, and
@@ -21,38 +22,58 @@ const { config } = require("../config/env");
 /**
  * Build the payload the Apps Script expects. The script writes columns named
  * Fullname / Phone / Email / Configuration / Timestamp, so every value is sent
- * under each likely spelling; unknown keys are ignored by the script. Any
- * attribution / spam / alias fields the client already sent (`extra`) ride
- * along so the sheet keeps whatever columns the owner has added.
+ * under each likely spelling; unknown keys are ignored by the script.
+ *
+ * We forward ONLY a fixed allow-list of known lead + audit fields — we no longer
+ * spread the raw client body (`...extra`). Spreading it let a caller inject
+ * arbitrary columns into the owner's sheet by simply POSTing extra keys; the
+ * allow-list closes that off. `spamSignals` is the one audit field not carried
+ * on the normalised lead, so it is pulled explicitly from the raw body.
+ *
+ * Every string value is run through defangFormula so a lead field beginning with
+ * =, +, -, or @ can't execute as a spreadsheet formula (CSV / formula injection).
+ * We defang only this outbound Sheets copy, not the DB write, so Neon keeps the
+ * clean values (e.g. a "+91…" phone).
  *
  * @param {import("./repositories/lead.repository").NormalisedLead} lead
- * @param {object} [extra] raw client fields to preserve (attribution, etc.)
+ * @param {object} [extra] raw client body — read via allow-list only
  */
 function buildSheetPayload(lead, extra = {}) {
   const now = new Date().toISOString();
-  return {
-    ...extra, // keep whatever the client sent (attribution, spam signals, page…)
 
-    // Canonical values (win over anything in `extra`) under every column spelling.
-    leadId: lead.externalId || extra.leadId,
-    name: lead.name,
-    fullname: lead.name,
-    fullName: lead.name,
-    Fullname: lead.name,
-    phone: lead.phone,
-    Phone: lead.phone,
-    email: lead.email || "",
-    Email: lead.email || "",
-    config: lead.project || "",
-    configuration: lead.project || "",
-    Configuration: lead.project || "",
-    budget: lead.budget || "",
-    Budget: lead.budget || "",
-    message: lead.message || "",
-    source: lead.source,
-    Source: lead.source,
-    status: lead.status,
-    page: lead.page || "",
+  // Assembled from known fields only; d() defangs each cell value.
+  const d = defangFormula;
+  return {
+    leadId: d(lead.externalId || extra.leadId || ""),
+    name: d(lead.name),
+    fullname: d(lead.name),
+    fullName: d(lead.name),
+    Fullname: d(lead.name),
+    phone: d(lead.phone),
+    Phone: d(lead.phone),
+    email: d(lead.email || ""),
+    Email: d(lead.email || ""),
+    config: d(lead.project || ""),
+    configuration: d(lead.project || ""),
+    Configuration: d(lead.project || ""),
+    budget: d(lead.budget || ""),
+    Budget: d(lead.budget || ""),
+    message: d(lead.message || ""),
+    source: d(lead.source),
+    Source: d(lead.source),
+    status: d(lead.status),
+    page: d(lead.page || ""),
+
+    // Audit / attribution columns the owner's sheet already tracks.
+    utmSource: d(lead.utmSource || ""),
+    utmMedium: d(lead.utmMedium || ""),
+    utmCampaign: d(lead.utmCampaign || ""),
+    referrer: d(lead.referrer || ""),
+    device: d(lead.device || ""),
+    spamScore: d(lead.spamScore != null ? String(lead.spamScore) : ""),
+    spamSignals: d(cleanText(extra.spamSignals, 200)),
+    fillMs: d(lead.fillMs != null ? String(lead.fillMs) : ""),
+
     submittedAt: now,
     timestamp: now,
     Timestamp: now,

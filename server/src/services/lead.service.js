@@ -14,15 +14,39 @@
 // ============================================================
 "use strict";
 
+const { randomUUID } = require("crypto");
+
 const { getLeadRepository } = require("./repositories/lead.repository");
 const sheets = require("./googleSheets.service");
 const { logger } = require("../config/logger");
 const { cleanText, cleanPhone, cleanEmail } = require("../utils/sanitize");
 
+// Server-side spam gate. The frontend already screens (src/lib/spam.js), but a
+// bot POSTing straight to /api/leads bypasses that entirely, so we re-check here.
+//   - HONEYPOT_FIELD: a hidden input no human ever fills (see spam.js
+//     HONEYPOT_NAME = "company"). Any non-empty value ⇒ a bot filled it.
+//   - MIN_FILL_MS: a real person cannot complete the form this fast; an
+//     implausibly small fill time is a bot that auto-submitted.
+const HONEYPOT_FIELD = "company";
+const MIN_FILL_MS = 1200;
+
 /** Coerce a value to a bounded integer, or undefined. */
 function toInt(v) {
   const n = parseInt(v, 10);
   return Number.isFinite(n) ? n : undefined;
+}
+
+/**
+ * Decide whether a raw submission is spam. Returns a reason string ("honeypot" /
+ * "too_fast") or null. fillMs is only used to reject when it is a real, positive
+ * measurement below the floor — a missing/0 value means "not timed" (e.g. an
+ * older client or a server-to-server caller) and must NOT be treated as spam.
+ */
+function detectSpam(body = {}) {
+  if (String(body[HONEYPOT_FIELD] || "").trim().length > 0) return "honeypot";
+  const fillMs = toInt(body.fillMs);
+  if (fillMs !== undefined && fillMs > 0 && fillMs < MIN_FILL_MS) return "too_fast";
+  return null;
 }
 
 /**
@@ -67,6 +91,17 @@ function normalise(body = {}, ctx = {}) {
  * @returns {Promise<{ok:boolean, id:string|null, db:object, sheet:object, ms:number}>}
  */
 async function processLead(rawBody, ctx = {}) {
+  // Silent drop for spam: we return a normal-looking success WITHOUT writing to
+  // Neon or forwarding to Sheets, so a bot cannot tell it was caught (an error
+  // or a different shape would just teach it how to evade). We still log it for
+  // our own visibility. The fabricated id is a real UUID so the response is
+  // indistinguishable from a genuine acceptance.
+  const spamReason = detectSpam(rawBody);
+  if (spamReason) {
+    logger.warn("Lead dropped as spam", { reqId: ctx.reqId, ip: ctx.ip, reason: spamReason });
+    return { ok: true, id: randomUUID(), db: { ok: true }, sheet: { ok: true }, ms: undefined };
+  }
+
   const lead = normalise(rawBody, ctx);
   const repo = getLeadRepository();
 

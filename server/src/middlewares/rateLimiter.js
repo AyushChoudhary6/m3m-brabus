@@ -14,8 +14,11 @@ const leadRateLimiter = rateLimit({
   max: config.rateLimit.max,
   standardHeaders: true, // RateLimit-* headers
   legacyHeaders: false,
-  // Key by the forwarded client IP set in requestContext, not the proxy IP.
-  keyGenerator: (req) => req.clientIp || req.ip,
+  // Key on Express's proxy-vetted req.ip, NOT req.clientIp. req.clientIp comes
+  // straight from the first X-Forwarded-For token, which any client can spoof —
+  // a bot could rotate that header to dodge the throttle. With trust proxy=1,
+  // req.ip is the last-hop-verified client IP and cannot be forged that way.
+  keyGenerator: (req) => req.ip || req.clientIp,
   handler: (req, res) =>
     fail(res, {
       status: 429,

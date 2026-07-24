@@ -27,8 +27,9 @@ services:
         value: production
       - key: LEAD_STORE
         value: prisma
-      # The live site origin allowed to call the API (CORS). Update if the
-      # domain changes.
+      # The live site origin(s) allowed to call the API (CORS). Accepts a
+      # comma-separated list (e.g. "https://a.com,https://b.com") to allow more
+      # than one origin. Update if the domain changes.
       - key: CORS_ORIGIN
         value: https://m3m-brabus.vercel.app
       # PORT is injected by Render automatically; the app reads process.env.PORT.

@@ -33,6 +33,8 @@ app.disable("x-powered-by");
 app.use(helmet());
 
 // 2. CORS — only the configured site origins may call the API from a browser.
+//    config.corsOrigins is a list (CORS_ORIGIN is parsed comma-separated), so
+//    several site origins can be allowed at once.
 app.use(
   cors({
     origin(origin, cb) {
@@ -41,7 +43,10 @@ app.use(
       if (config.corsOrigins.includes("*") || config.corsOrigins.includes(origin)) {
         return cb(null, true);
       }
-      return cb(new Error(`Origin ${origin} not allowed by CORS`));
+      // Clean deny: cb(null, false) omits the ACAO header (the browser blocks
+      // the request) without throwing. Passing an Error would surface as a 500
+      // with no CORS header and spam the logs — a denied origin isn't an error.
+      return cb(null, false);
     },
     methods: ["GET", "POST"],
     maxAge: 86400,

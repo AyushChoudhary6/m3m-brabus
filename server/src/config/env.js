@@ -37,7 +37,8 @@ const config = Object.freeze({
   // adapter exists) to point at White Collar CRM without touching the frontend.
   leadStore: process.env.LEAD_STORE || "prisma",
 
-  // CORS: exact origins allowed to call the API. "*" allows any (dev only).
+  // CORS: exact origins allowed to call the API, as a comma-separated list
+  // (e.g. "https://a.com,https://b.com"). "*" allows any (dev only).
   corsOrigins: list(process.env.CORS_ORIGIN, ["http://localhost:5173"]),
 
   // Rate limit: max requests per window, per IP, on the leads endpoint.
