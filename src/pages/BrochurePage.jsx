@@ -133,9 +133,6 @@ export default function BrochurePage() {
             </article>
           ))}
         </div>
-        <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          {t("brochure.contentsNote")}
-        </p>
       </section>
 
       {/* the download */}

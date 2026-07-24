@@ -242,9 +242,6 @@ export default function FloorPlanPage() {
           </div>
         </div>
 
-        <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          {t("floorplan.footLayouts")}
-        </p>
       </section>
 
       {/* what is drawn, what is issued on request */}

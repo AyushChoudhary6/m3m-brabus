@@ -211,9 +211,6 @@ export default function AboutPage() {
             </div>
             <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_52%,rgba(8,6,5,0.68))]" />
             <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
-            <figcaption className="mono absolute bottom-5 left-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">
-              {t("about.artistCaption")}
-            </figcaption>
           </figure>
         </div>
 
@@ -399,9 +396,6 @@ export default function AboutPage() {
                 </li>
               ))}
             </ul>
-            <p className="mono mt-6 text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-              {t("about.marketingFootnote")}
-            </p>
           </div>
         </div>
       </section>

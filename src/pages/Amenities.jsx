@@ -120,9 +120,6 @@ export default function Amenities() {
             </div>
           </article>
         ))}
-        <p className="mono mt-6 text-[0.58rem] tracking-[0.2em] text-ink-faint">
-          {t("amenitiespage.indicativeNote")}
-        </p>
       </section>
 
       <RelatedPages links={["/residences", "/gallery", "/location"]} />

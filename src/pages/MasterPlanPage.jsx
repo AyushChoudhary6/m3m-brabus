@@ -343,10 +343,6 @@ export default function MasterPlanPage() {
                   {PROJECT.phone}
                 </a>
               </div>
-
-              <p className="rise mono mt-8 text-[0.58rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-                {t("masterplan.requestNote")}
-              </p>
             </div>
           </div>
 

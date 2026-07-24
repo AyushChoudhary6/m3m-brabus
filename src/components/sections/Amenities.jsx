@@ -268,9 +268,6 @@ export default function Amenities() {
               className="relative z-10 text-brass transition-colors duration-500 group-hover/visit:text-obsidian"
             />
           </button>
-          <p className="mono max-w-[42ch] text-[0.56rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-            {t("samenities.disclaimer")}
-          </p>
         </div>
       </div>
     </section>

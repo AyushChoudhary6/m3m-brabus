@@ -232,9 +232,6 @@ export default function Gallery() {
                     {t(p.ledeKey)}
                   </p>
                   <p className="rise mt-5 max-w-[64ch] leading-relaxed text-ink-soft">{t(p.bodyKey)}</p>
-                  <p className="rise mono mt-6 border-t border-line pt-5 text-[0.56rem] leading-relaxed tracking-[0.16em] text-ink-faint">
-                    {t("gallery.creditRender")} {PROJECT.developer} · {PROJECT.location} · {t("gallery.creditArtist")}
-                  </p>
                 </div>
               </figcaption>
             </figure>
@@ -488,9 +485,6 @@ function PlateLightbox({ rootRef, index, onIndex, onClose }) {
           <div>
             <p className="max-w-[46ch] font-serif text-base italic leading-snug text-brass">
               {t(plate.ledeKey)}
-            </p>
-            <p className="mono mt-3 text-[0.54rem] leading-relaxed tracking-[0.16em] text-bone/45">
-              {t("gallery.creditRender")} {PROJECT.developer} · {t("gallery.creditArtistShort")} · {PROJECT.location}
             </p>
           </div>
 

@@ -175,9 +175,6 @@ export default function ReviewsPage() {
           </div>
           <div className="pointer-events-none absolute inset-0 [background:linear-gradient(180deg,transparent_55%,rgba(8,6,5,0.65))]" />
           <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brass/10" />
-          <span className="mono absolute bottom-5 left-5 text-[0.58rem] tracking-[0.2em] text-brass-soft">
-            {t("reviews.officialRender")} · {PROJECT.address}
-          </span>
         </div>
       </section>
 
