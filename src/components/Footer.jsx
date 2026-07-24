@@ -19,11 +19,14 @@ export default function Footer() {
               {t("footer.brandLinePre")} {PROJECT.location}{t("footer.brandLineMid")} {PROJECT.partner}. {PROJECT.configs}.
             </p>
 
-            <div className="mt-7 space-y-2 text-sm">
-              <a href={`tel:${PROJECT.phone}`} className="block text-ink transition-colors hover:text-brass">
+            {/* flex column (not space-y on block children): guarantees the
+                phone, email and address each sit on their own line with a gap,
+                even if the block utility is ever dropped from an anchor. */}
+            <div className="mt-7 flex flex-col items-start gap-2.5 text-sm">
+              <a href={`tel:${PROJECT.phone}`} className="w-fit text-ink transition-colors hover:text-brass">
                 {PROJECT.phone}
               </a>
-              <a href={`mailto:${PROJECT.email}`} className="block text-ink-soft transition-colors hover:text-brass">
+              <a href={`mailto:${PROJECT.email}`} className="w-fit text-ink-soft transition-colors hover:text-brass">
                 {PROJECT.email}
               </a>
               <p className="pt-1 text-ink-faint">{PROJECT.address}</p>
