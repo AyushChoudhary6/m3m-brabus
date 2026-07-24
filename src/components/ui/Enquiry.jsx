@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, useLayoutEffect, useRef, useId } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { X, ArrowRight } from "lucide-react";
@@ -67,8 +67,8 @@ const ls = {
 };
 
 /* Global enquiry popup + a gentle timed invitation.
-   Any button calls openEnquiry("subject"). After 1 minute an inviting version
-   appears once; closing it snoozes for the session so it never nags. */
+   Any button calls openEnquiry("subject"). After ~40s (AUTO_DELAY) an inviting
+   version appears once; closing it snoozes for the session so it never nags. */
 export function EnquiryProvider({ children }) {
   const [open, setOpen] = useState(false);
   const [subject, setSubject] = useState("");
@@ -165,6 +165,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
   const [gotFile, setGotFile] = useState(true);
   const backdropRef = useRef(null);
   const panelRef = useRef(null);
+  const titleId = useId();
 
   /* The panel has to outlive `open` so its closing tween can play: React detaches
      the node the instant the flag flips and GSAP cannot animate what is no longer
@@ -239,14 +240,55 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
     setErrors({});
     setGotFile(true);
     setForm((f) => ({ ...f, config: subject && subject.includes("BHK") ? subject : f.config }));
-    const onKey = (e) => e.key === "Escape" && onClose();
+
+    // Remember what opened the modal so focus can be handed back on close.
+    const prevFocus = typeof document !== "undefined" ? document.activeElement : null;
+
+    const focusables = () =>
+      panelRef.current
+        ? Array.from(
+            panelRef.current.querySelectorAll(
+              'a[href], button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+            ),
+          ).filter((el) => el.offsetParent !== null)
+        : [];
+
+    // Move focus into the dialog once it is committed to the DOM (the panel
+    // mounts a tick after `open` flips). Without this, `aria-modal` claims
+    // containment that keyboard focus never actually entered.
+    const raf = requestAnimationFrame(() => {
+      (focusables()[0] || panelRef.current)?.focus();
+    });
+
+    const onKey = (e) => {
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key !== "Tab") return;
+      // Trap Tab so focus cannot leave the dialog for the page behind it.
+      const f = focusables();
+      if (!f.length) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      const active = document.activeElement;
+      const inside = panelRef.current?.contains(active);
+      if (e.shiftKey && (active === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
       resetTimer(FORM_KEY); // a closed modal's clock is stale; the next open restarts it
+      // Hand focus back to the trigger so keyboard users aren't dropped at the
+      // top of the document.
+      if (prevFocus && typeof prevFocus.focus === "function") prevFocus.focus();
     };
   }, [open, subject, onClose]);
 
@@ -306,11 +348,13 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
       className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-md"
       aria-modal="true"
       role="dialog"
+      aria-labelledby={titleId}
     >
       <div
         ref={panelRef}
         onClick={(e) => e.stopPropagation()}
-        className="relative my-auto w-full max-w-md overflow-hidden rounded-[1.4rem] border border-brass/25 bg-paper p-8 shadow-[0_50px_120px_-30px_rgba(0,0,0,0.9)] md:p-10"
+        tabIndex={-1}
+        className="relative my-auto w-full max-w-md overflow-hidden rounded-[1.4rem] border border-brass/25 bg-paper p-8 shadow-[0_50px_120px_-30px_rgba(0,0,0,0.9)] outline-none md:p-10"
       >
         <div className="gold-glow pointer-events-none absolute -inset-16 [background:radial-gradient(30%_30%_at_80%_0%,rgba(201,168,106,0.16),transparent_70%)]" />
         <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brass/60 to-transparent" />
@@ -326,7 +370,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
 
         {sent ? (
           <div className="relative py-6 text-center">
-            <h3 className="mt-4 font-display text-[clamp(2rem,7vw,3rem)] font-light leading-[0.95] text-ink">
+            <h3 id={titleId} className="mt-4 font-display text-[clamp(2rem,7vw,3rem)] font-light leading-[0.95] text-ink">
               {t("enq.thankYou")} <span className="font-serif italic text-brass">{form.name.split(" ")[0] || "friend"}.</span>
             </h3>
             <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-ink-soft">
@@ -351,7 +395,7 @@ function EnquiryModal({ open, subject, auto, intent = "enquiry", onClose, onBroc
           </div>
         ) : (
           <div className="relative">
-            <h3 className="mt-3 font-display text-[clamp(1.9rem,6vw,2.6rem)] font-light leading-[1.02] tracking-[-0.01em] text-ink">
+            <h3 id={titleId} className="mt-3 font-display text-[clamp(1.9rem,6vw,2.6rem)] font-light leading-[1.02] tracking-[-0.01em] text-ink">
               {isVisit ? (
                 <>Book your <span className="font-serif italic text-brass">site visit.</span></>
               ) : isBrochure ? (

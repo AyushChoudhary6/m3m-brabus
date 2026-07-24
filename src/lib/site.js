@@ -107,13 +107,6 @@ export const FOOTER_NAV = [
   },
 ];
 
-export const STATS = [
-  { value: 58, label: "Sector · Golf Course Ext.", suffix: "" },
-  { value: 7000, label: "Sq.ft · Largest residence", suffix: "" },
-  { value: 3, label: "Sides Open · Every home", suffix: "" },
-  { value: 24, label: "Security & Concierge", suffix: "/7" },
-];
-
 export const HIGHLIGHTS = [
   {
     title: "Open-Core Architecture",

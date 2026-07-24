@@ -194,6 +194,11 @@ export default function BlogPost() {
       {related.length > 0 && (
         <section className="bp-rel-grid container-lux pb-[clamp(4rem,11vh,7rem)]">
           <div className="mb-8 flex items-baseline gap-5 border-t border-line pt-8">
+            {/* Owns the section so screen-reader heading navigation doesn't jump
+                from the body h2s straight to the card h3s with no h2 between. */}
+            <h2 className="font-display text-xl font-light text-ink">
+              {t("blogpost.continueReading")}
+            </h2>
             <Link
               to="/blogs"
               className="mono ml-auto text-[0.6rem] tracking-[0.18em] text-ink-soft transition-colors hover:text-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass"

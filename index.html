@@ -31,11 +31,13 @@
          'unsafe-inline', nonce or hash, so an inline script in this shell is
          refused on all 30 prerendered pages. One used to sit here injecting
          the hero poster's LCP preload on "/"; it never ran in production.
-         Its job now belongs to a route-scoped Link response header in
-         vercel.json (source "/"), which the browser acts on before parsing
-         any markup and which the other 29 pages never receive. Anything
-         needing component state instead of the URL belongs in React 19's
-         link hoisting from the route component. -->
+         The poster now carries LCP on its own: it is a responsive AVIF/WebP
+         <picture> rendered into the prerendered HTML with fetchpriority="high",
+         which the browser's preload scanner discovers and prioritises before
+         the app JS runs — no separate Link header, and nothing the other 29
+         pages would wrongly inherit. Anything needing component state instead
+         of the URL belongs in React 19's link hoisting from the route
+         component. -->
   </head>
   <body class="noise">
     <div id="root"></div>

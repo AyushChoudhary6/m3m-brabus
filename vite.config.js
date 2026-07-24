@@ -57,6 +57,18 @@ const VENDOR_GROUPS = [
     test: /node_modules[\\/]leaflet[\\/]/,
     priority: 40,
   },
+  // The brochure reader. pdfjs-dist + page-flip are import()ed lazily inside
+  // ui/BrochureBook.jsx so only a visitor who opens the book pays for them —
+  // ~400 kB raw of PDF/flip code. But the priority-10 catch-all below matches
+  // node_modules too, and would fold both into the eager `vendor` chunk that
+  // the entry modulepreloads, silently defeating the lazy boundary and
+  // shipping pdfjs to every homepage visitor. A dedicated higher-priority
+  // group keeps them as their own async chunks, fetched only on open.
+  {
+    name: 'brochure',
+    test: /node_modules[\\/](pdfjs-dist|page-flip)[\\/]/,
+    priority: 40,
+  },
   // lucide-react is imported by ~44 files but is thousands of tiny icon
   // modules — isolating it keeps that noise out of the app chunk's hash.
   {

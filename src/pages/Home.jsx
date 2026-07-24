@@ -17,9 +17,11 @@ import WelcomeHome from "../components/sections/WelcomeHome.jsx";
    there, not here. Resist adding to this list — every extra band pushes the
    enquiry further down and dilutes what the homepage is for. */
 
-/* Leaflet is ~145 kB (42 kB gz) and the map sits well below the fold, so it is
-   split out and fetched only when the reader gets there. The prerenderer waits
-   8s before dumping the DOM, so the map is still present in the crawlable HTML. */
+/* Leaflet is ~145 kB (42 kB gz), so it is split into its own async chunk here
+   (kept out of the entry). The section itself renders on mount — its distance
+   ledger is crawlable content — but the Leaflet init and CARTO tile requests
+   are deferred inside LivingMap until the reader scrolls near, so the map does
+   not compete with the above-the-fold load. */
 const LivingMap = lazy(() => import("../components/sections/LivingMap.jsx"));
 
 export default function Home() {
@@ -27,7 +29,7 @@ export default function Home() {
     <div className="bg-canvas">
       <Seo
         title="M3M Brabus, Sector 58 Gurgaon | 4 & 5 BHK Branded Residences"
-        description="M3M Brabus, Sector 58 Gurgaon — 4 & 5 BHK branded residences of approx. 5,000–7,000 sq.ft by M3M India, inspired by BRABUS. Floor plans, amenities and price."
+        description="M3M Brabus, Sector 58 Gurgaon — 4 & 5 BHK branded residences of ~5,000–7,000 sq.ft by M3M India, inspired by BRABUS. Floor plans, amenities and price."
         path="/"
         jsonLd={{
           "@context": "https://schema.org",

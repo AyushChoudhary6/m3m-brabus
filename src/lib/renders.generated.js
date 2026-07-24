@@ -35,6 +35,534 @@ export const RENDERS = {
       ]
     ]
   },
+  "/renders/lifestyle/billiards-games-room.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/billiards-games-room-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/billiards-games-room-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/billiards-games-room-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/billiards-games-room-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/billiards-games-room-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/billiards-games-room-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/clubhouse-lounge.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/clubhouse-lounge-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/clubhouse-lounge-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/clubhouse-lounge-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/clubhouse-lounge-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/clubhouse-lounge-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/clubhouse-lounge-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/dining-room.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/dining-room-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/dining-room-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/dining-room-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/dining-room-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/dining-room-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/dining-room-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/entrance-signage-wall.jpg": {
+    "w": 1600,
+    "h": 1066,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/entrance-signage-wall-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/entrance-signage-wall-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/entrance-signage-wall-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/entrance-signage-wall-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/entrance-signage-wall-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/entrance-signage-wall-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/golf-simulator.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/golf-simulator-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/golf-simulator-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/golf-simulator-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/golf-simulator-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/golf-simulator-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/golf-simulator-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/gym.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/gym-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/gym-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/gym-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/gym-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/gym-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/gym-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/home-theatre.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/home-theatre-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/home-theatre-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/home-theatre-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/home-theatre-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/home-theatre-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/home-theatre-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/kids.jpg": {
+    "w": 586,
+    "h": 880,
+    "avif": [
+      [
+        586,
+        "/renders/gen/lifestyle/kids-586.avif"
+      ]
+    ],
+    "webp": [
+      [
+        586,
+        "/renders/gen/lifestyle/kids-586.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/kitchen.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/kitchen-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/kitchen-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/kitchen-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/kitchen-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/kitchen-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/kitchen-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/living-room.jpg": {
+    "w": 1600,
+    "h": 1066,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/living-room-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/living-room-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/living-room-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/living-room-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/living-room-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/living-room-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/master-bathroom.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/master-bathroom-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/master-bathroom-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/master-bathroom-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/master-bathroom-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/master-bathroom-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/master-bathroom-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/master-bedroom.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/master-bedroom-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/master-bedroom-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/master-bedroom-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/master-bedroom-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/master-bedroom-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/master-bedroom-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/private-dining-room.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/private-dining-room-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/private-dining-room-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/private-dining-room-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/private-dining-room-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/private-dining-room-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/private-dining-room-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/private-garden-terrace.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/private-garden-terrace-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/private-garden-terrace-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/private-garden-terrace-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/private-garden-terrace-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/private-garden-terrace-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/private-garden-terrace-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/rooftop-pool-dusk.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/rooftop-pool-dusk-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/rooftop-pool-dusk-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/rooftop-pool-dusk-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/rooftop-pool-dusk-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/rooftop-pool-dusk-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/rooftop-pool-dusk-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/sky-terrace-sunset.jpg": {
+    "w": 1600,
+    "h": 1066,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/sky-terrace-sunset-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/sky-terrace-sunset-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/sky-terrace-sunset-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/sky-terrace-sunset-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/sky-terrace-sunset-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/sky-terrace-sunset-1600.webp"
+      ]
+    ]
+  },
+  "/renders/lifestyle/walk-in-wardrobe.jpg": {
+    "w": 1600,
+    "h": 1067,
+    "avif": [
+      [
+        640,
+        "/renders/gen/lifestyle/walk-in-wardrobe-640.avif"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/walk-in-wardrobe-1024.avif"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/walk-in-wardrobe-1600.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/renders/gen/lifestyle/walk-in-wardrobe-640.webp"
+      ],
+      [
+        1024,
+        "/renders/gen/lifestyle/walk-in-wardrobe-1024.webp"
+      ],
+      [
+        1600,
+        "/renders/gen/lifestyle/walk-in-wardrobe-1600.webp"
+      ]
+    ]
+  },
   "/renders/lobby.jpg": {
     "w": 1536,
     "h": 1024,

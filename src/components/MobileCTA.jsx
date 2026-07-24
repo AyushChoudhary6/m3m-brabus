@@ -5,18 +5,18 @@ import { useEnquiry } from "./ui/Enquiry.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { PROJECT } from "../lib/site.js";
 import { whatsappUrl } from "../lib/whatsapp.js";
-import { trackCall, trackWhatsApp, trackBrochure } from "../lib/analytics.js";
+import { trackCall, trackWhatsApp } from "../lib/analytics.js";
 
 /**
  * Sticky bottom action bar — mobile only (PRD Ch.21 — utility navigation:
- * call · WhatsApp · site visit · brochure).
+ * call · WhatsApp · brochure).
  *
- * Four actions on a 360px screen means labels sit *under* the icon rather than
+ * Three actions on a 360px screen means labels sit *under* the icon rather than
  * beside it: a two-line cell stays legible where a horizontal one would either
  * truncate or shrink the tap target. Each cell is kept at 52px + safe-area so
  * the whole bar never exceeds the 6rem (bottom-24) offset WhatsAppFloat lifts
- * itself to on scroll — the two never occupy the same pixels. At 360px the bar
- * is 4 × 90px cells and the float sits clear above it, right-aligned.
+ * itself to on scroll — the two never occupy the same pixels. The float sits
+ * clear above the bar, right-aligned.
  *
  * The WhatsApp ask is built per route by src/lib/whatsapp.js.
  */
@@ -72,7 +72,11 @@ export default function MobileCTA() {
 
       <button
         type="button"
-        onClick={() => { trackBrochure("mobile_bar"); openBrochure("Mobile bar"); }}
+        /* No trackBrochure() here: a tap only opens the gate form. The
+           brochure conversion is fired once, on submit, inside Enquiry —
+           counting the click too would inflate the metric with taps that
+           never became leads (the decision every other trigger follows). */
+        onClick={() => openBrochure("Mobile bar")}
         aria-label={t("cta.downloadBrochure")}
         className={`${cell} bg-brass text-obsidian`}
       >

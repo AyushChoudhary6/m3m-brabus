@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -153,25 +154,39 @@ export default function Contact() {
           <div className="ct-grid">
             <p className="mono mb-6 text-[0.6rem] tracking-[0.24em] text-ink-faint">{t("contact.directLines")}</p>
             <div className="border-t border-line">
-              {CHANNELS.map((c) => (
-                <a
-                  key={c.k}
-                  href={c.href}
-                  target={c.href.startsWith("http") ? "_blank" : undefined}
-                  rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className="ct group flex items-start gap-5 border-b border-line py-5 transition-colors duration-500 hover:bg-brass/[0.035]"
-                >
-                  <span className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-full border border-brass/30 text-brass transition-colors duration-300 group-hover:bg-brass group-hover:text-obsidian">
-                    <c.icon size={15} />
-                  </span>
-                  <div>
-                    <p className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{c.k}</p>
-                    <p className="mt-1.5 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
-                      {c.v}
-                    </p>
-                  </div>
-                </a>
-              ))}
+              {CHANNELS.map((c) => {
+                const cls =
+                  "ct group flex items-start gap-5 border-b border-line py-5 transition-colors duration-500 hover:bg-brass/[0.035]";
+                const inner = (
+                  <>
+                    <span className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-full border border-brass/30 text-brass transition-colors duration-300 group-hover:bg-brass group-hover:text-obsidian">
+                      <c.icon size={15} />
+                    </span>
+                    <div>
+                      <p className="mono text-[0.6rem] tracking-[0.2em] text-ink-faint">{c.k}</p>
+                      <p className="mt-1.5 font-display text-xl text-ink transition-colors duration-300 group-hover:text-brass-soft">
+                        {c.v}
+                      </p>
+                    </div>
+                  </>
+                );
+                /* An internal route (the address → /location) must be a router
+                   Link, or the click does a full-document reload and drops SPA
+                   state; tel:/mailto:/wa.me stay as plain anchors. */
+                return c.href.startsWith("/") ? (
+                  <Link key={c.k} to={c.href} className={cls}>{inner}</Link>
+                ) : (
+                  <a
+                    key={c.k}
+                    href={c.href}
+                    target={c.href.startsWith("http") ? "_blank" : undefined}
+                    rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    className={cls}
+                  >
+                    {inner}
+                  </a>
+                );
+              })}
             </div>
           </div>
 

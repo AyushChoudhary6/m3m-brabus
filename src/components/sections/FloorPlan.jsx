@@ -106,7 +106,7 @@ function PlanSvg({ plan, active, onRoom, animated = false, className = "" }) {
       viewBox="0 0 800 540"
       className={className}
       role="img"
-      aria-label={`${plan.label} ${t("sfloorplan.roomLayoutAria")}، ${t(plan.compKey)}`}
+      aria-label={`${plan.label} ${t("sfloorplan.roomLayoutAria")}, ${t(plan.compKey)}`}
     >
       <rect
         className={animated ? "plan-frame" : undefined}
@@ -260,7 +260,6 @@ function GatedPlan({ plan, unlocked, onEnlarge }) {
    `rootRef` comes from the section's usePresence: the parent owns the mount,
    so it owns the node the leaving tween runs on. */
 function PlanLightbox({ rootRef, index, onIndex, onClose }) {
-  const { openEnquiry } = useEnquiry();
   const { t } = useI18n();
   const dialogRef = useRef(null);
   const stageRef = useRef(null);
@@ -278,7 +277,6 @@ function PlanLightbox({ rootRef, index, onIndex, onClose }) {
   );
 
   const plan = PLANS[index];
-  const cfg = CONFIG_BY_ID[plan.id];
   const room = hover != null ? plan.rooms[hover] : null;
 
   /* Pan is bounded by how far the scaled drawing can travel inside the stage,

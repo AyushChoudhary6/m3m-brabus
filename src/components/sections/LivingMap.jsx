@@ -22,36 +22,72 @@ export default function LivingMap({ bare = false }) {
   const { t } = useI18n();
 
   useEffect(() => {
-    if (mapRef.current || !mapEl.current) return;
-    const map = L.map(mapEl.current, {
-      center: COORDS,
-      zoom: 14,
-      zoomControl: false,
-      scrollWheelZoom: false, // don't hijack page scroll
-      dragging: true,
-      attributionControl: true,
-    });
-    mapRef.current = map;
+    const node = mapEl.current;
+    if (mapRef.current || !node) return;
 
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-      subdomains: "abcd",
-      maxZoom: 20,
-      attribution: "&copy; OpenStreetMap &copy; CARTO",
-    }).addTo(map);
+    let invalidate;
+    const init = () => {
+      if (mapRef.current) return;
+      const map = L.map(node, {
+        center: COORDS,
+        zoom: 14,
+        zoomControl: false,
+        scrollWheelZoom: false, // don't hijack page scroll
+        dragging: true,
+        attributionControl: true,
+      });
+      mapRef.current = map;
 
-    const icon = L.divIcon({
-      className: "mb-pin",
-      html: '<span class="mb-pin-ring"></span><span class="mb-pin-dot"></span>',
-      iconSize: [16, 16],
-      iconAnchor: [8, 8],
-    });
-    L.marker(COORDS, { icon, keyboard: false }).addTo(map);
-    L.control.zoom({ position: "bottomright" }).addTo(map);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        subdomains: "abcd",
+        maxZoom: 20,
+        attribution: "&copy; OpenStreetMap &copy; CARTO",
+      }).addTo(map);
 
-    const t = setTimeout(() => map.invalidateSize(), 250);
+      const icon = L.divIcon({
+        className: "mb-pin",
+        html: '<span class="mb-pin-ring"></span><span class="mb-pin-dot"></span>',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
+      });
+      L.marker(COORDS, { icon, keyboard: false }).addTo(map);
+      L.control.zoom({ position: "bottomright" }).addTo(map);
+
+      // Named to avoid shadowing the translation function `t` above — a stray
+      // t("…") added inside this effect would otherwise resolve to a timeout id.
+      invalidate = setTimeout(() => map.invalidateSize(), 250);
+    };
+
+    // The section (and its crawlable distance ledger) stays in the DOM, but the
+    // Leaflet init and the batch of cross-origin CARTO tile requests are the
+    // real cost — and the map sits well below the fold. Hold both until the
+    // reader is within ~300px of it so they don't compete with the homepage's
+    // above-the-fold load. No IntersectionObserver (old browser, or the
+    // prerenderer, which never scrolls) → initialise immediately, unchanged.
+    if (typeof IntersectionObserver === "undefined") {
+      init();
+    } else {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io.disconnect();
+            init();
+          }
+        },
+        { rootMargin: "300px" },
+      );
+      io.observe(node);
+      return () => {
+        io.disconnect();
+        clearTimeout(invalidate);
+        mapRef.current?.remove();
+        mapRef.current = null;
+      };
+    }
+
     return () => {
-      clearTimeout(t);
-      map.remove();
+      clearTimeout(invalidate);
+      mapRef.current?.remove();
       mapRef.current = null;
     };
   }, []);

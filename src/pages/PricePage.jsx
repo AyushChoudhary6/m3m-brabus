@@ -131,7 +131,7 @@ export default function PricePage() {
     <div ref={root}>
       <Seo
         title="M3M Brabus Price | Price List Status, Sector 58 Gurgaon"
-        description="M3M Brabus price is not yet publicly released. What will set the price of the 4 & 5 BHK residences, what the official price sheet covers, and how to receive it."
+        description="M3M Brabus price is not yet public. What will set the price of the 4 & 5 BHK residences, what the official price sheet covers, and how to receive it."
         path="/price"
         jsonLd={[
           breadcrumbLd([{ name: "Home", path: "/" }, { name: "Price", path: "/price" }]),

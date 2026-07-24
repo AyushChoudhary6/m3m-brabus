@@ -139,10 +139,28 @@ if (!CWEBP && !CAN_AVIF) {
   process.exit(0);
 }
 
-const sources = fs
-  .readdirSync(SRC_DIR)
-  .filter((f) => /\.jpe?g$/i.test(f))
-  .sort();
+// Collect every JPEG under /public/renders, walking subfolders (lifestyle/,
+// and any future ones) as well as the top level. Each source is described by
+// its path RELATIVE to SRC_DIR, in POSIX form, so the same string yields both
+// the manifest key (/renders/<rel>) and a gen path that mirrors the subtree —
+// which is what keeps a top-level `foo.jpg` from colliding with `sub/foo.jpg`.
+// The gen output tree is skipped: it holds derivatives, never sources.
+function collectSources(dir, baseRel = "") {
+  const out = [];
+  for (const name of fs.readdirSync(dir).sort()) {
+    if (baseRel === "" && name === "gen") continue; // never descend into our own output
+    const abs = path.join(dir, name);
+    const rel = baseRel ? `${baseRel}/${name}` : name;
+    if (fs.statSync(abs).isDirectory()) {
+      out.push(...collectSources(abs, rel));
+    } else if (/\.jpe?g$/i.test(name)) {
+      out.push(rel);
+    }
+  }
+  return out;
+}
+
+const sources = collectSources(SRC_DIR);
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
@@ -151,12 +169,21 @@ const rows = [];
 let madeCount = 0;
 let skipCount = 0;
 
-for (const file of sources) {
-  const src = path.join(SRC_DIR, file);
-  const stem = file.replace(/\.jpe?g$/i, "");
+for (const rel of sources) {
+  const src = path.join(SRC_DIR, rel);
+  const stem = path.basename(rel).replace(/\.jpe?g$/i, "");
+  // Subdirectory of the source, mirrored under gen/ so derivatives from
+  // lifestyle/ land in gen/lifestyle/ and can never overwrite a top-level
+  // file of the same name. Empty for top-level sources — those stay exactly
+  // where they have always been (gen/arrival-640.webp, etc.).
+  const relDir = path.dirname(rel) === "." ? "" : path.dirname(rel);
+  const outDir = relDir ? path.join(OUT_DIR, relDir) : OUT_DIR;
+  const genBase = `/renders/gen/${relDir ? `${relDir}/` : ""}`;
+  fs.mkdirSync(outDir, { recursive: true });
+
   const dim = jpegSize(src);
   if (!dim) {
-    console.warn(`! ${file}: could not read dimensions, skipped.`);
+    console.warn(`! ${rel}: could not read dimensions, skipped.`);
     continue;
   }
 
@@ -171,7 +198,7 @@ for (const file of sources) {
 
   for (const w of widths) {
     if (CWEBP) {
-      const out = path.join(OUT_DIR, `${stem}-${w}.webp`);
+      const out = path.join(outDir, `${stem}-${w}.webp`);
       if (fresh(out, src)) skipCount++;
       else {
         try {
@@ -182,18 +209,18 @@ for (const file of sources) {
         }
       }
       if (bytes(out) > 0) {
-        entry.webp.push([w, `/renders/gen/${stem}-${w}.webp`]);
+        entry.webp.push([w, `${genBase}${stem}-${w}.webp`]);
         webpTotal += bytes(out);
       }
     }
 
     if (CAN_AVIF) {
-      const out = path.join(OUT_DIR, `${stem}-${w}.avif`);
+      const out = path.join(outDir, `${stem}-${w}.avif`);
       if (fresh(out, src)) skipCount++;
       else {
         try {
           // avifenc has no scaler: feed it the matching WebP when we made one.
-          const input = AVIFENC && w !== dim.w ? path.join(OUT_DIR, `${stem}-${w}.webp`) : src;
+          const input = AVIFENC && w !== dim.w ? path.join(outDir, `${stem}-${w}.webp`) : src;
           encodeAvif(fs.existsSync(input) ? input : src, out, w);
           madeCount++;
         } catch (e) {
@@ -201,19 +228,19 @@ for (const file of sources) {
         }
       }
       if (bytes(out) > 0) {
-        entry.avif.push([w, `/renders/gen/${stem}-${w}.avif`]);
+        entry.avif.push([w, `${genBase}${stem}-${w}.avif`]);
         avifTotal += bytes(out);
       }
     }
   }
 
-  manifest[`/renders/${file}`] = entry;
+  manifest[`/renders/${rel}`] = entry;
 
   // Compare like for like: the widest derivative against the JPEG it replaces.
   const widestWebp = entry.webp.length ? bytes(path.join(ROOT, "public", entry.webp.at(-1)[1])) : 0;
   const widestAvif = entry.avif.length ? bytes(path.join(ROOT, "public", entry.avif.at(-1)[1])) : 0;
   rows.push({
-    file,
+    file: rel,
     dims: `${dim.w}x${dim.h}`,
     widths: widths.join("/"),
     jpg: srcBytes,

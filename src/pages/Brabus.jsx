@@ -67,7 +67,7 @@ export default function Brabus() {
     <div ref={root}>
       <Seo
         title="M3M x BRABUS | The Branded Residence Partnership, Gurgaon"
-        description="How BRABUS — the German luxury automotive marque — shapes M3M Brabus: bespoke interiors, premium finishes and an ethos of luxury, performance and exclusivity."
+        description="How BRABUS — the German luxury automotive marque — shapes M3M Brabus: bespoke interiors, premium finishes and an ethos of performance and exclusivity."
         path="/brabus"
         jsonLd={breadcrumbLd([{ name: "Home", path: "/" }, { name: "BRABUS", path: "/brabus" }])}
       />

@@ -43,3 +43,6 @@ public/BrabusIslandVilla_H264_WEB.mp4
 
 # Generated QA deliverable
 Website_QA_Report.xlsx
+
+# Source master video — the hero encodes derive from it; never shipped
+_media-source/

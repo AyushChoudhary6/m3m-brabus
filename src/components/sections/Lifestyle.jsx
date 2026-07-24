@@ -7,6 +7,12 @@ import { ArrowUpRight } from "lucide-react";
 import { icon } from "../../lib/icons.js";
 import { useI18n } from "../../lib/i18n.jsx";
 import { AMENITY_CATEGORY, AMENITY_COUNT } from "../../lib/amenities.js";
+import { RENDERS } from "../../lib/renders.generated.js";
+
+/* Card widths: 78vw phone, 58vw sm, 30vw md, 26vw lg — kept in sync with the
+   <article> classes below so the browser fetches the right derivative width. */
+const IMG_SIZES = "(max-width:640px) 78vw, (max-width:768px) 58vw, (max-width:1024px) 30vw, 26vw";
+const srcSet = (variants) => variants.map(([w, url]) => `${url} ${w}w`).join(", ");
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -139,6 +145,7 @@ export default function Lifestyle() {
           >
             {PANELS.map((p, i) => {
               const Icon = icon(p.icon);
+              const gen = RENDERS[`/renders/lifestyle/${p.img}.jpg`];
               return (
                 <article
                   key={p.n}
@@ -153,11 +160,23 @@ export default function Lifestyle() {
                       NOT a render of this project. It fills the top of the card
                       and fades into the card bg so the text below stays legible. */}
                   <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[62%] overflow-hidden rounded-t-[1.25rem]">
+                    {/* Responsive AVIF/WebP from the generated manifest, best
+                        first; the hand-made full-size .webp is the fallback for
+                        any plate that has no derivatives yet, then the JPEG. */}
                     <picture>
-                      <source type="image/webp" srcSet={`/renders/lifestyle/${p.img}.webp`} />
+                      {gen?.avif?.length ? (
+                        <source type="image/avif" srcSet={srcSet(gen.avif)} sizes={IMG_SIZES} />
+                      ) : null}
+                      {gen?.webp?.length ? (
+                        <source type="image/webp" srcSet={srcSet(gen.webp)} sizes={IMG_SIZES} />
+                      ) : (
+                        <source type="image/webp" srcSet={`/renders/lifestyle/${p.img}.webp`} />
+                      )}
                       <img
                         src={`/renders/lifestyle/${p.img}.jpg`}
                         alt=""
+                        width={gen?.w}
+                        height={gen?.h}
                         loading="lazy"
                         decoding="async"
                         className="h-full w-full object-cover opacity-[0.72] transition-[transform,opacity] duration-[1200ms] ease-lux group-hover:scale-[1.04] group-hover:opacity-90"

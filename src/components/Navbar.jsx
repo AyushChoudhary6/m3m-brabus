@@ -60,10 +60,51 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e) => e.key === "Escape" && setOpen(false);
+
+    // Return focus to whatever opened the menu (the burger) when it closes, so
+    // a keyboard user isn't dropped at the top of the document.
+    const prevFocus = typeof document !== "undefined" ? document.activeElement : null;
+
+    const focusables = () =>
+      menuRef.current
+        ? Array.from(
+            menuRef.current.querySelectorAll(
+              'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+            ),
+          ).filter((el) => el.offsetParent !== null)
+        : [];
+
+    // Move focus into the overlay once it mounts, and trap Tab inside it — the
+    // sheet is opaque but the page links behind it stay in the tab order
+    // otherwise, so `aria-modal` would be a promise the focus order breaks.
+    const raf = requestAnimationFrame(() => {
+      (focusables()[0] || menuRef.current)?.focus();
+    });
+
+    const onKey = (e) => {
+      if (e.key === "Escape") { setOpen(false); return; }
+      if (e.key !== "Tab") return;
+      const f = focusables();
+      if (!f.length) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      const active = document.activeElement;
+      const inside = menuRef.current?.contains(active);
+      if (e.shiftKey && (active === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("keydown", onKey);
+      if (prevFocus && typeof prevFocus.focus === "function") prevFocus.focus();
+    };
+  }, [open, menuRef]);
 
   // Quiet unveil on load
   useGSAP(
@@ -197,6 +238,9 @@ export default function Navbar() {
       {menuMounted && (
         <div
           ref={menuRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
           className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-canvas text-ink"
         >
           <div className="pointer-events-none absolute inset-0 [background:radial-gradient(50%_50%_at_82%_12%,rgba(124,106,79,0.08),transparent_70%)]" />
