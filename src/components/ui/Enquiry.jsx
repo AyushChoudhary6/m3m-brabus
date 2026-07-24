@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { X, ArrowRight } from "lucide-react";
 import BrochureBook from "./BrochureBook.jsx";
-import { submitLead, markLeadCaptured } from "../../lib/leads.js";
+import { submitLead, markLeadCaptured, hasLeadCaptured } from "../../lib/leads.js";
 import { startTimer, resetTimer } from "../../lib/spam.js";
 import { sanitizeField, validateField, validateLead, isClean } from "../../lib/validate.js";
 import { useI18n } from "../../lib/i18n.jsx";
@@ -74,6 +74,9 @@ export function EnquiryProvider({ children }) {
   const [subject, setSubject] = useState("");
   const [auto, setAuto] = useState(false);
   const [intent, setIntent] = useState("enquiry");
+  /* The book the brochure opens into. It lives here, not in the modal, so
+     closing the modal does not unmount the reader. */
+  const [book, setBook] = useState(false);
   const openRef = useRef(false);
   useEffect(() => { openRef.current = open; }, [open]);
 
@@ -90,13 +93,36 @@ export function EnquiryProvider({ children }) {
     setOpen(true);
   }, []);
 
-  /** Brochure gate: same modal, but the submit unlocks the PDF download. */
+  /* Deliver the brochure with no form — used once a lead is already on file.
+     Opens the on-screen reader and keeps the file, exactly as a fresh submit
+     would, so a returning visitor is never asked for their details twice. */
+  const deliverBrochure = useCallback(async (subj) => {
+    trackBrochure(subj || "unlocked");
+    const ok = await brochureExists();
+    if (ok) {
+      saveBrochure();
+      setBook(true);
+    } else {
+      // File genuinely missing (a deploy slip) — fall back to the modal so the
+      // visitor still gets the "we'll email it" path rather than nothing.
+      setSubject(subj);
+      setAuto(false);
+      setIntent("brochure");
+      setOpen(true);
+    }
+  }, []);
+
+  /* Brochure gate. The first time, the modal captures details and its submit
+     opens the book. But once ANY form on the site has been filled — brochure,
+     enquiry, floor-plan, visit — the whole site is unlocked for this visitor,
+     so skip the form and hand over the brochure straight away. */
   const openBrochure = useCallback((subj = "Brochure") => {
+    if (hasLeadCaptured()) { deliverBrochure(subj); return; }
     setSubject(subj);
     setAuto(false);
     setIntent("brochure");
     setOpen(true);
-  }, []);
+  }, [deliverBrochure]);
 
   /** Ch. 21 utility action: book a site visit. Same modal, visit-specific copy. */
   const openVisit = useCallback((subj = "Site visit") => {
@@ -105,10 +131,6 @@ export function EnquiryProvider({ children }) {
     setIntent("visit");
     setOpen(true);
   }, []);
-
-  /* The book the brochure opens into once the form is submitted. It lives here,
-     not in the modal, so closing the modal does not unmount the reader. */
-  const [book, setBook] = useState(false);
 
   const close = useCallback(() => setOpen(false), []);
 
